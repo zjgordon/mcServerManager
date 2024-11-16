@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Accept Minecraft EULA</h2>
+    <p>
+        Please read the End User License Agreement (EULA) by clicking the link below.
+        You must accept the EULA to start the server.
+    </p>
+    <p>
+        <a href="https://aka.ms/MinecraftEULA" target="_blank">Read the Minecraft EULA</a>
+    </p>
+
+    <form method="post">
+        <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" id="acceptCheckbox" required>
+            <label class="form-check-label" for="acceptCheckbox">
+                I have read and accept the Minecraft EULA.
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Accept and Continue</button>
+    </form>
+</div>
+{% endblock %}

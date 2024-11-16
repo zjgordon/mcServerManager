@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Your Minecraft Servers{% endblock %}
+
+{% block content %}
+    <h1 class="mt-4">Your Minecraft Servers</h1>
+    <a href="{{ url_for('server.create') }}" class="btn btn-primary mb-3">Create New Server</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Server Name</th>
+                <th>Status</th>
+                <th>Version</th>
+                <th>Port</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for server in servers %}
+            <tr>
+                <td>{{ server.server_name }}</td>
+                <td>
+                    {% if server.is_running %}
+                        <span class="text-success">Running</span>
+                    {% else %}
+                        <span class="text-danger">Stopped</span>
+                    {% endif %}
+                </td>
+                <td>{{ server.version }}</td>
+                <td>{{ server.port }}</td>
+                <td>
+                    {% if not server.is_running %}
+                        <form action="{{ url_for('server.start_server', server_id=server.id) }}" method="post" style="display:inline;">
+                         
+                            <button type="submit" class="btn btn-success btn-sm">Start</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('server.stop_server', server_id=server.id) }}" method="post" style="display:inline;">
+                           
+                            <button type="submit" class="btn btn-danger btn-sm">Stop</button>
+                        </form>
+                    {% endif %}
+                    <form action="{{ url_for('server.backup_server', server_id=server.id) }}" method="post" style="display:inline;">
+                 
+                        <button type="submit" class="btn btn-warning btn-sm">Backup</button>
+                    </form>
+                    <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Are you sure you want to delete this server? This action cannot be undone.');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

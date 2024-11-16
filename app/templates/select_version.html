@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Select Minecraft Version{% endblock %}
+
+{% block content %}
+    <h2 class="mt-4">Select Minecraft Version</h2>
+
+    <!-- Form to select release or snapshot -->
+    <form action="{{ url_for('server.create') }}" method="post">
+
+        <div class="form-group">
+            <label for="version_type">Release or Snapshot:</label>
+            <select id="version_type" name="version_type" class="form-control" onchange="showVersions(this.value)">
+                <option value="release">Release</option>
+                <option value="snapshot">Snapshot</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="version_dropdown">Version:</label>
+            <select id="version_dropdown" name="selected_version" class="form-control">
+                <!-- This will be populated dynamically using JavaScript -->
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Next</button>
+    </form>
+
+    <!-- Include JavaScript to dynamically change the versions shown -->
+    <script>
+        // Predefined lists of releases and snapshots
+        const releases = {{ releases | tojson | safe }};
+        const snapshots = {{ snapshots | tojson | safe }};
+
+        // Function to dynamically update the version dropdown based on selection
+        function showVersions(versionType) {
+            const versionDropdown = document.getElementById('version_dropdown');
+            versionDropdown.innerHTML = '';  // Clear existing options
+
+            const versions = versionType === 'snapshot' ? snapshots : releases;
+
+            // Populate the dropdown with the correct version list
+            versions.forEach(function(version) {
+                const option = document.createElement('option');
+                option.value = version;
+                option.text = version;
+                versionDropdown.add(option);
+            });
+        }
+
+        // On page load, default to showing release versions
+        window.onload = function() {
+            // Set the default value of version_type to 'release'
+            document.getElementById('version_type').value = 'release';
+            showVersions('release');
+        };
+    </script>
+{% endblock %}
