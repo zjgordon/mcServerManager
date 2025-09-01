@@ -71,6 +71,11 @@ def create_app():
     # Create database tables if they don't exist
     with app.app_context():
         db.create_all()
+        
+        # Initialize default configuration
+        from .utils import initialize_default_config
+        initialize_default_config()
+        
         # Check if any admin user exists
         admin_user = User.query.filter_by(is_admin=True).first()
         if not admin_user:

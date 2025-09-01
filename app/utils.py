@@ -269,18 +269,36 @@ def load_exclusion_list(filename='app/static/excluded_versions.json'):
 
 
 def get_app_config():
-    """Get application configuration from app config."""
+    """Get application configuration from database."""
     try:
-        config = {
-            'app_title': current_app.config.get('APP_TITLE', 'Minecraft Server Manager'),
-            'server_hostname': current_app.config.get('SERVER_HOSTNAME', 'localhost'),
-            'max_total_mb': current_app.config.get('MAX_TOTAL_MEMORY_MB', 8192),
-            'default_server_mb': current_app.config.get('DEFAULT_SERVER_MEMORY_MB', 1024),
-            'min_server_mb': current_app.config.get('MIN_SERVER_MEMORY_MB', 512),
-            'max_server_mb': current_app.config.get('MAX_SERVER_MEMORY_MB', 4096)
+        from .models import Configuration
+        
+        # Get configuration from database
+        config_entries = Configuration.query.all()
+        config = {}
+        
+        for entry in config_entries:
+            config[entry.key] = entry.value
+        
+        # Set defaults if not in database
+        app_title = config.get('app_title', 'Minecraft Server Manager')
+        server_hostname = config.get('server_hostname', 'localhost')
+        max_total_mb = int(config.get('max_total_mb', '8192'))
+        default_server_mb = int(config.get('default_server_mb', '1024'))
+        min_server_mb = int(config.get('min_server_mb', '512'))
+        max_server_mb = int(config.get('max_server_mb', '4096'))
+        
+        result = {
+            'app_title': app_title,
+            'server_hostname': server_hostname,
+            'max_total_mb': max_total_mb,
+            'default_server_mb': default_server_mb,
+            'min_server_mb': min_server_mb,
+            'max_server_mb': max_server_mb
         }
-        logger.debug(f"App config: {config}")
-        return config
+        
+        logger.debug(f"App config from database: {result}")
+        return result
     except Exception as e:
         logger.error(f"Error getting app config: {str(e)}")
         # Return safe defaults
@@ -380,22 +398,78 @@ def validate_memory_allocation(requested_memory_mb, exclude_server_id=None):
 
 
 def update_app_config(app_title=None, server_hostname=None, max_total_mb=None, max_per_server_mb=None):
-    """Update application configuration by setting environment variables."""
+    """Update application configuration in database."""
     try:
-        import os
-        if app_title is not None:
-            os.environ['APP_TITLE'] = str(app_title)
-        if server_hostname is not None:
-            os.environ['SERVER_HOSTNAME'] = str(server_hostname)
-        if max_total_mb is not None:
-            os.environ['MAX_TOTAL_MEMORY_MB'] = str(max_total_mb)
-        if max_per_server_mb is not None:
-            os.environ['MAX_SERVER_MEMORY_MB'] = str(max_per_server_mb)
+        from .models import Configuration
         
-        logger.info(f"App configuration updated: Title={app_title}, Hostname={server_hostname}, Total={max_total_mb}MB, Per Server={max_per_server_mb}MB")
+        # Try to get current user, but don't fail if not available
+        try:
+            from flask_login import current_user
+            user_id = current_user.id if current_user.is_authenticated else None
+        except:
+            user_id = None
+        
+        # Update each configuration value
+        if app_title is not None:
+            config_entry = Configuration.query.filter_by(key='app_title').first()
+            if config_entry:
+                config_entry.value = str(app_title)
+                config_entry.updated_by = user_id
+            else:
+                config_entry = Configuration(
+                    key='app_title',
+                    value=str(app_title),
+                    updated_by=user_id
+                )
+                db.session.add(config_entry)
+        
+        if server_hostname is not None:
+            config_entry = Configuration.query.filter_by(key='server_hostname').first()
+            if config_entry:
+                config_entry.value = str(server_hostname)
+                config_entry.updated_by = user_id
+            else:
+                config_entry = Configuration(
+                    key='server_hostname',
+                    value=str(server_hostname),
+                    updated_by=user_id
+                )
+                db.session.add(config_entry)
+        
+        if max_total_mb is not None:
+            config_entry = Configuration.query.filter_by(key='max_total_mb').first()
+            if config_entry:
+                config_entry.value = str(max_total_mb)
+                config_entry.updated_by = user_id
+            else:
+                config_entry = Configuration(
+                    key='max_total_mb',
+                    value=str(max_total_mb),
+                    updated_by=user_id
+                )
+                db.session.add(config_entry)
+        
+        if max_per_server_mb is not None:
+            config_entry = Configuration.query.filter_by(key='max_server_mb').first()
+            if config_entry:
+                config_entry.value = str(max_per_server_mb)
+                config_entry.updated_by = user_id
+            else:
+                config_entry = Configuration(
+                    key='max_server_mb',
+                    value=str(max_per_server_mb),
+                    updated_by=user_id
+                )
+                db.session.add(config_entry)
+        
+        # Commit changes to database
+        db.session.commit()
+        
+        logger.info(f"App configuration updated in database: Title={app_title}, Hostname={server_hostname}, Total={max_total_mb}MB, Per Server={max_per_server_mb}MB")
         return True
     except Exception as e:
         logger.error(f"Failed to update app configuration: {str(e)}")
+        db.session.rollback()
         return False
 
 
@@ -446,3 +520,41 @@ def get_memory_usage_summary(user_id=None):
             'available_memory_display': '8GB',
             'usage_percentage': 0
         }
+
+def initialize_default_config():
+    """Initialize default configuration values in database if they don't exist."""
+    try:
+        from .models import Configuration
+        
+        # Default configuration values
+        default_config = {
+            'app_title': 'Minecraft Server Manager',
+            'server_hostname': 'localhost',
+            'max_total_mb': '8192',
+            'default_server_mb': '1024',
+            'min_server_mb': '512',
+            'max_server_mb': '4096'
+        }
+        
+        # Check which configurations exist and add missing ones
+        for key, value in default_config.items():
+            existing = Configuration.query.filter_by(key=key).first()
+            if not existing:
+                config_entry = Configuration(
+                    key=key,
+                    value=value,
+                    updated_by=None
+                )
+                db.session.add(config_entry)
+                logger.info(f"Added default configuration: {key}={value}")
+        
+        # Commit any new configurations
+        if db.session.new:
+            db.session.commit()
+            logger.info("Default configuration initialized successfully")
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to initialize default configuration: {str(e)}")
+        db.session.rollback()
+        return False

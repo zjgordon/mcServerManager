@@ -382,6 +382,9 @@ def admin_config():
     # Get current configuration
     config = get_app_config()
     
+    # Debug logging
+    print(f"DEBUG: Current config: {config}")
+    
     return render_template('admin_config.html', 
                          app_title=config['app_title'],
                          server_hostname=config['server_hostname'],

@@ -1,5 +1,6 @@
 from .extensions import db
 from flask_login import UserMixin
+from datetime import datetime
 
 class User(db.Model, UserMixin):
     """User model to store the username and password."""
@@ -43,3 +44,16 @@ class Server(db.Model):
     memory_mb = db.Column(db.Integer, nullable=False, default=1024)  # Memory allocation in MB
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('servers', lazy=True))
+
+class Configuration(db.Model):
+    """Application configuration settings."""
+    __tablename__ = 'configuration'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    def __repr__(self):
+        return f'<Configuration {self.key}={self.value}>'
