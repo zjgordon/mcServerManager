@@ -5,7 +5,7 @@ if [ -d "venv" ]; then
     echo "Virtual environment 'venv' already exists."
     source ./venv/bin/activate
     python3 ./run.py
-    exit 1
+    exit 0
 fi
 
 # Create the virtual environment

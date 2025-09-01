@@ -232,8 +232,8 @@ def load_exclusion_list(filename='app/static/excluded_versions.json'):
     
     # Ensure the filename uses a safe path
     safe_filename = os.path.normpath(filename)
-    if '..' in safe_filename or safe_filename.startswith('/'):
-        raise ValidationError("Invalid file path")
+    if '..' in safe_filename:
+        raise ValidationError("Invalid file path - directory traversal not allowed")
     
     logger.info(f"Loading exclusion list from: {safe_filename}")
     

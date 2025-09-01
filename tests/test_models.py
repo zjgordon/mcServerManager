@@ -127,7 +127,7 @@ class TestUserModel:
 class TestServerModel:
     """Test Server model functionality."""
     
-    def test_server_creation(self, app):
+    def test_server_creation(self, app, admin_user):
         """Test creating a new server."""
         with app.app_context():
             server = Server(
@@ -142,7 +142,9 @@ class TestServerModel:
                 hardcore=False,
                 pvp=True,
                 spawn_monsters=True,
-                motd='Test Server'
+                motd='Test Server',
+                memory_mb=1024,
+                owner_id=admin_user.id
             )
             db.session.add(server)
             db.session.commit()

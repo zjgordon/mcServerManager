@@ -62,38 +62,41 @@ class TestNetworkErrorDecorator:
         result = successful_request()
         assert result == {"status": "success"}
     
-    def test_timeout_error_handling(self):
+    def test_timeout_error_handling(self, app):
         """Test decorator handles timeout errors."""
-        @handle_network_error
-        def timeout_request():
-            raise requests.exceptions.Timeout("Request timed out")
-        
-        with pytest.raises(NetworkError) as exc_info:
-            timeout_request()
-        assert "timed out" in str(exc_info.value)
+        with app.app_context():
+            @handle_network_error
+            def timeout_request():
+                raise requests.exceptions.Timeout("Request timed out")
+            
+            with pytest.raises(NetworkError) as exc_info:
+                timeout_request()
+            assert "timed out" in str(exc_info.value)
     
-    def test_connection_error_handling(self):
+    def test_connection_error_handling(self, app):
         """Test decorator handles connection errors."""
-        @handle_network_error
-        def connection_request():
-            raise requests.exceptions.ConnectionError("Connection failed")
-        
-        with pytest.raises(NetworkError) as exc_info:
-            connection_request()
-        assert "connect to remote server" in str(exc_info.value)
+        with app.app_context():
+            @handle_network_error
+            def connection_request():
+                raise requests.exceptions.ConnectionError("Connection failed")
+            
+            with pytest.raises(NetworkError) as exc_info:
+                connection_request()
+            assert "connect to remote server" in str(exc_info.value)
     
-    def test_http_error_handling(self):
+    def test_http_error_handling(self, app):
         """Test decorator handles HTTP errors."""
-        @handle_network_error
-        def http_error_request():
-            response = MagicMock()
-            response.status_code = 404
-            error = requests.exceptions.HTTPError(response=response)
-            raise error
-        
-        with pytest.raises(NetworkError) as exc_info:
-            http_error_request()
-        assert "HTTP error" in str(exc_info.value)
+        with app.app_context():
+            @handle_network_error
+            def http_error_request():
+                response = MagicMock()
+                response.status_code = 404
+                error = requests.exceptions.HTTPError(response=response)
+                raise error
+            
+            with pytest.raises(NetworkError) as exc_info:
+                http_error_request()
+            assert "HTTP error" in str(exc_info.value)
 
 
 class TestFileOperationsDecorator:
@@ -108,25 +111,27 @@ class TestFileOperationsDecorator:
         result = read_file()
         assert result == "file content"
     
-    def test_file_not_found_handling(self):
+    def test_file_not_found_handling(self, app):
         """Test decorator handles FileNotFoundError."""
-        @handle_file_operations
-        def read_missing_file():
-            raise FileNotFoundError("File not found")
-        
-        with pytest.raises(FileOperationError) as exc_info:
-            read_missing_file()
-        assert "Required file not found" in str(exc_info.value)
+        with app.app_context():
+            @handle_file_operations
+            def read_missing_file():
+                raise FileNotFoundError("File not found")
+            
+            with pytest.raises(FileOperationError) as exc_info:
+                read_missing_file()
+            assert "Required file not found" in str(exc_info.value)
     
-    def test_permission_error_handling(self):
+    def test_permission_error_handling(self, app):
         """Test decorator handles PermissionError."""
-        @handle_file_operations
-        def permission_denied_file():
-            raise PermissionError("Permission denied")
-        
-        with pytest.raises(FileOperationError) as exc_info:
-            permission_denied_file()
-        assert "Permission denied" in str(exc_info.value)
+        with app.app_context():
+            @handle_file_operations
+            def permission_denied_file():
+                raise PermissionError("Permission denied")
+            
+            with pytest.raises(FileOperationError) as exc_info:
+                permission_denied_file()
+            assert "Permission denied" in str(exc_info.value)
 
 
 class TestServerOperationsDecorator:
@@ -141,25 +146,27 @@ class TestServerOperationsDecorator:
         result = start_server()
         assert result == "Server started"
     
-    def test_no_such_process_handling(self):
+    def test_no_such_process_handling(self, app):
         """Test decorator handles NoSuchProcess."""
-        @handle_server_operations
-        def stop_missing_process():
-            raise psutil.NoSuchProcess(12345)
-        
-        with pytest.raises(ServerError) as exc_info:
-            stop_missing_process()
-        assert "process not found" in str(exc_info.value)
+        with app.app_context():
+            @handle_server_operations
+            def stop_missing_process():
+                raise psutil.NoSuchProcess(12345)
+            
+            with pytest.raises(ServerError) as exc_info:
+                stop_missing_process()
+            assert "process not found" in str(exc_info.value)
     
-    def test_access_denied_handling(self):
+    def test_access_denied_handling(self, app):
         """Test decorator handles AccessDenied."""
-        @handle_server_operations
-        def access_denied_process():
-            raise psutil.AccessDenied(12345)
-        
-        with pytest.raises(ServerError) as exc_info:
-            access_denied_process()
-        assert "Permission denied" in str(exc_info.value)
+        with app.app_context():
+            @handle_server_operations
+            def access_denied_process():
+                raise psutil.AccessDenied(12345)
+            
+            with pytest.raises(ServerError) as exc_info:
+                access_denied_process()
+            assert "Permission denied" in str(exc_info.value)
 
 
 class TestDatabaseOperationsDecorator:
@@ -174,15 +181,16 @@ class TestDatabaseOperationsDecorator:
         result = add_record()
         assert result == "Record added"
     
-    def test_integrity_error_handling(self):
+    def test_integrity_error_handling(self, app):
         """Test decorator handles IntegrityError."""
-        @handle_database_operations
-        def duplicate_record():
-            raise IntegrityError("statement", "params", "orig")
-        
-        with pytest.raises(DatabaseError) as exc_info:
-            duplicate_record()
-        assert "integrity constraint violated" in str(exc_info.value)
+        with app.app_context():
+            @handle_database_operations
+            def duplicate_record():
+                raise IntegrityError("statement", "params", "orig")
+            
+            with pytest.raises(DatabaseError) as exc_info:
+                duplicate_record()
+            assert "integrity constraint violated" in str(exc_info.value)
 
 
 class TestSafeExecute:
@@ -198,25 +206,27 @@ class TestSafeExecute:
         assert result == 5
         assert error is None
     
-    def test_app_error_handling(self):
+    def test_app_error_handling(self, app):
         """Test safe_execute with AppError."""
-        def failing_func():
-            raise ValidationError("Validation failed")
-        
-        success, result, error = safe_execute(failing_func)
-        assert success is False
-        assert result is None
-        assert error == "Validation failed"
+        with app.app_context():
+            def failing_func():
+                raise ValidationError("Validation failed")
+            
+            success, result, error = safe_execute(failing_func)
+            assert success is False
+            assert result is None
+            assert error == "Validation failed"
     
-    def test_unexpected_error_handling(self):
+    def test_unexpected_error_handling(self, app):
         """Test safe_execute with unexpected error."""
-        def unexpected_error_func():
-            raise ValueError("Unexpected error")
-        
-        success, result, error = safe_execute(unexpected_error_func)
-        assert success is False
-        assert result is None
-        assert "Unexpected error" in error
+        with app.app_context():
+            def unexpected_error_func():
+                raise ValueError("Unexpected error")
+            
+            success, result, error = safe_execute(unexpected_error_func)
+            assert success is False
+            assert result is None
+            assert "Unexpected error" in error
 
 
 class TestSafeFileOperation:

@@ -52,6 +52,11 @@ def runner(app):
 def admin_user(app):
     """Create an admin user for testing."""
     with app.app_context():
+        # Check if admin user already exists
+        existing_admin = User.query.filter_by(username='admin').first()
+        if existing_admin:
+            return existing_admin
+        
         user = User(
             username='admin',
             password_hash='pbkdf2:sha256:600000$test$test_hash',
@@ -66,6 +71,11 @@ def admin_user(app):
 def regular_user(app):
     """Create a regular user for testing."""
     with app.app_context():
+        # Check if test user already exists
+        existing_user = User.query.filter_by(username='testuser').first()
+        if existing_user:
+            return existing_user
+        
         user = User(
             username='testuser',
             password_hash='pbkdf2:sha256:600000$test$test_hash',
@@ -77,7 +87,7 @@ def regular_user(app):
 
 
 @pytest.fixture
-def test_server(app):
+def test_server(app, admin_user):
     """Create a test server for testing."""
     with app.app_context():
         server = Server(
@@ -92,7 +102,9 @@ def test_server(app):
             hardcore=False,
             pvp=True,
             spawn_monsters=True,
-            motd='Test Server'
+            motd='Test Server',
+            memory_mb=1024,
+            owner_id=admin_user.id
         )
         db.session.add(server)
         db.session.commit()

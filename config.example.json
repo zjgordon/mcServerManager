@@ -1,0 +1,12 @@
+{
+  "memory": {
+    "max_total_mb": 8192,
+    "default_server_mb": 1024,
+    "min_server_mb": 512,
+    "max_server_mb": 4096
+  },
+  "system": {
+    "auto_refresh_interval": 30,
+    "max_servers_per_user": 10
+  }
+}
