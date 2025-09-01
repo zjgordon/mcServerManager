@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, request, redirect, url_for
+from flask_login import current_user
 from .config import Config
-from .extensions import db, login_manager
+from .extensions import db, login_manager, csrf
 from .models import User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
@@ -16,6 +17,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     # Initialize error handlers
     init_error_handlers(app)
@@ -30,8 +32,26 @@ def create_app():
         return add_security_headers(response)
     
     @app.before_request
+    def check_admin_setup():
+        """Check if admin setup is needed and redirect accordingly."""
+        # Skip check for admin setup and static endpoints
+        if request.endpoint in ['auth.set_admin_password', 'static'] or request.endpoint.startswith('static'):
+            return
+        
+        # Check if any admin user exists with a password
+        admin_user = User.query.filter_by(is_admin=True).first()
+        if not admin_user or not admin_user.password_hash:
+            # No admin user or admin has no password - redirect to setup
+            return redirect(url_for('auth.set_admin_password'))
+    
+    @app.before_request
     def log_request():
-        if current_user.is_authenticated:
+        # Skip logging for authentication-related endpoints to avoid interference
+        if request.endpoint in ['auth.login', 'auth.logout', 'auth.set_admin_password']:
+            return
+        
+        # Only log if user is authenticated and not during login process
+        if hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
             audit_log('request', {
                 'method': request.method,
                 'endpoint': request.endpoint,

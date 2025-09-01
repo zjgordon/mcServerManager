@@ -31,25 +31,14 @@ def admin_required(f):
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
-@auth_bp.route('/')
-def index():
-    """Redirect to appropriate page based on authentication and admin setup."""
-    if current_user.is_authenticated:
-        return redirect(url_for('server.home'))
-    
-    # Check if admin setup is needed
-    admin_user = User.query.filter_by(is_admin=True).first()
-    if not admin_user or not admin_user.password_hash:
-        return redirect(url_for('auth.set_admin_password'))
-    
-    return redirect(url_for('auth.login'))
+# Removed duplicate route - server.home handles the root path
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 @rate_limit(max_attempts=5, window_seconds=300)  # 5 attempts per 5 minutes
 def login():
     """Handle login and sessions."""
     if current_user.is_authenticated:
-        return redirect(url_for('server.home'))
+        return redirect('/')
     
     if request.method == 'POST':
         username = SecurityUtils.sanitize_input(request.form.get('username', ''))
@@ -74,7 +63,7 @@ def login():
                 login_user(user)
                 audit_log('login_success', {'username': username})
                 flash('Logged in successfully.', 'success')
-                return redirect(url_for('server.home'))
+                return redirect('/')
             else:
                 audit_log('login_failed', {'username': username, 'reason': 'invalid_password'})
                 flash('Invalid username or password.', 'danger')
@@ -100,9 +89,10 @@ def set_admin_password():
     admin_user = User.query.filter_by(is_admin=True).first()
     
     if admin_user and admin_user.password_hash:
-        # Admin password already set
-        flash('Admin account is already set up. Please log in.')
-        return redirect(url_for('auth.login'))
+        # Admin password already set - require authentication to change it
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('Admin account is already set up. Please log in as admin to change the password.', 'danger')
+            return redirect(url_for('auth.login'))
     
     if request.method == 'POST':
         username = SecurityUtils.sanitize_input(request.form.get('username', ''))
@@ -125,30 +115,41 @@ def set_admin_password():
             flash('Passwords do not match.', 'danger')
             return render_template('set_admin_password.html')
         
-        # Check if username already exists
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists.', 'danger')
-            return render_template('set_admin_password.html')
-        
         # Check if email already exists (if provided)
         if email and User.query.filter_by(email=email).first():
             flash('Email already exists.', 'danger')
             return render_template('set_admin_password.html')
         
-        # Create admin user
-        admin_user = User(
-            username=username,
-            password_hash=generate_password_hash(password),
-            email=email if email else None,
-            is_admin=True,
-            is_active=True
-        )
-        db.session.add(admin_user)
-        db.session.commit()
+        # Handle admin user creation/update
+        if admin_user and not admin_user.password_hash:
+            # Update existing admin user
+            admin_user.username = username
+            admin_user.password_hash = generate_password_hash(password)
+            admin_user.email = email if email else None
+            db.session.commit()
+            
+            audit_log('admin_account_updated', {'username': username, 'email': email})
+            flash('Admin account updated successfully. Please log in.', 'success')
+        else:
+            # Create new admin user
+            # Check if username already exists (only for new users)
+            if User.query.filter_by(username=username).first():
+                flash('Username already exists.', 'danger')
+                return render_template('set_admin_password.html')
+            
+            new_admin_user = User(
+                username=username,
+                password_hash=generate_password_hash(password),
+                email=email if email else None,
+                is_admin=True,
+                is_active=True
+            )
+            db.session.add(new_admin_user)
+            db.session.commit()
+            
+            audit_log('admin_account_created', {'username': username, 'email': email})
+            flash('Admin account created successfully. Please log in.', 'success')
         
-        audit_log('admin_account_created', {'username': username, 'email': email})
-        
-        flash('Admin account created successfully. Please log in.', 'success')
         return redirect(url_for('auth.login'))
     
     return render_template('set_admin_password.html')

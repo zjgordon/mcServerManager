@@ -86,20 +86,21 @@
                 <td>
                     {% if not server.is_running %}
                         <form action="{{ url_for('server.start_server', server_id=server.id) }}" method="post" style="display:inline;">
-                         
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="btn btn-success btn-sm">Start</button>
                         </form>
                     {% else %}
                         <form action="{{ url_for('server.stop_server', server_id=server.id) }}" method="post" style="display:inline;">
-                           
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="btn btn-danger btn-sm">Stop</button>
                         </form>
                     {% endif %}
                     <form action="{{ url_for('server.backup_server', server_id=server.id) }}" method="post" style="display:inline;">
-                 
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" class="btn btn-warning btn-sm">Backup</button>
                     </form>
                     <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Are you sure you want to delete this server? This action cannot be undone.');">Delete</button>
                     </form>
                 </td>

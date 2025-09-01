@@ -291,7 +291,11 @@ class SafeFileOperation:
     
     def __enter__(self):
         try:
-            self.file = open(self.filepath, self.mode, encoding=self.encoding)
+            # Only pass encoding for text modes, not binary modes
+            if 'b' in self.mode:
+                self.file = open(self.filepath, self.mode)
+            else:
+                self.file = open(self.filepath, self.mode, encoding=self.encoding)
             return self.file
         except Exception as e:
             raise FileOperationError(f"Failed to open file {self.filepath}: {str(e)}")
