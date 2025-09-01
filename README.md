@@ -1,86 +1,68 @@
 # Minecraft Server Manager
 
-A comprehensive web application built with Flask that allows users to create, manage, and monitor Minecraft game servers effortlessly. This application provides a user-friendly interface with advanced features for server management, user administration, and system resource monitoring.
+A professional web application for creating, managing, and monitoring Minecraft game servers with enterprise-grade process management and user administration.
 
 ## 🚀 Features
 
 ### Core Server Management
-- **Server Lifecycle Management:** Create, start, stop, delete, and backup Minecraft servers
-- **Version Selection:** Select from available Minecraft versions with automatic exclusion of versions without server downloads
-- **Dynamic Port Allocation:** Automatically assigns available ports for new servers
-- **Server Configuration:** Customize server properties (game mode, difficulty, PvP, spawn monsters, MOTD, etc.)
-- **Memory Management:** Configure and monitor memory allocation for each server with system-wide limits
+- **Server Lifecycle**: Create, start, stop, delete, and backup Minecraft servers
+- **Version Selection**: Choose from available Minecraft versions with automatic exclusion filtering
+- **Dynamic Port Allocation**: Automatic port assignment with conflict detection
+- **Server Configuration**: Customize game mode, difficulty, PvP, spawn settings, MOTD, and more
+- **Memory Management**: Configurable memory allocation with system-wide limits and per-server defaults
 
 ### User Management & Security
-- **Role-Based Access Control:** Admin and regular user roles with different permissions
-- **User Authentication:** Secure login system with password hashing
-- **Admin Dashboard:** Comprehensive user management interface for administrators
-- **Server Ownership:** Users can only manage their own servers (admins can manage all)
-- **First-Time Setup:** Automatic admin account creation on first launch
+- **Role-Based Access Control**: Admin and regular user roles with granular permissions
+- **Secure Authentication**: Password hashing, rate limiting, and session management
+- **User Administration**: Comprehensive user management interface for administrators
+- **Server Ownership**: Users manage only their own servers (admins can manage all)
+- **First-Time Setup**: Automatic admin account creation on first launch
+
+### Process Management & Monitoring
+- **Real-time Status Verification**: Accurate server status reporting with process validation
+- **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft processes
+- **Startup Reconciliation**: Ensures database consistency with actual running processes
+- **Periodic Health Checks**: Automated status monitoring with configurable intervals
+- **Process Oversight**: Admin interface for process monitoring and management
 
 ### System Administration
-- **Memory Configuration:** Admin-configurable system-wide memory limits and per-server defaults
-- **System Monitoring:** Real-time system memory information and usage statistics
-- **Resource Tracking:** Monitor total memory allocation across all servers
-- **Persistent Configuration:** JSON-based configuration system with environment variable integration
-
-### Error Handling & Reliability
-- **Comprehensive Error Handling:** Centralized error management with custom exceptions
-- **Logging System:** Detailed logging for debugging and monitoring
-- **Network Error Recovery:** Robust handling of network timeouts and connection issues
-- **File Operation Safety:** Safe file operations with proper error handling
-- **Database Transaction Management:** Safe database operations with rollback capabilities
-
-### Security & Protection
-- **Strong Authentication:** Password hashing, rate limiting, and session security
-- **Input Validation:** Comprehensive input sanitization and validation
-- **CSRF Protection:** Cross-Site Request Forgery protection on all forms
-- **Security Headers:** HTTP security headers (CSP, HSTS, XSS protection)
-- **Audit Logging:** Detailed security event logging and monitoring
-- **File Upload Security:** Secure file upload validation and processing
-
-### User Interface & Experience
-- **Minecraft-Inspired Theme:** Custom green color scheme with pixelated fonts and Minecraft-style UI elements
-- **Responsive Design:** Mobile-friendly interface that works on all screen sizes
-- **Advanced Search & Filtering:** Compact three-column search bar with server name, status, and version filtering
-- **View Toggle:** Switch between table and card views for server management
-- **Real-time Updates:** Live server status updates and memory monitoring
-- **Enhanced Navigation:** Streamlined navigation with user dropdown and prominent action buttons
-- **Console Integration:** Built-in server console viewer with log management
-- **Analytics Dashboard:** System-wide analytics and memory usage visualization
-- **Bulk Operations:** Multi-server management capabilities
-
-### Technical Features
-- **Modular Architecture:** Organized using Flask blueprints for scalability
-- **EULA Integration:** Integrated EULA acceptance process within the app
-- **Mojang API Integration:** Automatic version manifest fetching and server JAR downloads
-- **Process Management:** Advanced process monitoring and management using psutil
-- **Test Suite:** Comprehensive test coverage including unit, integration, and security tests
-- **Enhanced Confirmation System:** Multi-level confirmation dialogs for destructive operations
-
-## 📋 Prerequisites
-
-- **Python 3.7 or higher**
-- **Java 8 or higher** (Required to run Minecraft servers)
-- **Linux/Unix system** (Tested on Linux, may work on other Unix-like systems)
-- **Network access** (For downloading Minecraft server files)
+- **Memory Configuration**: Admin-configurable system-wide memory limits
+- **System Monitoring**: Real-time memory usage and allocation statistics
+- **Resource Tracking**: Monitor total memory allocation across all servers
+- **Persistent Configuration**: Database-backed configuration system
+- **Comprehensive Logging**: Detailed logging for debugging and monitoring
 
 ## 🛠️ Installation
 
-### 1. Clone the Repository
+### Prerequisites
+- **Python 3.8+** with pip
+- **Java 8+** (for Minecraft servers)
+- **Linux/Unix** system (tested on Ubuntu, CentOS, Debian)
+
+### Quick Start
 ```bash
-git clone https://github.com/yourusername/minecraft-server-manager.git
-cd minecraft-server-manager
+# Clone the repository
+git clone <repository-url>
+cd mcServerManager
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up the application
+python run.py
 ```
 
-### 2. Configure Environment Variables (Optional)
-Create a `.env` file in the root directory to customize settings:
+### Environment Configuration
+Create a `.env` file or set environment variables:
+
 ```bash
 # Security
-SECRET_KEY=your_secure_random_key_here
-
-# Admin Configuration
-ADMIN_USERNAME=admin
+SECRET_KEY=your_secure_secret_key_here
+STATUS_CHECK_API_KEY=your_secure_api_key_here
 
 # Database
 DATABASE_URL=sqlite:///minecraft_manager.db
@@ -91,115 +73,147 @@ DEFAULT_SERVER_MEMORY_MB=1024
 MIN_SERVER_MEMORY_MB=512
 MAX_SERVER_MEMORY_MB=4096
 
-# Security Settings (Optional)
+# Optional Security Settings
 SESSION_COOKIE_SECURE=False  # Set to True for HTTPS
 RATELIMIT_DEFAULT=200 per day;50 per hour;10 per minute
 PASSWORD_MIN_LENGTH=8
-
-### 3. Run the Application
-```bash
-bash ./start.sh
 ```
 
-The `start.sh` script will:
-- Create a Python virtual environment if it doesn't exist
-- Install all required dependencies
-- Launch the Flask application
+### First-Time Setup
+1. **Launch the application**: `python run.py`
+2. **Create Admin Account**: Set up the initial administrator account
+3. **Configure System Settings**: Set memory limits and system configuration
+4. **Access Web Interface**: Navigate to `http://localhost:5000`
 
 ## 🎮 Usage
 
-### First-Time Setup
-1. **Launch the application** using `./start.sh`
-2. **Create Admin Account:** On first run, you'll be prompted to create the administrator account
-3. **Configure System Settings:** Use the admin dashboard to configure memory limits and system settings
+### Web Interface
+- **URL**: `http://localhost:5000` (default)
+- **Authentication**: Login with admin or user credentials
+- **Responsive Design**: Works on desktop and mobile devices
 
-### Regular Usage
-1. **Login:** Access the web interface at `http://localhost:5000`
-2. **Create Servers:** Use the "Create New Server" button to set up Minecraft servers
-3. **Manage Servers:** Start, stop, backup, or delete servers as needed
-4. **Monitor Resources:** Check memory usage and system statistics in the admin dashboard
+### Creating Servers
+1. **Select Version**: Choose from available Minecraft versions
+2. **Configure Settings**: Set server properties and memory allocation
+3. **Server Setup**: Automatic EULA acceptance and configuration generation
+4. **Launch**: Start the server with one click
+
+### Managing Servers
+- **Start/Stop**: Control server lifecycle
+- **Backup**: Create server backups with compression
+- **Monitor**: Real-time status and resource usage
+- **Configure**: Modify server properties and settings
 
 ### Admin Features
-- **User Management:** Create, edit, and delete user accounts
-- **System Configuration:** Set memory limits and monitor system resources
-- **Server Oversight:** Manage all servers across all users
-- **System Statistics:** View real-time memory usage and system information
+- **User Management**: Create, edit, and delete user accounts
+- **System Configuration**: Set memory limits and monitor resources
+- **Process Management**: Monitor and reconcile server processes
+- **System Statistics**: View real-time system information
+
+## 🔧 Maintenance
+
+### Process Management
+The application automatically manages server processes and provides tools for oversight:
+
+```bash
+# Set up automated status checks (every 5 minutes)
+chmod +x scripts/setup_status_check.sh
+./scripts/setup_status_check.sh
+
+# Manual status check via API
+curl -X POST \
+  -H "X-API-Key: your_api_key" \
+  http://localhost:5000/admin/status_check
+```
+
+### Logs and Monitoring
+- **Application Logs**: `app.log` - General application logging
+- **Status Check Logs**: `logs/status_check.log` - Automated status check results
+- **Process Monitoring**: Admin interface for real-time process oversight
+
+### Database Management
+- **Automatic Setup**: Database tables created on first run
+- **SQLite Default**: Uses SQLite for simplicity (can be changed to PostgreSQL/MySQL)
+- **Backup**: Regular database backups recommended
+
+### Updates and Maintenance
+```bash
+# Update dependencies
+pip install -r requirements.txt --upgrade
+
+# Check for orphaned processes
+# Access Admin → Process Management → Find Orphaned
+
+# Reconcile server statuses
+# Access Admin → Process Management → Reconcile Server Statuses
+```
 
 ## 🏗️ Architecture
+
+### Technology Stack
+- **Backend**: Flask (Python web framework)
+- **Database**: SQLAlchemy ORM with SQLite/PostgreSQL support
+- **Frontend**: Bootstrap 4, jQuery, custom CSS
+- **Process Management**: psutil, subprocess
+- **Authentication**: Flask-Login with CSRF protection
 
 ### Directory Structure
 ```
 mcServerManager/
 ├── app/                    # Main application package
 │   ├── routes/            # Flask route handlers
-│   ├── templates/         # HTML templates
-│   ├── static/           # Static files (CSS, JS, etc.)
-│   ├── models.py         # Database models
-│   ├── utils.py          # Utility functions
-│   ├── config.py         # Configuration settings
-│   ├── extensions.py     # Flask extensions
-│   └── error_handlers.py # Error handling system
-├── tests/                # Test suite
-├── backups/              # Server backup storage
-├── servers/              # Minecraft server files
-├── start.sh             # Application launcher
-├── run.py               # Application entry point
-└── requirements.txt    # Python dependencies
+│   ├── models.py          # Database models
+│   ├── utils.py           # Utility functions
+│   ├── config.py          # Configuration management
+│   └── templates/         # HTML templates
+├── servers/               # Minecraft server files
+├── backups/               # Server backup storage
+├── scripts/               # Maintenance and setup scripts
+├── tests/                 # Test suite
+├── requirements.txt       # Python dependencies
+└── run.py                 # Application entry point
 ```
 
 ### Key Components
-- **Flask Blueprints:** Modular route organization
-- **SQLAlchemy ORM:** Database abstraction layer
-- **Flask-Login:** User session management
-- **Custom Error Handling:** Centralized error management
-- **Configuration Manager:** Persistent settings management
+- **Server Management**: Handles Minecraft server lifecycle
+- **User Management**: Authentication and authorization system
+- **Process Management**: Real-time process monitoring and reconciliation
+- **Memory Management**: System resource allocation and monitoring
+- **Configuration System**: Database-backed application settings
+
+## 🔒 Security Features
+
+- **CSRF Protection**: Built-in CSRF token validation
+- **Rate Limiting**: Configurable request rate limiting
+- **Password Policy**: Enforceable password requirements
+- **Session Security**: Secure session management
+- **Input Validation**: Comprehensive input sanitization
+- **Audit Logging**: Detailed security event logging
+
+## 📊 Performance
+
+- **Memory Efficiency**: Lightweight process monitoring
+- **Database Optimization**: Efficient queries and indexing
+- **Caching**: Template and configuration caching
+- **Asynchronous Operations**: Non-blocking process management
 
 ## 🧪 Testing
 
-The application includes a comprehensive test suite:
-
 ```bash
-# Run all tests
-python3 -m pytest tests/ -v
+# Run test suite
+pytest
+
+# Run with coverage
+pytest --cov=app
 
 # Run specific test categories
-python3 -m pytest tests/test_error_handling.py -v
-python3 -m pytest tests/test_user_management.py -v
-python3 -m pytest tests/test_memory_management.py -v
+pytest tests/test_server_routes.py
+pytest tests/test_auth.py
 ```
-
-## 🔧 Configuration
-
-### Memory Management
-- **Total Memory Limit:** Maximum memory for all Minecraft servers combined
-- **Default Server Memory:** Default memory allocation for new servers
-- **Min/Max Server Memory:** Per-server memory limits
-- **Real-time Monitoring:** Live system memory statistics
-
-### User Management
-- **Admin Privileges:** Full system access and user management
-- **Regular Users:** Limited to their own servers
-- **Account Security:** Password hashing and session management
-
-## 🔒 Security
-
-For detailed security information, best practices, and configuration options, see [SECURITY.md](SECURITY.md).
-
-### Key Security Features:
-- **Strong Authentication:** Password hashing, rate limiting, session security
-- **Input Validation:** Comprehensive sanitization and validation
-- **CSRF Protection:** Cross-Site Request Forgery protection
-- **Security Headers:** HTTP security headers (CSP, HSTS, XSS protection)
-- **Audit Logging:** Detailed security event logging
-- **File Upload Security:** Secure file validation and processing
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## ⚠️ Disclaimer
-
-This application is not affiliated with or endorsed by Mojang Studios or Microsoft Corporation. Minecraft is a trademark of Mojang Studios.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
@@ -207,16 +221,19 @@ This application is not affiliated with or endorsed by Mojang Studios or Microso
 2. Create a feature branch
 3. Make your changes
 4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+5. Submit a pull request
 
-## 📊 System Requirements
+## 📞 Support
 
-- **Minimum RAM:** 2GB (plus memory for Minecraft servers)
-- **Storage:** 1GB+ for application and server files
-- **Network:** Internet connection for version downloads
-- **Permissions:** Write access to application directory
+- **Documentation**: See [PROCESS_MANAGEMENT.md](PROCESS_MANAGEMENT.md) for detailed process management information
+- **Issues**: Report bugs and feature requests via GitHub issues
+- **Security**: Report security vulnerabilities privately
+
+## 🔄 Version History
+
+- **v2.0.0**: Comprehensive process management and monitoring
+- **v1.0.0**: Initial release with basic server management
 
 ---
 
-**Note:** This application is designed for development and testing environments. For production use, consider additional security measures and proper deployment configurations.
+**Minecraft Server Manager** - Professional server management made simple.
