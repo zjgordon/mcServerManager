@@ -328,14 +328,25 @@ def reset_user_password(user_id):
 @admin_required
 def admin_config():
     """Admin configuration page for system settings."""
-    from ..utils import get_memory_config, update_memory_config
+    from ..utils import get_app_config, update_app_config
     
     if request.method == 'POST':
         try:
+            # Get form data
+            app_title = request.form.get('app_title', '').strip()
+            server_hostname = request.form.get('server_hostname', '').strip()
             max_total_mb = int(request.form['max_total_mb'])
             max_per_server_mb = int(request.form['max_per_server_mb'])
             
             # Validate the values
+            if not app_title:
+                flash('Application title cannot be empty.', 'danger')
+                return redirect(url_for('auth.admin_config'))
+            
+            if not server_hostname:
+                flash('Server hostname cannot be empty.', 'danger')
+                return redirect(url_for('auth.admin_config'))
+            
             if max_total_mb < 1024:  # At least 1GB
                 flash('Total system memory must be at least 1GB (1024MB).', 'danger')
                 return redirect(url_for('auth.admin_config'))
@@ -349,7 +360,12 @@ def admin_config():
                 return redirect(url_for('auth.admin_config'))
             
             # Update the configuration
-            success = update_memory_config(max_total_mb, max_per_server_mb)
+            success = update_app_config(
+                app_title=app_title,
+                server_hostname=server_hostname,
+                max_total_mb=max_total_mb,
+                max_per_server_mb=max_per_server_mb
+            )
             
             if success:
                 flash('System configuration updated successfully.', 'success')
@@ -364,8 +380,10 @@ def admin_config():
         return redirect(url_for('auth.admin_config'))
     
     # Get current configuration
-    config = get_memory_config()
+    config = get_app_config()
     
     return render_template('admin_config.html', 
+                         app_title=config['app_title'],
+                         server_hostname=config['server_hostname'],
                          max_total_mb=config['max_total_mb'],
-                         max_per_server_mb=config['max_per_server_mb'])
+                         max_per_server_mb=config['max_server_mb'])

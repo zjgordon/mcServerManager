@@ -127,9 +127,19 @@ class TestUserModel:
 class TestServerModel:
     """Test Server model functionality."""
     
-    def test_server_creation(self, app, admin_user):
+    def test_server_creation(self, app):
         """Test creating a new server."""
         with app.app_context():
+            # Create admin user in the same session context
+            admin_user = User(
+                username='admin',
+                password_hash='test_hash',
+                is_admin=True,
+                is_active=True
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+            
             server = Server(
                 server_name='testserver',
                 version='1.20.1',
@@ -168,12 +178,23 @@ class TestServerModel:
     def test_server_unique_name(self, app):
         """Test that server names must be unique."""
         with app.app_context():
+            # Create admin user in the same session context
+            admin_user = User(
+                username='admin',
+                password_hash='test_hash',
+                is_admin=True,
+                is_active=True
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+            
             # Create first server
             server1 = Server(
                 server_name='testserver',
                 version='1.20.1',
                 port=25565,
-                status='Stopped'
+                status='Stopped',
+                owner_id=admin_user.id
             )
             db.session.add(server1)
             db.session.commit()
@@ -183,7 +204,8 @@ class TestServerModel:
                 server_name='testserver',
                 version='1.19.4',
                 port=25575,
-                status='Stopped'
+                status='Stopped',
+                owner_id=admin_user.id
             )
             db.session.add(server2)
             
@@ -200,7 +222,7 @@ class TestServerModel:
             with pytest.raises(Exception):  # Should raise IntegrityError
                 db.session.commit()
     
-    def test_server_nullable_fields(self, app):
+    def test_server_nullable_fields(self, app, admin_user):
         """Test that nullable fields can be None."""
         with app.app_context():
             server = Server(
@@ -208,6 +230,7 @@ class TestServerModel:
                 version='1.20.1',
                 port=25565,
                 status='Stopped',
+                owner_id=admin_user.id
                 # All other fields should be nullable
             )
             db.session.add(server)
@@ -224,7 +247,7 @@ class TestServerModel:
             assert created_server.spawn_monsters is None
             assert created_server.motd is None
     
-    def test_server_boolean_fields(self, app):
+    def test_server_boolean_fields(self, app, admin_user):
         """Test boolean field handling."""
         with app.app_context():
             server = Server(
@@ -234,7 +257,8 @@ class TestServerModel:
                 status='Running',
                 hardcore=True,
                 pvp=False,
-                spawn_monsters=True
+                spawn_monsters=True,
+                owner_id=admin_user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -244,7 +268,7 @@ class TestServerModel:
             assert created_server.pvp is False
             assert created_server.spawn_monsters is True
     
-    def test_server_status_values(self, app):
+    def test_server_status_values(self, app, admin_user):
         """Test different server status values."""
         with app.app_context():
             # Test Running status
@@ -253,7 +277,8 @@ class TestServerModel:
                 version='1.20.1',
                 port=25565,
                 status='Running',
-                pid=12345
+                pid=12345,
+                owner_id=admin_user.id
             )
             db.session.add(running_server)
             
@@ -263,7 +288,8 @@ class TestServerModel:
                 version='1.20.1',
                 port=25575,
                 status='Stopped',
-                pid=None
+                pid=None,
+                owner_id=admin_user.id
             )
             db.session.add(stopped_server)
             db.session.commit()
@@ -277,14 +303,15 @@ class TestServerModel:
             assert stopped.status == 'Stopped'
             assert stopped.pid is None
     
-    def test_server_port_type(self, app):
+    def test_server_port_type(self, app, admin_user):
         """Test that port is stored as integer."""
         with app.app_context():
             server = Server(
                 server_name='portserver',
                 version='1.20.1',
                 port=25565,
-                status='Stopped'
+                status='Stopped',
+                owner_id=admin_user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -293,7 +320,7 @@ class TestServerModel:
             assert isinstance(created_server.port, int)
             assert created_server.port == 25565
     
-    def test_server_string_length_limits(self, app):
+    def test_server_string_length_limits(self, app, admin_user):
         """Test string field length constraints."""
         with app.app_context():
             # Test maximum length strings
@@ -305,7 +332,8 @@ class TestServerModel:
                 level_seed='a' * 150,   # Max length for level_seed
                 gamemode='a' * 50,      # Max length for gamemode
                 difficulty='a' * 50,    # Max length for difficulty
-                motd='a' * 150         # Max length for motd
+                motd='a' * 150,        # Max length for motd
+                owner_id=admin_user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -314,7 +342,7 @@ class TestServerModel:
             created_server = Server.query.filter_by(server_name='a' * 150).first()
             assert created_server is not None
     
-    def test_multiple_servers_different_ports(self, app):
+    def test_multiple_servers_different_ports(self, app, admin_user):
         """Test creating multiple servers with different ports."""
         with app.app_context():
             servers_data = [
@@ -328,7 +356,8 @@ class TestServerModel:
                     server_name=name,
                     version='1.20.1',
                     port=port,
-                    status='Stopped'
+                    status='Stopped',
+                    owner_id=admin_user.id
                 )
                 db.session.add(server)
             

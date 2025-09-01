@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Minecraft Server Manager{% endblock %}</title>
+    <title>{% block title %}{{ app_title }}{% endblock %}</title>
     <!-- Include Bootstrap CSS for styling -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <!-- Include Font Awesome for icons -->
@@ -15,7 +15,7 @@
     <nav class="navbar navbar-expand-lg navbar-mc">
         <div class="container">
             <a class="navbar-brand pixel-font" href="{{ url_for('server.home') }}">
-                <i class="fas fa-cube"></i> Minecraft Server Manager
+                <i class="fas fa-cube"></i> {{ app_title }}
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -231,6 +231,100 @@
             URL.revokeObjectURL(url);
         };
         
+        // Server sharing functionality
+        window.copyServerLink = function(hostname, port, serverName) {
+            const serverLink = `${hostname}:${port}`;
+            
+            // Try to copy to clipboard using modern API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(serverLink).then(() => {
+                    showCopySuccess(serverName, serverLink);
+                }).catch(err => {
+                    console.error('Failed to copy to clipboard:', err);
+                    fallbackCopyToClipboard(serverLink, serverName);
+                });
+            } else {
+                // Fallback for older browsers or non-secure contexts
+                fallbackCopyToClipboard(serverLink, serverName);
+            }
+        };
+        
+        function fallbackCopyToClipboard(text, serverName) {
+            // Create a temporary textarea element
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess(serverName, text);
+                } else {
+                    showCopyError(serverName);
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                showCopyError(serverName);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function showCopySuccess(serverName, serverLink) {
+            // Create a temporary success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'copy-success-message';
+            successDiv.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Server link copied!</strong><br>
+                    <small>${serverName}: <code>${serverLink}</code></small>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 4000);
+        }
+        
+        function showCopyError(serverName) {
+            // Create a temporary error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'copy-error-message';
+            errorDiv.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Failed to copy link</strong><br>
+                    <small>Please manually copy the server address for ${serverName}</small>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
+        }
+
         window.updateBulkSelection = function() {
             const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
             const checkedBoxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');

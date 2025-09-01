@@ -26,6 +26,16 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(server_bp)
     
+    # Template context processor for global variables
+    @app.context_processor
+    def inject_app_config():
+        from .utils import get_app_config
+        config = get_app_config()
+        return {
+            'app_title': config['app_title'],
+            'server_hostname': config['server_hostname']
+        }
+    
     # Security middleware
     @app.after_request
     def security_headers(response):

@@ -20,7 +20,8 @@ def app():
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
         'SECRET_KEY': 'test-secret-key',
-        'WTF_CSRF_ENABLED': False  # Disable CSRF for testing
+        'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False
     }
     
     # Create app with test config
@@ -28,6 +29,8 @@ def app():
     app.config.update(test_config)
     
     with app.app_context():
+        # Drop all tables first to ensure clean state
+        db.drop_all()
         db.create_all()
         yield app
         
@@ -52,18 +55,17 @@ def runner(app):
 def admin_user(app):
     """Create an admin user for testing."""
     with app.app_context():
-        # Check if admin user already exists
-        existing_admin = User.query.filter_by(username='admin').first()
-        if existing_admin:
-            return existing_admin
-        
+        # Always create a fresh admin user for each test
         user = User(
             username='admin',
             password_hash='pbkdf2:sha256:600000$test$test_hash',
-            is_admin=True
+            is_admin=True,
+            is_active=True
         )
         db.session.add(user)
         db.session.commit()
+        # Refresh the user to ensure it's properly attached to the session
+        db.session.refresh(user)
         return user
 
 
@@ -71,18 +73,17 @@ def admin_user(app):
 def regular_user(app):
     """Create a regular user for testing."""
     with app.app_context():
-        # Check if test user already exists
-        existing_user = User.query.filter_by(username='testuser').first()
-        if existing_user:
-            return existing_user
-        
+        # Always create a fresh regular user for each test
         user = User(
             username='testuser',
             password_hash='pbkdf2:sha256:600000$test$test_hash',
-            is_admin=False
+            is_admin=False,
+            is_active=True
         )
         db.session.add(user)
         db.session.commit()
+        # Refresh the user to ensure it's properly attached to the session
+        db.session.refresh(user)
         return user
 
 

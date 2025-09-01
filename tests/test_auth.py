@@ -20,9 +20,9 @@ class TestAuthentication:
     def test_valid_login(self, client, app):
         """Test login with valid credentials."""
         with app.app_context():
-            # Create a test user
+            # Create a test user with unique username
             user = User(
-                username='testuser',
+                username='logintestuser',
                 password_hash=generate_password_hash('testpass'),
                 is_admin=False
             )
@@ -31,7 +31,7 @@ class TestAuthentication:
             
             # Attempt login
             response = client.post('/login', data={
-                'username': 'testuser',
+                'username': 'logintestuser',
                 'password': 'testpass'
             }, follow_redirects=True)
             
@@ -41,9 +41,9 @@ class TestAuthentication:
     def test_invalid_login(self, client, app):
         """Test login with invalid credentials."""
         with app.app_context():
-            # Create a test user
+            # Create a test user with unique username
             user = User(
-                username='testuser',
+                username='invalidlogintestuser',
                 password_hash=generate_password_hash('testpass'),
                 is_admin=False
             )
@@ -52,7 +52,7 @@ class TestAuthentication:
             
             # Attempt login with wrong password
             response = client.post('/login', data={
-                'username': 'testuser',
+                'username': 'invalidlogintestuser',
                 'password': 'wrongpass'
             })
             
@@ -76,9 +76,9 @@ class TestAuthentication:
     def test_set_admin_password(self, client, app):
         """Test setting admin password for first time."""
         with app.app_context():
-            # Create admin user without password
+            # Create admin user without password with unique username
             admin = User(
-                username='admin',
+                username='adminsetup',
                 password_hash=None,
                 is_admin=True
             )
@@ -87,6 +87,7 @@ class TestAuthentication:
             
             # Set password
             response = client.post('/set_admin_password', data={
+                'username': 'adminsetup',
                 'password': 'newpassword',
                 'confirm_password': 'newpassword'
             }, follow_redirects=True)
@@ -95,16 +96,16 @@ class TestAuthentication:
             assert b'password set successfully' in response.data.lower()
             
             # Verify password was set
-            admin = User.query.filter_by(username='admin').first()
+            admin = User.query.filter_by(username='adminsetup').first()
             assert admin.password_hash is not None
             assert check_password_hash(admin.password_hash, 'newpassword')
     
     def test_set_admin_password_mismatch(self, client, app):
         """Test setting admin password with mismatched passwords."""
         with app.app_context():
-            # Create admin user without password
+            # Create admin user without password with unique username
             admin = User(
-                username='admin',
+                username='adminmismatch',
                 password_hash=None,
                 is_admin=True
             )
@@ -113,6 +114,7 @@ class TestAuthentication:
             
             # Attempt to set password with mismatch
             response = client.post('/set_admin_password', data={
+                'username': 'adminmismatch',
                 'password': 'newpassword',
                 'confirm_password': 'differentpassword'
             })

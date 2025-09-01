@@ -203,6 +203,11 @@
                                     </button>
                                 </form>
                             {% endif %}
+                            <button type="button" class="btn btn-mc btn-mc-primary btn-sm" 
+                                    onclick="copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}')" 
+                                    data-tooltip="Copy server connection link to clipboard">
+                                <i class="fas fa-share"></i> Share
+                            </button>
                             <form style="display:inline;">
                                 <button type="button" class="btn btn-mc btn-mc-info btn-sm" onclick="showConsole({{ server.id }}, '{{ server.server_name }}')" data-tooltip="View server console logs">
                                     <i class="fas fa-terminal"></i> Console
@@ -231,85 +236,94 @@
     </div>
 
     <!-- Card View -->
-    <div id="cardView" class="server-grid hidden">
+    <div id="cardView" class="modern-server-grid hidden">
         {% for server in servers %}
-        <div class="server-card-item fade-in server-card" data-server-name="{{ server.server_name }}" data-server-version="{{ server.version }}" data-server-status="{% if server.is_running %}running{% else %}stopped{% endif %}" data-server-port="{{ server.port }}">
-            <div class="server-card-header">
-                <div style="display: flex; align-items: center; flex-grow: 1;">
-                    <input type="checkbox" class="server-checkbox" data-server-id="{{ server.id }}" onchange="updateBulkSelection()" style="margin-right: 0.5rem;">
-                    <h3 class="server-name" style="margin: 0; flex-grow: 1;">{{ server.server_name }}</h3>
+        <div class="modern-server-card fade-in" data-server-name="{{ server.server_name }}" data-server-version="{{ server.version }}" data-server-status="{% if server.is_running %}running{% else %}stopped{% endif %}" data-server-port="{{ server.port }}">
+            <!-- Card Header -->
+            <div class="card-header-modern">
+                <div class="server-title-group">
+                    <h3 class="server-name-modern">{{ server.server_name }}</h3>
+                    <div class="server-meta">
+                        <span class="version-tag">{{ server.version }}</span>
+                        <span class="port-tag">{{ server.port }}</span>
+                    </div>
                 </div>
-                {% if server.is_running %}
-                    <span class="status-badge-mc status-running-mc">
-                        <span class="status-indicator-mc running"></span>
-                        <i class="fas fa-play"></i> Running
-                    </span>
-                {% else %}
-                    <span class="status-badge-mc status-stopped-mc">
-                        <span class="status-indicator-mc stopped"></span>
-                        <i class="fas fa-stop"></i> Stopped
-                    </span>
-                {% endif %}
             </div>
             
-            <div class="server-info-grid">
-                <div class="server-info-item">
-                    <i class="fas fa-code-branch"></i>
-                    <span><strong>Version:</strong> {{ server.version }}</span>
-                </div>
-                <div class="server-info-item">
-                    <i class="fas fa-plug"></i>
-                    <span><strong>Port:</strong> {{ server.port }}</span>
-                </div>
-                <div class="server-info-item">
+            <!-- Server Information Tags -->
+            <div class="server-info-tags">
+                <div class="info-tag memory-tag">
                     <i class="fas fa-memory"></i>
-                    <span><strong>Memory:</strong> {{ server.memory_mb }}MB</span>
+                    <span>{{ server.memory_mb }}MB</span>
                 </div>
                 {% if current_user.is_admin %}
-                <div class="server-info-item">
+                <div class="info-tag owner-tag">
                     <i class="fas fa-user"></i>
-                    <span><strong>Owner:</strong> {{ server.owner.username }}</span>
+                    <span>{{ server.owner.username }}</span>
                 </div>
                 {% endif %}
                 {% if server.pid %}
-                <div class="server-info-item">
+                <div class="info-tag pid-tag">
                     <i class="fas fa-cog"></i>
-                    <span><strong>PID:</strong> {{ server.pid }}</span>
+                    <span>PID: {{ server.pid }}</span>
                 </div>
                 {% endif %}
             </div>
             
-            <div class="server-actions">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- Status Indicator -->
+                <div class="status-indicator-small {% if server.is_running %}status-running{% else %}status-stopped{% endif %}">
+                    <div class="status-dot-small"></div>
+                    <span class="status-text-small">{% if server.is_running %}Running{% else %}Stopped{% endif %}</span>
+                </div>
+                
+                <!-- Start/Stop Button -->
                 {% if not server.is_running %}
                     <form action="{{ url_for('server.start_server', server_id=server.id) }}" method="post" style="display:inline;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button type="submit" class="btn btn-mc btn-mc-success btn-sm" data-tooltip="Start the server">
-                            <i class="fas fa-play"></i> Start
+                        <button type="submit" class="control-btn start-btn" data-tooltip="Start server">
+                            ▶
                         </button>
                     </form>
                 {% else %}
                     <form action="{{ url_for('server.stop_server', server_id=server.id) }}" method="post" style="display:inline;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button type="submit" class="btn btn-mc btn-mc-danger btn-sm" data-tooltip="Stop the server">
-                            <i class="fas fa-stop"></i> Stop
+                        <button type="submit" class="control-btn stop-btn" data-tooltip="Stop server">
+                            ⏹
                         </button>
                     </form>
                 {% endif %}
-                <button class="btn btn-mc btn-mc-info btn-sm" onclick="showConsole({{ server.id }}, '{{ server.server_name }}')" data-tooltip="View server console logs">
-                    <i class="fas fa-terminal"></i> Console
+                
+                <!-- Share Button -->
+                <button type="button" class="control-btn share-btn" 
+                        onclick="copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}')" 
+                        data-tooltip="Copy server link">
+                    📤
                 </button>
+                
+                <!-- Console Button -->
+                <button class="control-btn console-btn" 
+                        onclick="showConsole({{ server.id }}, '{{ server.server_name }}')" 
+                        data-tooltip="View console">
+                    ⬜
+                </button>
+                
+                <!-- Backup Button -->
                 <form action="{{ url_for('server.backup_server', server_id=server.id) }}" method="post" style="display:inline;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="btn btn-mc btn-mc-warning btn-sm" data-tooltip="Create a backup of server files">
-                        <i class="fas fa-download"></i> Backup
+                    <button type="submit" class="control-btn backup-btn" data-tooltip="Create backup">
+                        ⬇
                     </button>
                 </form>
+                
+                <!-- Delete Button -->
                 <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="btn btn-mc btn-mc-danger btn-sm" 
-                            data-tooltip="Permanently delete this server and all its files"
+                    <button type="submit" class="control-btn delete-btn" 
+                            data-tooltip="Delete server"
                             onclick="return confirmDeleteServer({{ server.id }}, '{{ server.server_name }}', {{ (server.owner_id == current_user.id) | lower }}, '{{ server.owner.username }}');">
-                        <i class="fas fa-trash"></i> Delete
+                        ✕
                     </button>
                 </form>
             </div>

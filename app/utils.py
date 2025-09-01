@@ -268,21 +268,25 @@ def load_exclusion_list(filename='app/static/excluded_versions.json'):
         raise FileOperationError(f"Failed to load exclusion list: {str(e)}")
 
 
-def get_memory_config():
-    """Get memory configuration from app config."""
+def get_app_config():
+    """Get application configuration from app config."""
     try:
         config = {
+            'app_title': current_app.config.get('APP_TITLE', 'Minecraft Server Manager'),
+            'server_hostname': current_app.config.get('SERVER_HOSTNAME', 'localhost'),
             'max_total_mb': current_app.config.get('MAX_TOTAL_MEMORY_MB', 8192),
             'default_server_mb': current_app.config.get('DEFAULT_SERVER_MEMORY_MB', 1024),
             'min_server_mb': current_app.config.get('MIN_SERVER_MEMORY_MB', 512),
             'max_server_mb': current_app.config.get('MAX_SERVER_MEMORY_MB', 4096)
         }
-        logger.debug(f"Memory config: {config}")
+        logger.debug(f"App config: {config}")
         return config
     except Exception as e:
-        logger.error(f"Error getting memory config: {str(e)}")
+        logger.error(f"Error getting app config: {str(e)}")
         # Return safe defaults
         return {
+            'app_title': 'Minecraft Server Manager',
+            'server_hostname': 'localhost',
             'max_total_mb': 8192,
             'default_server_mb': 1024,
             'min_server_mb': 512,
@@ -290,32 +294,44 @@ def get_memory_config():
         }
 
 
+def get_memory_config():
+    """Get memory configuration from app config (backward compatibility)."""
+    config = get_app_config()
+    return {
+        'max_total_mb': config['max_total_mb'],
+        'default_server_mb': config['default_server_mb'],
+        'min_server_mb': config['min_server_mb'],
+        'max_server_mb': config['max_server_mb']
+    }
+
+
 def get_total_allocated_memory(user_id=None):
-    """Get total memory allocated by servers."""
+    """Get total allocated memory across all servers or for a specific user."""
     try:
-        if user_id:
-            servers = Server.query.filter_by(owner_id=user_id).all()
+        if user_id is None:
+            # Get total for all servers (admin view)
+            total = db.session.query(db.func.sum(Server.memory_mb)).scalar() or 0
+            logger.debug(f"Total allocated memory across all servers: {total}MB")
         else:
-            servers = Server.query.all()
-        total_memory = sum(server.memory_mb for server in servers)
-        logger.debug(f"Total allocated memory: {total_memory}MB across {len(servers)} servers")
-        return total_memory
+            # Get total for specific user
+            total = db.session.query(db.func.sum(Server.memory_mb)).filter_by(owner_id=user_id).scalar() or 0
+            logger.debug(f"Total allocated memory for user {user_id}: {total}MB")
+        return total
     except Exception as e:
-        logger.error(f"Error calculating total allocated memory: {str(e)}")
+        logger.error(f"Error getting total allocated memory: {str(e)}")
         return 0
 
 
 def get_available_memory(user_id=None):
-    """Get available memory for new servers."""
+    """Get available memory based on total system memory and allocated memory."""
     try:
         config = get_memory_config()
         allocated = get_total_allocated_memory(user_id)
         available = config['max_total_mb'] - allocated
-        logger.debug(f"Available memory: {available}MB (max: {config['max_total_mb']}MB, allocated: {allocated}MB)")
-        return max(0, available)
+        return max(0, available)  # Don't return negative values
     except Exception as e:
-        logger.error(f"Error calculating available memory: {str(e)}")
-        return 0
+        logger.error(f"Error getting available memory: {str(e)}")
+        return 8192  # Default to 8GB if error
 
 
 def validate_memory_allocation(requested_memory_mb, exclude_server_id=None):
@@ -363,17 +379,29 @@ def validate_memory_allocation(requested_memory_mb, exclude_server_id=None):
 
 
 
-def update_memory_config(max_total_mb, max_per_server_mb):
-    """Update memory configuration by setting environment variables."""
+def update_app_config(app_title=None, server_hostname=None, max_total_mb=None, max_per_server_mb=None):
+    """Update application configuration by setting environment variables."""
     try:
         import os
-        os.environ['MAX_TOTAL_MEMORY_MB'] = str(max_total_mb)
-        os.environ['MAX_SERVER_MEMORY_MB'] = str(max_per_server_mb)
-        logger.info(f"Memory configuration updated: Total={max_total_mb}MB, Per Server={max_per_server_mb}MB")
+        if app_title is not None:
+            os.environ['APP_TITLE'] = str(app_title)
+        if server_hostname is not None:
+            os.environ['SERVER_HOSTNAME'] = str(server_hostname)
+        if max_total_mb is not None:
+            os.environ['MAX_TOTAL_MEMORY_MB'] = str(max_total_mb)
+        if max_per_server_mb is not None:
+            os.environ['MAX_SERVER_MEMORY_MB'] = str(max_per_server_mb)
+        
+        logger.info(f"App configuration updated: Title={app_title}, Hostname={server_hostname}, Total={max_total_mb}MB, Per Server={max_per_server_mb}MB")
         return True
     except Exception as e:
-        logger.error(f"Failed to update memory configuration: {str(e)}")
+        logger.error(f"Failed to update app configuration: {str(e)}")
         return False
+
+
+def update_memory_config(max_total_mb, max_per_server_mb):
+    """Update memory configuration by setting environment variables (backward compatibility)."""
+    return update_app_config(max_total_mb=max_total_mb, max_per_server_mb=max_per_server_mb)
 
 def format_memory_display(memory_mb):
     """Format memory in MB to human-readable format."""
@@ -386,32 +414,7 @@ def format_memory_display(memory_mb):
         return f"{memory_mb}MB"
 
 
-def get_total_allocated_memory(user_id=None):
-    """Get total allocated memory across all servers or for a specific user."""
-    try:
-        if user_id is None:
-            # Get total for all servers (admin view)
-            total = db.session.query(db.func.sum(Server.memory_mb)).scalar() or 0
-            logger.debug(f"Total allocated memory across all servers: {total}MB")
-        else:
-            # Get total for specific user
-            total = db.session.query(db.func.sum(Server.memory_mb)).filter_by(owner_id=user_id).scalar() or 0
-            logger.debug(f"Total allocated memory for user {user_id}: {total}MB")
-        return total
-    except Exception as e:
-        logger.error(f"Error getting total allocated memory: {str(e)}")
-        return 0
 
-def get_available_memory(user_id=None):
-    """Get available memory based on total system memory and allocated memory."""
-    try:
-        config = get_memory_config()
-        allocated = get_total_allocated_memory(user_id)
-        available = config['max_total_mb'] - allocated
-        return max(0, available)  # Don't return negative values
-    except Exception as e:
-        logger.error(f"Error getting available memory: {str(e)}")
-        return 8192  # Default to 8GB if error
 
 def get_memory_usage_summary(user_id=None):
     """Get a summary of memory usage for display."""

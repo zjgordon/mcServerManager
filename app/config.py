@@ -49,6 +49,10 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     ALLOWED_EXTENSIONS = {'jar', 'zip', 'tar.gz'}
     
+    # Application Configuration
+    APP_TITLE = os.environ.get('APP_TITLE', 'Minecraft Server Manager')
+    SERVER_HOSTNAME = os.environ.get('SERVER_HOSTNAME', 'localhost')
+    
     # Memory Management Configuration
     MAX_TOTAL_MEMORY_MB = int(os.environ.get('MAX_TOTAL_MEMORY_MB', '8192'))  # Default 8GB total
     DEFAULT_SERVER_MEMORY_MB = int(os.environ.get('DEFAULT_SERVER_MEMORY_MB', '1024'))  # Default 1GB per server

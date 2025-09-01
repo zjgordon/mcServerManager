@@ -114,7 +114,7 @@ class TestUtilityFunctions:
                 assert port == 25575
                 assert mock_available.call_count == 2
     
-    def test_find_next_available_port_with_assigned_ports(self, app):
+    def test_find_next_available_port_with_assigned_ports(self, app, admin_user):
         """Test finding port when some ports are assigned to servers."""
         with app.app_context():
             # Create a server with port 25565
@@ -122,7 +122,8 @@ class TestUtilityFunctions:
                 server_name='testserver',
                 version='1.20.1',
                 port=25565,
-                status='Stopped'
+                status='Stopped',
+                owner_id=admin_user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -237,7 +238,7 @@ class TestUtilityFunctions:
 class TestPortAllocation:
     """Test port allocation functionality in detail."""
     
-    def test_port_range_logic(self, app):
+    def test_port_range_logic(self, app, admin_user):
         """Test the port allocation follows the expected pattern."""
         with app.app_context():
             # Create servers with specific ports to test the logic
@@ -247,7 +248,8 @@ class TestPortAllocation:
                     server_name=f'testserver{i}',
                     version='1.20.1',
                     port=port,
-                    status='Stopped'
+                    status='Stopped',
+                    owner_id=admin_user.id
                 )
                 db.session.add(server)
             db.session.commit()
@@ -259,7 +261,7 @@ class TestPortAllocation:
                 # Should return 25595 (next in sequence)
                 assert port == 25595
     
-    def test_port_allocation_edge_cases(self, app):
+    def test_port_allocation_edge_cases(self, app, admin_user):
         """Test edge cases in port allocation."""
         with app.app_context():
             # Fill up many ports
@@ -268,7 +270,8 @@ class TestPortAllocation:
                     server_name=f'testserver{i}',
                     version='1.20.1',
                     port=25565 + (i * 10),
-                    status='Stopped'
+                    status='Stopped',
+                    owner_id=admin_user.id
                 )
                 db.session.add(server)
             db.session.commit()
@@ -280,7 +283,7 @@ class TestPortAllocation:
                 port = find_next_available_port()
                 assert port == 25755  # 25565 + (19 * 10)
     
-    def test_port_allocation_all_database_ports_taken(self, app):
+    def test_port_allocation_all_database_ports_taken(self, app, admin_user):
         """Test port allocation when all database ports are taken but system ports are free."""
         with app.app_context():
             # Fill up all 20 slots in the range
@@ -289,7 +292,8 @@ class TestPortAllocation:
                     server_name=f'testserver{i}',
                     version='1.20.1',
                     port=25565 + (i * 10),
-                    status='Stopped'
+                    status='Stopped',
+                    owner_id=admin_user.id
                 )
                 db.session.add(server)
             db.session.commit()

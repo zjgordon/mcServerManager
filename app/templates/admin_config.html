@@ -15,12 +15,52 @@
             <div class="card card-mc">
                 <div class="card-header card-mc-header">
                     <h5 class="mb-0 pixel-font">
-                        <i class="fas fa-memory"></i> Memory Configuration
+                        <i class="fas fa-cog"></i> Application Configuration
                     </h5>
                 </div>
                 <div class="card-body">
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <div class="form-group">
+                            <label for="app_title" class="form-label">
+                                <i class="fas fa-heading"></i> Application Title
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="app_title" 
+                                   name="app_title" 
+                                   value="{{ app_title }}"
+                                   placeholder="Minecraft Server Manager"
+                                   maxlength="100"
+                                   required>
+                            <small class="form-text text-muted">
+                                The title displayed in the header and browser tab
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="server_hostname" class="form-label">
+                                <i class="fas fa-globe"></i> Server Hostname/DNS
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="server_hostname" 
+                                   name="server_hostname" 
+                                   value="{{ server_hostname }}"
+                                   placeholder="minecraft.server.local"
+                                   maxlength="255"
+                                   required>
+                            <small class="form-text text-muted">
+                                DNS name or IP address for server sharing links (e.g., minecraft.server.local)
+                            </small>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h6 class="pixel-font text-gradient-mc">
+                            <i class="fas fa-memory"></i> Memory Configuration
+                        </h6>
                         
                         <div class="form-group">
                             <label for="max_total_mb" class="form-label">
@@ -70,6 +110,8 @@
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
                                 <strong>Current Settings:</strong><br>
+                                Application Title: <strong>{{ app_title }}</strong><br>
+                                Server Hostname: <strong>{{ server_hostname }}</strong><br>
                                 Total System Memory: <strong>{{ (max_total_mb / 1024)|round(1) }}GB</strong><br>
                                 Max Per Server: <strong>{{ (max_per_server_mb / 1024)|round(1) }}GB</strong><br>
                                 <small>Changes will take effect immediately and affect all users.</small>
@@ -97,6 +139,18 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    <h6><i class="fas fa-heading"></i> Application Title</h6>
+                    <p class="small text-muted">
+                        The title displayed in the browser tab and application header. 
+                        This helps identify your server management instance.
+                    </p>
+                    
+                    <h6><i class="fas fa-globe"></i> Server Hostname/DNS</h6>
+                    <p class="small text-muted">
+                        The DNS name or IP address used for server sharing links. 
+                        Players will use this to connect: <code>hostname:port</code>
+                    </p>
+                    
                     <h6><i class="fas fa-server"></i> Total System Memory</h6>
                     <p class="small text-muted">
                         This is the maximum amount of RAM that can be allocated across all Minecraft servers. 

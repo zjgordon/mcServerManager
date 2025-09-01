@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
-from ..models import Server
+from ..models import Server, User
 from ..extensions import db
 from ..utils import (
     is_valid_server_name,
@@ -20,7 +20,6 @@ from ..error_handlers import (
     ValidationError, NetworkError, FileOperationError, ServerError, DatabaseError,
     SafeFileOperation, SafeDatabaseOperation, logger, create_error_response
 )
-from ..models import Server, User
 import os
 import subprocess
 import psutil
