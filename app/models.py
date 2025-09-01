@@ -23,3 +23,4 @@ class Server(db.Model):
     pvp = db.Column(db.Boolean)
     spawn_monsters = db.Column(db.Boolean)
     motd = db.Column(db.String(150))
+    memory_mb = db.Column(db.Integer, nullable=False, default=1024)  # Memory allocation in MB

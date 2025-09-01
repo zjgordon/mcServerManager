@@ -4,6 +4,40 @@
 
 {% block content %}
     <h1 class="mt-4">Your Minecraft Servers</h1>
+    
+    <!-- Memory Usage Summary -->
+    {% if memory_summary %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Memory Usage Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <strong>Total Memory:</strong> {{ memory_summary.total_memory_display }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Allocated:</strong> {{ memory_summary.allocated_memory_display }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Available:</strong> {{ memory_summary.available_memory_display }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Usage:</strong> {{ memory_summary.usage_percentage }}%
+                </div>
+            </div>
+            <div class="progress mt-2">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: {{ memory_summary.usage_percentage }}%"
+                     aria-valuenow="{{ memory_summary.usage_percentage }}" 
+                     aria-valuemin="0" aria-valuemax="100">
+                    {{ memory_summary.usage_percentage }}%
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     <a href="{{ url_for('server.create') }}" class="btn btn-primary mb-3">Create New Server</a>
 
     <table class="table table-bordered">
@@ -13,6 +47,7 @@
                 <th>Status</th>
                 <th>Version</th>
                 <th>Port</th>
+                <th>Memory</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -29,6 +64,7 @@
                 </td>
                 <td>{{ server.version }}</td>
                 <td>{{ server.port }}</td>
+                <td>{{ server.memory_mb }}MB</td>
                 <td>
                     {% if not server.is_running %}
                         <form action="{{ url_for('server.start_server', server_id=server.id) }}" method="post" style="display:inline;">

@@ -4,6 +4,36 @@
 
 {% block content %}
     <h2 class="mt-4">Configure Server - Version {{ version }}</h2>
+    
+    <!-- Memory Usage Summary -->
+    {% if memory_summary %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Memory Usage</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Total Memory:</strong> {{ memory_summary.total_memory_display }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Allocated:</strong> {{ memory_summary.allocated_memory_display }}
+                </div>
+                <div class="col-md-4">
+                    <strong>Available:</strong> {{ memory_summary.available_memory_display }}
+                </div>
+            </div>
+            <div class="progress mt-2">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: {{ memory_summary.usage_percentage }}%"
+                     aria-valuenow="{{ memory_summary.usage_percentage }}" 
+                     aria-valuemin="0" aria-valuemax="100">
+                    {{ memory_summary.usage_percentage }}%
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <form action="{{ url_for('server.configure_server', version_type=version_type, version=version) }}" method="post">
         <div class="form-group">
             <label for="server_name">Server Name:</label>
@@ -53,6 +83,19 @@
         <div class="form-group">
             <label for="motd">MOTD:</label>
             <input type="text" name="motd" id="motd" class="form-control" value="{{ request.form.motd or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="memory_mb">Memory Allocation (MB):</label>
+            <input type="number" name="memory_mb" id="memory_mb" class="form-control" 
+                   min="{{ memory_config.min_server_mb }}" 
+                   max="{{ memory_config.max_server_mb }}"
+                   value="{{ request.form.memory_mb or memory_config.default_server_mb }}" 
+                   required>
+            <small class="form-text text-muted">
+                Min: {{ memory_config.min_server_mb }}MB, Max: {{ memory_config.max_server_mb }}MB, 
+                Available: {{ memory_summary.available_memory_mb }}MB
+            </small>
         </div>
 
         <button type="submit" class="btn btn-primary">Create Server</button>

@@ -10,8 +10,10 @@ import json
 from .error_handlers import (
     ValidationError, NetworkError, FileOperationError, ServerError,
     handle_network_error, handle_file_operations, safe_execute,
-    SafeFileOperation, logger
+    SafeFileOperation, SafeDatabaseOperation, logger
 )
+from .models import Server
+from flask import current_app
 
 def is_valid_server_name(name):
     """
@@ -264,3 +266,128 @@ def load_exclusion_list(filename='app/static/excluded_versions.json'):
     except Exception as e:
         logger.error(f"Unexpected error loading exclusion list: {str(e)}")
         raise FileOperationError(f"Failed to load exclusion list: {str(e)}")
+
+
+def get_memory_config():
+    """Get memory configuration from app config."""
+    try:
+        return {
+            'max_total_mb': current_app.config.get('MAX_TOTAL_MEMORY_MB', 8192),
+            'default_server_mb': current_app.config.get('DEFAULT_SERVER_MEMORY_MB', 1024),
+            'min_server_mb': current_app.config.get('MIN_SERVER_MEMORY_MB', 512),
+            'max_server_mb': current_app.config.get('MAX_SERVER_MEMORY_MB', 4096)
+        }
+    except Exception as e:
+        logger.error(f"Error getting memory config: {str(e)}")
+        # Return safe defaults
+        return {
+            'max_total_mb': 8192,
+            'default_server_mb': 1024,
+            'min_server_mb': 512,
+            'max_server_mb': 4096
+        }
+
+
+def get_total_allocated_memory():
+    """Get total memory allocated by all servers."""
+    try:
+        servers = Server.query.all()
+        total_memory = sum(server.memory_mb for server in servers)
+        logger.debug(f"Total allocated memory: {total_memory}MB across {len(servers)} servers")
+        return total_memory
+    except Exception as e:
+        logger.error(f"Error calculating total allocated memory: {str(e)}")
+        return 0
+
+
+def get_available_memory():
+    """Get available memory for new servers."""
+    try:
+        config = get_memory_config()
+        allocated = get_total_allocated_memory()
+        available = config['max_total_mb'] - allocated
+        logger.debug(f"Available memory: {available}MB (max: {config['max_total_mb']}MB, allocated: {allocated}MB)")
+        return max(0, available)
+    except Exception as e:
+        logger.error(f"Error calculating available memory: {str(e)}")
+        return 0
+
+
+def validate_memory_allocation(requested_memory_mb, exclude_server_id=None):
+    """
+    Validate if the requested memory allocation is possible.
+    
+    Args:
+        requested_memory_mb: Memory requested in MB
+        exclude_server_id: Server ID to exclude from calculation (for updates)
+    
+    Returns:
+        tuple: (is_valid, error_message, available_memory)
+    """
+    try:
+        config = get_memory_config()
+        
+        # Validate memory bounds
+        if requested_memory_mb < config['min_server_mb']:
+            return False, f"Memory must be at least {config['min_server_mb']}MB", 0
+        
+        if requested_memory_mb > config['max_server_mb']:
+            return False, f"Memory cannot exceed {config['max_server_mb']}MB", 0
+        
+        # Calculate current allocation excluding the server being updated
+        current_allocation = 0
+        servers = Server.query.all()
+        
+        for server in servers:
+            if exclude_server_id is None or server.id != exclude_server_id:
+                current_allocation += server.memory_mb
+        
+        # Check if new allocation would exceed total limit
+        new_total = current_allocation + requested_memory_mb
+        if new_total > config['max_total_mb']:
+            available = config['max_total_mb'] - current_allocation
+            return False, f"Total memory allocation would exceed limit. Available: {available}MB", available
+        
+        available = config['max_total_mb'] - new_total
+        return True, "", available
+        
+    except Exception as e:
+        logger.error(f"Error validating memory allocation: {str(e)}")
+        return False, "Error validating memory allocation", 0
+
+
+def format_memory_display(memory_mb):
+    """Format memory in MB to human-readable format."""
+    if memory_mb >= 1024:
+        return f"{memory_mb // 1024}GB {(memory_mb % 1024)}MB"
+    else:
+        return f"{memory_mb}MB"
+
+
+def get_memory_usage_summary():
+    """Get a summary of memory usage for display."""
+    try:
+        config = get_memory_config()
+        allocated = get_total_allocated_memory()
+        available = get_available_memory()
+        
+        return {
+            'total_memory_mb': config['max_total_mb'],
+            'allocated_memory_mb': allocated,
+            'available_memory_mb': available,
+            'total_memory_display': format_memory_display(config['max_total_mb']),
+            'allocated_memory_display': format_memory_display(allocated),
+            'available_memory_display': format_memory_display(available),
+            'usage_percentage': round((allocated / config['max_total_mb']) * 100, 1) if config['max_total_mb'] > 0 else 0
+        }
+    except Exception as e:
+        logger.error(f"Error getting memory usage summary: {str(e)}")
+        return {
+            'total_memory_mb': 8192,
+            'allocated_memory_mb': 0,
+            'available_memory_mb': 8192,
+            'total_memory_display': '8GB',
+            'allocated_memory_display': '0MB',
+            'available_memory_display': '8GB',
+            'usage_percentage': 0
+        }

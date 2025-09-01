@@ -9,6 +9,10 @@ from ..utils import (
     fetch_version_manifest,
     get_version_info,
     load_exclusion_list,
+    get_memory_config,
+    get_memory_usage_summary,
+    validate_memory_allocation,
+    format_memory_display,
 )
 from ..error_handlers import (
     route_error_handler, handle_network_error, handle_file_operations,
@@ -42,8 +46,11 @@ def home():
         for server in servers:
             server.is_running = server.status == 'Running' and server.pid is not None
 
+        # Get memory usage summary
+        memory_summary = get_memory_usage_summary()
+        
         logger.debug(f"Loaded {len(servers)} servers for home page")
-        return render_template('home.html', servers=servers)
+        return render_template('home.html', servers=servers, memory_summary=memory_summary)
     except Exception as e:
         logger.error(f"Error loading home page: {str(e)}")
         flash("Error loading server list. Please try again.", "danger")
@@ -151,7 +158,17 @@ def configure_server():
         if existing_server:
             raise ValidationError('A server with this name already exists. Please choose a different name.')
         
-        logger.info(f"Creating server '{server_name}' with gamemode '{gamemode}' and difficulty '{difficulty}'")
+        # Validate memory allocation
+        try:
+            memory_mb = int(request.form.get('memory_mb', get_memory_config()['default_server_mb']))
+        except (ValueError, TypeError):
+            memory_mb = get_memory_config()['default_server_mb']
+        
+        is_valid, error_msg, available_memory = validate_memory_allocation(memory_mb)
+        if not is_valid:
+            raise ValidationError(error_msg)
+        
+        logger.info(f"Creating server '{server_name}' with gamemode '{gamemode}', difficulty '{difficulty}', and memory '{memory_mb}MB'")
 
         # Create the server directory inside 'servers/' with proper error handling
         server_dir = os.path.normpath(os.path.join('servers', server_name))
@@ -256,7 +273,8 @@ def configure_server():
             hardcore=hardcore,
             pvp=pvp,
             spawn_monsters=spawn_monsters,
-            motd=motd or None
+            motd=motd or None,
+            memory_mb=memory_mb
         )
         
         try:
@@ -334,8 +352,16 @@ def configure_server():
     if not version_type or not version:
         raise ValidationError("Missing version information")
     
+    # Get memory configuration for the form
+    memory_config = get_memory_config()
+    memory_summary = get_memory_usage_summary()
+    
     logger.info(f"Displaying configuration form for version {version} ({version_type})")
-    return render_template('configure_server.html', version_type=version_type, version=version)
+    return render_template('configure_server.html', 
+                         version_type=version_type, 
+                         version=version,
+                         memory_config=memory_config,
+                         memory_summary=memory_summary)
 
 @server_bp.route('/start/<int:server_id>', methods=['POST'])
 @login_required
@@ -382,14 +408,12 @@ def start_server(server_id):
     if not os.path.exists(server_jar_path):
         raise FileOperationError(f"Server JAR not found: {server_jar_path}")
 
-    # Build the command to start the server with configurable memory
-    min_memory = os.environ.get('MINECRAFT_MIN_MEMORY', '1024M')
-    max_memory = os.environ.get('MINECRAFT_MAX_MEMORY', '2048M')
-    
+    # Build the command to start the server with the server's allocated memory
+    memory_mb = server.memory_mb
     command = [
         'java',
-        f'-Xms{min_memory}',
-        f'-Xmx{max_memory}',
+        f'-Xms{memory_mb}M',
+        f'-Xmx{memory_mb}M',
         '-jar',
         'server.jar',
         'nogui'
