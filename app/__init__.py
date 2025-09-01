@@ -5,6 +5,7 @@ from .models import User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .utils import check_admin_password
+from .error_handlers import init_error_handlers
 import os
 
 def create_app():
@@ -14,6 +15,9 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
+
+    # Initialize error handlers
+    init_error_handlers(app)
 
     # Register blueprints
     app.register_blueprint(auth_bp)
