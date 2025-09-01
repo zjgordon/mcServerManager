@@ -13,6 +13,7 @@ from ..utils import (
     get_memory_usage_summary,
     validate_memory_allocation,
     format_memory_display,
+    verify_process_status,
 )
 from ..error_handlers import (
     route_error_handler, handle_network_error, handle_file_operations,
@@ -61,8 +62,20 @@ def home():
         else:
             servers = Server.query.filter_by(owner_id=current_user.id).all()
 
-        # Update the is_running attribute based on server status
+        # Verify actual process status for each server in real-time
         for server in servers:
+            if server.status == 'Running' and server.pid:
+                # Verify the process is actually running
+                process_status = verify_process_status(server.pid)
+                if not process_status['is_running']:
+                    # Process is not running, update the status
+                    logger.info(f"Server {server.server_name} marked as running but process {server.pid} is not active")
+                    server.status = 'Stopped'
+                    server.pid = None
+                    # Don't commit here - just update the object for display
+                    # The actual database update will happen during the next reconciliation
+                
+            # Set the is_running attribute based on verified status
             server.is_running = server.status == 'Running' and server.pid is not None
 
         # Get memory usage summary (always show total system allocation)

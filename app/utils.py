@@ -14,6 +14,7 @@ from .error_handlers import (
 )
 from .models import Server
 from flask import current_app
+import psutil
 
 def is_valid_server_name(name):
     """
@@ -558,3 +559,274 @@ def initialize_default_config():
         logger.error(f"Failed to initialize default configuration: {str(e)}")
         db.session.rollback()
         return False
+
+def verify_process_status(pid):
+    """
+    Verify if a process with the given PID is actually running.
+    
+    Args:
+        pid: Process ID to check
+        
+    Returns:
+        dict: Status information including is_running, process_info, and error
+    """
+    try:
+        if not pid:
+            return {'is_running': False, 'process_info': None, 'error': None}
+        
+        process = psutil.Process(pid)
+        
+        # Check if process is running and get basic info
+        if process.is_running():
+            try:
+                # Get process details to verify it's a Java Minecraft server
+                process_info = {
+                    'pid': process.pid,
+                    'name': process.name(),
+                    'cmdline': process.cmdline(),
+                    'cwd': process.cwd(),
+                    'create_time': process.create_time(),
+                    'memory_info': process.memory_info(),
+                    'cpu_percent': process.cpu_percent()
+                }
+                
+                # Verify it's a Java process (basic validation)
+                if 'java' in process_info['name'].lower() or any('java' in cmd.lower() for cmd in process_info['cmdline']):
+                    return {
+                        'is_running': True, 
+                        'process_info': process_info, 
+                        'error': None
+                    }
+                else:
+                    return {
+                        'is_running': False, 
+                        'process_info': process_info, 
+                        'error': 'Process is not a Java application'
+                    }
+                    
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                return {'is_running': False, 'process_info': None, 'error': 'Access denied or process not found'}
+        else:
+            return {'is_running': False, 'process_info': None, 'error': 'Process is not running'}
+            
+    except psutil.NoSuchProcess:
+        return {'is_running': False, 'process_info': None, 'error': 'Process does not exist'}
+    except Exception as e:
+        logger.error(f"Error verifying process {pid}: {str(e)}")
+        return {'is_running': False, 'process_info': None, 'error': str(e)}
+
+
+def find_orphaned_minecraft_processes():
+    """
+    Find orphaned Minecraft server processes that are running but not managed by the app.
+    
+    Returns:
+        list: List of orphaned process information
+    """
+    orphaned_processes = []
+    
+    try:
+        # Get all Java processes
+        for process in psutil.process_iter(['pid', 'name', 'cmdline', 'cwd']):
+            try:
+                # Check if it's a Java process
+                if 'java' in process.info['name'].lower():
+                    cmdline = process.info['cmdline']
+                    
+                    # Check if it looks like a Minecraft server
+                    if (cmdline and 
+                        len(cmdline) > 2 and 
+                        'server.jar' in ' '.join(cmdline) and
+                        'nogui' in ' '.join(cmdline)):
+                        
+                        # Check if this process is managed by our app
+                        from .models import Server
+                        managed_server = Server.query.filter_by(pid=process.info['pid']).first()
+                        
+                        if not managed_server:
+                            # This is an orphaned process
+                            orphaned_info = {
+                                'pid': process.info['pid'],
+                                'cmdline': cmdline,
+                                'cwd': process.info['cwd'],
+                                'create_time': process.create_time(),
+                                'memory_info': process.memory_info()
+                            }
+                            orphaned_processes.append(orphaned_info)
+                            logger.warning(f"Found orphaned Minecraft process: PID {process.info['pid']}, CWD: {process.info['cwd']}")
+                            
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+            except Exception as e:
+                logger.debug(f"Error checking process {process.info.get('pid', 'unknown')}: {str(e)}")
+                continue
+                
+    except Exception as e:
+        logger.error(f"Error finding orphaned processes: {str(e)}")
+        
+    return orphaned_processes
+
+
+def reconcile_server_statuses():
+    """
+    Reconcile server statuses with actual running processes.
+    This should be called on app startup to ensure consistency.
+    
+    Returns:
+        dict: Summary of reconciliation actions taken
+    """
+    from .models import Server
+    
+    summary = {
+        'servers_checked': 0,
+        'statuses_updated': 0,
+        'orphaned_processes_found': 0,
+        'errors': []
+    }
+    
+    try:
+        # Check all servers marked as running
+        running_servers = Server.query.filter_by(status='Running').all()
+        summary['servers_checked'] = len(running_servers)
+        
+        for server in running_servers:
+            try:
+                # Verify process status
+                process_status = verify_process_status(server.pid)
+                
+                if not process_status['is_running']:
+                    # Process is not running, update status
+                    logger.info(f"Server {server.server_name} (PID {server.pid}) is not running, updating status")
+                    
+                    try:
+                        server.status = 'Stopped'
+                        server.pid = None
+                        db.session.commit()
+                        summary['statuses_updated'] += 1
+                        logger.info(f"Updated status for server {server.server_name}")
+                    except Exception as e:
+                        error_msg = f"Failed to update status for server {server.server_name}: {str(e)}"
+                        logger.error(error_msg)
+                        summary['errors'].append(error_msg)
+                        
+                else:
+                    # Process is running, verify it's still valid
+                    logger.debug(f"Server {server.server_name} (PID {server.pid}) is running and verified")
+                    
+            except Exception as e:
+                error_msg = f"Error checking server {server.server_name}: {str(e)}"
+                logger.error(error_msg)
+                summary['errors'].append(error_msg)
+        
+        # Find orphaned processes
+        orphaned = find_orphaned_minecraft_processes()
+        summary['orphaned_processes_found'] = len(orphaned)
+        
+        if orphaned:
+            logger.warning(f"Found {len(orphaned)} orphaned Minecraft processes")
+            for orphan in orphaned:
+                logger.warning(f"Orphaned process: PID {orphan['pid']}, CWD: {orphan['cwd']}")
+        
+        logger.info(f"Server status reconciliation complete: {summary['statuses_updated']} statuses updated, {summary['orphaned_processes_found']} orphaned processes found")
+        
+    except Exception as e:
+        error_msg = f"Error during server status reconciliation: {str(e)}"
+        logger.error(error_msg)
+        summary['errors'].append(error_msg)
+        
+    return summary
+
+
+def periodic_status_check():
+    """
+    Periodic function to check server statuses and update the database.
+    This should be called periodically (e.g., every few minutes) to keep statuses current.
+    
+    Returns:
+        dict: Summary of status updates
+    """
+    from .models import Server
+    
+    summary = {
+        'servers_checked': 0,
+        'statuses_updated': 0,
+        'errors': []
+    }
+    
+    try:
+        # Get all servers with PIDs
+        servers_with_pids = Server.query.filter(Server.pid.isnot(None)).all()
+        summary['servers_checked'] = len(servers_with_pids)
+        
+        for server in servers_with_pids:
+            try:
+                if not server.pid:
+                    continue
+                    
+                # Check if process is still running
+                process_status = verify_process_status(server.pid)
+                
+                if not process_status['is_running']:
+                    # Process is not running, update status
+                    logger.info(f"Periodic check: Server {server.server_name} (PID {server.pid}) is not running, updating status")
+                    
+                    try:
+                        server.status = 'Stopped'
+                        server.pid = None
+                        db.session.commit()
+                        summary['statuses_updated'] += 1
+                        logger.info(f"Updated status for server {server.server_name} during periodic check")
+                    except Exception as e:
+                        error_msg = f"Failed to update status for server {server.server_name}: {str(e)}"
+                        logger.error(error_msg)
+                        summary['errors'].append(error_msg)
+                        
+            except Exception as e:
+                error_msg = f"Error checking server {server.server_name}: {str(e)}"
+                logger.error(error_msg)
+                summary['errors'].append(error_msg)
+                
+        if summary['statuses_updated'] > 0:
+            logger.info(f"Periodic status check complete: {summary['statuses_updated']} statuses updated")
+            
+    except Exception as e:
+        error_msg = f"Error during periodic status check: {str(e)}"
+        logger.error(error_msg)
+        summary['errors'].append(error_msg)
+        
+    return summary
+
+
+def get_server_process_info(server):
+    """
+    Get detailed process information for a server.
+    
+    Args:
+        server: Server model instance
+        
+    Returns:
+        dict: Process information or None if not running
+    """
+    if not server.pid:
+        return None
+        
+    try:
+        process = psutil.Process(server.pid)
+        if process.is_running():
+            return {
+                'pid': process.pid,
+                'name': process.name(),
+                'cmdline': process.cmdline(),
+                'cwd': process.cwd(),
+                'create_time': process.create_time(),
+                'memory_info': process.memory_info(),
+                'cpu_percent': process.cpu_percent(),
+                'status': process.status()
+            }
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        return None
+    except Exception as e:
+        logger.error(f"Error getting process info for server {server.server_name}: {str(e)}")
+        return None
+        
+    return None

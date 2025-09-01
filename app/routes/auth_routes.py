@@ -390,3 +390,84 @@ def admin_config():
                          server_hostname=config['server_hostname'],
                          max_total_mb=config['max_total_mb'],
                          max_per_server_mb=config['max_server_mb'])
+
+@auth_bp.route('/admin/process_management', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def process_management():
+    """Admin process management page for server process oversight."""
+    from ..utils import (
+        reconcile_server_statuses, 
+        periodic_status_check, 
+        find_orphaned_minecraft_processes,
+        get_server_process_info
+    )
+    from ..models import Server
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'reconcile':
+            # Reconcile server statuses
+            summary = reconcile_server_statuses()
+            flash(f'Process reconciliation complete: {summary["statuses_updated"]} statuses updated, {summary["orphaned_processes_found"]} orphaned processes found', 'info')
+            
+        elif action == 'periodic_check':
+            # Run periodic status check
+            summary = periodic_status_check()
+            flash(f'Periodic status check complete: {summary["statuses_updated"]} statuses updated', 'info')
+            
+        elif action == 'cleanup_orphaned':
+            # Find orphaned processes (read-only, no cleanup action for safety)
+            orphaned = find_orphaned_minecraft_processes()
+            flash(f'Found {len(orphaned)} orphaned Minecraft processes', 'warning')
+            
+        return redirect(url_for('auth.process_management'))
+    
+    # Get current server statuses
+    servers = Server.query.all()
+    
+    # Get process information for each server
+    for server in servers:
+        if server.pid:
+            server.process_info = get_server_process_info(server)
+    
+    # Find orphaned processes
+    orphaned_processes = find_orphaned_minecraft_processes()
+    
+    return render_template('process_management.html', 
+                         servers=servers,
+                         orphaned_processes=orphaned_processes)
+
+
+@auth_bp.route('/admin/status_check', methods=['POST'])
+def status_check_endpoint():
+    """
+    Endpoint for periodic status checks.
+    This can be called by external schedulers (cron, systemd timers, etc.)
+    
+    Requires a simple API key for security.
+    """
+    # Simple API key check (you can enhance this with proper authentication)
+    api_key = request.headers.get('X-API-Key') or request.form.get('api_key')
+    expected_key = os.environ.get('STATUS_CHECK_API_KEY', 'default_key_change_me')
+    
+    if api_key != expected_key:
+        return jsonify({'error': 'Invalid API key'}), 401
+    
+    try:
+        from ..utils import periodic_status_check
+        summary = periodic_status_check()
+        
+        return jsonify({
+            'success': True,
+            'timestamp': datetime.utcnow().isoformat(),
+            'summary': summary
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500

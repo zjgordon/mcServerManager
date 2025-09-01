@@ -9,6 +9,9 @@ from .utils import check_admin_password
 from .error_handlers import init_error_handlers
 from .security import add_security_headers, audit_log
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
@@ -35,6 +38,16 @@ def create_app():
             'app_title': config['app_title'],
             'server_hostname': config['server_hostname']
         }
+    
+    # Custom Jinja filters
+    @app.template_filter('datetime')
+    def format_datetime(timestamp):
+        """Format Unix timestamp as readable datetime."""
+        try:
+            from datetime import datetime
+            return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        except:
+            return str(timestamp)
     
     # Security middleware
     @app.after_request
@@ -75,6 +88,11 @@ def create_app():
         # Initialize default configuration
         from .utils import initialize_default_config
         initialize_default_config()
+        
+        # Reconcile server statuses with actual running processes
+        from .utils import reconcile_server_statuses
+        reconciliation_summary = reconcile_server_statuses()
+        logger.info(f"Startup process reconciliation: {reconciliation_summary}")
         
         # Check if any admin user exists
         admin_user = User.query.filter_by(is_admin=True).first()
