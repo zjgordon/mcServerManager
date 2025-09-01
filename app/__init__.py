@@ -23,16 +23,20 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(server_bp)
 
-    # Run admin password check before each request
-    app.before_request(check_admin_password)
-
     # Create database tables if they don't exist
     with app.app_context():
         db.create_all()
-        # Create default admin user if none exists
-        admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
-        if not User.query.filter_by(username=admin_username).first():
-            new_user = User(username=admin_username, password_hash=None, is_admin=True)
+        # Check if any admin user exists
+        admin_user = User.query.filter_by(is_admin=True).first()
+        if not admin_user:
+            # Create default admin user without password (will be set via setup)
+            admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
+            new_user = User(
+                username=admin_username, 
+                password_hash=None, 
+                is_admin=True,
+                is_active=True
+            )
             db.session.add(new_user)
             db.session.commit()
 

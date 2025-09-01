@@ -288,10 +288,13 @@ def get_memory_config():
         }
 
 
-def get_total_allocated_memory():
-    """Get total memory allocated by all servers."""
+def get_total_allocated_memory(user_id=None):
+    """Get total memory allocated by servers."""
     try:
-        servers = Server.query.all()
+        if user_id:
+            servers = Server.query.filter_by(owner_id=user_id).all()
+        else:
+            servers = Server.query.all()
         total_memory = sum(server.memory_mb for server in servers)
         logger.debug(f"Total allocated memory: {total_memory}MB across {len(servers)} servers")
         return total_memory
@@ -300,11 +303,11 @@ def get_total_allocated_memory():
         return 0
 
 
-def get_available_memory():
+def get_available_memory(user_id=None):
     """Get available memory for new servers."""
     try:
         config = get_memory_config()
-        allocated = get_total_allocated_memory()
+        allocated = get_total_allocated_memory(user_id)
         available = config['max_total_mb'] - allocated
         logger.debug(f"Available memory: {available}MB (max: {config['max_total_mb']}MB, allocated: {allocated}MB)")
         return max(0, available)
@@ -364,12 +367,12 @@ def format_memory_display(memory_mb):
         return f"{memory_mb}MB"
 
 
-def get_memory_usage_summary():
+def get_memory_usage_summary(user_id=None):
     """Get a summary of memory usage for display."""
     try:
         config = get_memory_config()
-        allocated = get_total_allocated_memory()
-        available = get_available_memory()
+        allocated = get_total_allocated_memory(user_id)
+        available = get_available_memory(user_id)
         
         return {
             'total_memory_mb': config['max_total_mb'],

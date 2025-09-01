@@ -20,6 +20,7 @@ from ..error_handlers import (
     ValidationError, NetworkError, FileOperationError, ServerError, DatabaseError,
     SafeFileOperation, SafeDatabaseOperation, logger, create_error_response
 )
+from ..models import Server, User
 import os
 import subprocess
 import psutil
@@ -32,6 +33,21 @@ import time
 
 server_bp = Blueprint('server', __name__)
 
+def check_server_access(server_id):
+    """Check if current user has access to the server."""
+    server = Server.query.get_or_404(server_id)
+    
+    # Admin can access any server
+    if current_user.is_admin:
+        return server
+    
+    # Regular users can only access their own servers
+    if server.owner_id != current_user.id:
+        flash('You do not have permission to access this server.', 'danger')
+        return None
+    
+    return server
+
 @server_bp.route('/')
 @login_required
 @route_error_handler
@@ -40,16 +56,23 @@ def home():
     logger.info(f"User {current_user.username} accessing home page")
     
     try:
-        servers = Server.query.all()
+        # Show all servers for admin, only user's servers for regular users
+        if current_user.is_admin:
+            servers = Server.query.all()
+        else:
+            servers = Server.query.filter_by(owner_id=current_user.id).all()
 
         # Update the is_running attribute based on server status
         for server in servers:
             server.is_running = server.status == 'Running' and server.pid is not None
 
-        # Get memory usage summary
-        memory_summary = get_memory_usage_summary()
+        # Get memory usage summary (only for user's servers unless admin)
+        if current_user.is_admin:
+            memory_summary = get_memory_usage_summary()
+        else:
+            memory_summary = get_memory_usage_summary(user_id=current_user.id)
         
-        logger.debug(f"Loaded {len(servers)} servers for home page")
+        logger.debug(f"Loaded {len(servers)} servers for user {current_user.username}")
         return render_template('home.html', servers=servers, memory_summary=memory_summary)
     except Exception as e:
         logger.error(f"Error loading home page: {str(e)}")
@@ -274,7 +297,8 @@ def configure_server():
             pvp=pvp,
             spawn_monsters=spawn_monsters,
             motd=motd or None,
-            memory_mb=memory_mb
+            memory_mb=memory_mb,
+            owner_id=current_user.id
         )
         
         try:
@@ -369,7 +393,9 @@ def configure_server():
 def start_server(server_id):
     """Start the server if not running."""
     logger.info(f"User {current_user.username} attempting to start server ID {server_id}")
-    server = Server.query.get_or_404(server_id)
+    server = check_server_access(server_id)
+    if not server:
+        return redirect(url_for('server.home'))
 
     server_dir = os.path.normpath(os.path.join('servers', server.server_name))
     eula_file_path = os.path.join(server_dir, 'eula.txt')
@@ -466,7 +492,9 @@ def start_server(server_id):
 def stop_server(server_id):
     """Stop the server if running."""
     logger.info(f"User {current_user.username} attempting to stop server ID {server_id}")
-    server = Server.query.get_or_404(server_id)
+    server = check_server_access(server_id)
+    if not server:
+        return redirect(url_for('server.home'))
 
     if server.status != 'Running' or not server.pid:
         logger.info(f"Server {server.server_name} is already stopped")
@@ -533,9 +561,12 @@ def stop_server(server_id):
 
 @server_bp.route('/delete/<int:server_id>', methods=['POST', 'GET'])
 @login_required
+@route_error_handler
 def delete_server(server_id):
     """Delete the server entry and files."""
-    server = Server.query.get_or_404(server_id)
+    server = check_server_access(server_id)
+    if not server:
+        return redirect(url_for('server.home'))
 
     if request.method == 'POST':
         # Stop the server if it is running
@@ -569,9 +600,12 @@ def delete_server(server_id):
 
 @server_bp.route('/backup/<int:server_id>', methods=['POST'])
 @login_required
+@route_error_handler
 def backup_server(server_id):
     """Backup the server files."""
-    server = Server.query.get_or_404(server_id)
+    server = check_server_access(server_id)
+    if not server:
+        return redirect(url_for('server.home'))
 
     server_dir = os.path.join('servers', server.server_name)
     backup_dir = os.path.join('backups', server.server_name)
