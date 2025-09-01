@@ -1,11 +1,11 @@
 #Minecraft server properties
-level-seed={{level_seed}}
-gamemode={{gamemode}}
-difficulty={{difficulty}}
-pvp={{pvp}}
-motd={{motd}}
-hardcore={{hardcore}}
-spawn-monsters={{spawn_monsters}}
+level-seed={level_seed}
+gamemode={gamemode}
+difficulty={difficulty}
+pvp={pvp}
+motd={motd}
+hardcore={hardcore}
+spawn-monsters={spawn_monsters}
 enable-jmx-monitoring=false
 rcon.port=25575
 enable-command-block=false
@@ -28,7 +28,7 @@ view-distance=10
 server-ip=
 resource-pack-prompt=
 allow-nether=true
-server-port={{server_port}}
+server-port={server_port}
 enable-rcon=false
 sync-chunk-writes=true
 op-permission-level=4
