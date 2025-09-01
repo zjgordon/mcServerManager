@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Configuration{% endblock %}
+
+{% block content %}
+    <div class="mb-4">
+        <h1 class="text-gradient-mc pixel-font-lg">
+            <i class="fas fa-cog"></i> Admin Configuration
+        </h1>
+        <p class="text-muted">Configure system-wide memory allocation settings</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card card-mc">
+                <div class="card-header card-mc-header">
+                    <h5 class="mb-0 pixel-font">
+                        <i class="fas fa-memory"></i> Memory Configuration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <div class="form-group">
+                            <label for="max_total_mb" class="form-label">
+                                <i class="fas fa-server"></i> Total System Memory
+                            </label>
+                            <div class="input-group">
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="max_total_mb" 
+                                       name="max_total_mb" 
+                                       value="{{ max_total_mb }}"
+                                       min="1024" 
+                                       step="512"
+                                       required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">MB</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Total memory available for all Minecraft servers across all users
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="max_per_server_mb" class="form-label">
+                                <i class="fas fa-cube"></i> Maximum Memory Per Server
+                            </label>
+                            <div class="input-group">
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="max_per_server_mb" 
+                                       name="max_per_server_mb" 
+                                       value="{{ max_per_server_mb }}"
+                                       min="512" 
+                                       step="256"
+                                       required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">MB</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Maximum memory that can be allocated to a single server
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Current Settings:</strong><br>
+                                Total System Memory: <strong>{{ (max_total_mb / 1024)|round(1) }}GB</strong><br>
+                                Max Per Server: <strong>{{ (max_per_server_mb / 1024)|round(1) }}GB</strong><br>
+                                <small>Changes will take effect immediately and affect all users.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-mc btn-mc-primary">
+                                <i class="fas fa-save"></i> Save Configuration
+                            </button>
+                            <a href="{{ url_for('server.home') }}" class="btn btn-mc btn-mc-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card card-mc">
+                <div class="card-header card-mc-header">
+                    <h5 class="mb-0 pixel-font">
+                        <i class="fas fa-info-circle"></i> Configuration Help
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6><i class="fas fa-server"></i> Total System Memory</h6>
+                    <p class="small text-muted">
+                        This is the maximum amount of RAM that can be allocated across all Minecraft servers. 
+                        Make sure this doesn't exceed your server's available RAM.
+                    </p>
+                    
+                    <h6><i class="fas fa-cube"></i> Maximum Per Server</h6>
+                    <p class="small text-muted">
+                        This limits how much memory any single server can use. This prevents one user from 
+                        consuming all available system memory.
+                    </p>
+                    
+                    <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
+                    <ul class="small text-muted">
+                        <li>Changes take effect immediately</li>
+                        <li>Existing servers may need to be restarted</li>
+                        <li>Ensure your system has enough RAM</li>
+                        <li>Consider leaving some RAM for the OS</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

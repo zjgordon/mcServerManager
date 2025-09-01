@@ -3,7 +3,14 @@
 {% block title %}Configure Minecraft Server{% endblock %}
 
 {% block content %}
-    <h2 class="mt-4">Configure Server - Version {{ version }}</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-gradient">
+            <i class="fas fa-cogs"></i> Configure Server - Version {{ version }}
+        </h2>
+        <a href="{{ url_for('server.create') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Version Selection
+        </a>
+    </div>
     
     <!-- Memory Usage Summary -->
     {% if memory_summary %}
@@ -34,71 +41,116 @@
         </div>
     </div>
     {% endif %}
-    <form action="{{ url_for('server.configure_server', version_type=version_type, version=version) }}" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="form-group">
-            <label for="server_name">Server Name:</label>
-            <input type="text" name="server_name" id="server_name" class="form-control" required value="{{ request.form.server_name or '' }}">
-        </div>
+    <div class="card shadow-soft">
+        <div class="card-body">
+            <form action="{{ url_for('server.configure_server', version_type=version_type, version=version) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="server_name" class="form-label">
+                                <i class="fas fa-server"></i> Server Name
+                            </label>
+                            <input type="text" name="server_name" id="server_name" class="form-control" required 
+                                   value="{{ request.form.server_name or '' }}" placeholder="My Minecraft Server"
+                                   data-tooltip="Choose a unique name for your server">
+                        </div>
 
-        <div class="form-group">
-            <label for="level_seed">Level Seed:</label>
-            <input type="text" name="level_seed" id="level_seed" class="form-control" value="{{ request.form.level_seed or '' }}">
-        </div>
+                        <div class="form-group">
+                            <label for="level_seed" class="form-label">
+                                <i class="fas fa-seedling"></i> Level Seed
+                            </label>
+                            <input type="text" name="level_seed" id="level_seed" class="form-control" 
+                                   value="{{ request.form.level_seed or '' }}" placeholder="Leave empty for random"
+                                   data-tooltip="Optional: Enter a specific seed for world generation">
+                        </div>
 
-        <div class="form-group">
-            <label for="gamemode">Gamemode:</label>
-            <select name="gamemode" id="gamemode" class="form-control">
-                <option value="survival" {% if request.form.gamemode == 'survival' %}selected{% endif %}>Survival</option>
-                <option value="creative" {% if request.form.gamemode == 'creative' %}selected{% endif %}>Creative</option>
-                <option value="adventure" {% if request.form.gamemode == 'adventure' %}selected{% endif %}>Adventure</option>
-                <option value="spectator" {% if request.form.gamemode == 'spectator' %}selected{% endif %}>Spectator</option>
-            </select>
-        </div>
+                        <div class="form-group">
+                            <label for="gamemode" class="form-label">
+                                <i class="fas fa-gamepad"></i> Gamemode
+                            </label>
+                            <select name="gamemode" id="gamemode" class="form-control" data-tooltip="Default game mode for new players">
+                                <option value="survival" {% if request.form.gamemode == 'survival' %}selected{% endif %}>Survival</option>
+                                <option value="creative" {% if request.form.gamemode == 'creative' %}selected{% endif %}>Creative</option>
+                                <option value="adventure" {% if request.form.gamemode == 'adventure' %}selected{% endif %}>Adventure</option>
+                                <option value="spectator" {% if request.form.gamemode == 'spectator' %}selected{% endif %}>Spectator</option>
+                            </select>
+                        </div>
 
-        <div class="form-group">
-            <label for="difficulty">Difficulty:</label>
-            <select name="difficulty" id="difficulty" class="form-control">
-                <option value="peaceful" {% if request.form.difficulty == 'peaceful' %}selected{% endif %}>Peaceful</option>
-                <option value="easy" {% if request.form.difficulty == 'easy' %}selected{% endif %}>Easy</option>
-                <option value="normal" {% if request.form.difficulty == 'normal' %}selected{% endif %}>Normal</option>
-                <option value="hard" {% if request.form.difficulty == 'hard' %}selected{% endif %}>Hard</option>
-            </select>
-        </div>
+                        <div class="form-group">
+                            <label for="difficulty" class="form-label">
+                                <i class="fas fa-shield-alt"></i> Difficulty
+                            </label>
+                            <select name="difficulty" id="difficulty" class="form-control" data-tooltip="How challenging the game will be">
+                                <option value="peaceful" {% if request.form.difficulty == 'peaceful' %}selected{% endif %}>Peaceful</option>
+                                <option value="easy" {% if request.form.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                                <option value="normal" {% if request.form.difficulty == 'normal' %}selected{% endif %}>Normal</option>
+                                <option value="hard" {% if request.form.difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-cog"></i> Server Options
+                            </label>
+                            <div class="form-check">
+                                <input type="checkbox" name="hardcore" id="hardcore" class="form-check-input" {% if request.form.get('hardcore') %}checked{% endif %}>
+                                <label for="hardcore" class="form-check-label" data-tooltip="Players are permanently banned when they die">
+                                    <i class="fas fa-skull"></i> Hardcore
+                                </label>
+                            </div>
 
-        <div class="form-group form-check">
-            <input type="checkbox" name="hardcore" id="hardcore" class="form-check-input" {% if request.form.get('hardcore') %}checked{% endif %}>
-            <label for="hardcore" class="form-check-label">Hardcore</label>
-        </div>
+                            <div class="form-check">
+                                <input type="checkbox" name="pvp" id="pvp" class="form-check-input" {% if request.form.get('pvp') or request.method == 'GET' %}checked{% endif %}>
+                                <label for="pvp" class="form-check-label" data-tooltip="Allow players to fight each other">
+                                    <i class="fas fa-sword"></i> PVP
+                                </label>
+                            </div>
 
-        <div class="form-group form-check">
-            <input type="checkbox" name="pvp" id="pvp" class="form-check-input" {% if request.form.get('pvp') or request.method == 'GET' %}checked{% endif %}>
-            <label for="pvp" class="form-check-label">PVP</label>
-        </div>
+                            <div class="form-check">
+                                <input type="checkbox" name="spawn_monsters" id="spawn_monsters" class="form-check-input" {% if request.form.get('spawn_monsters') or request.method == 'GET' %}checked{% endif %}>
+                                <label for="spawn_monsters" class="form-check-label" data-tooltip="Allow hostile mobs to spawn">
+                                    <i class="fas fa-spider"></i> Spawn Monsters
+                                </label>
+                            </div>
+                        </div>
 
-        <div class="form-group form-check">
-            <input type="checkbox" name="spawn_monsters" id="spawn_monsters" class="form-check-input" {% if request.form.get('spawn_monsters') or request.method == 'GET' %}checked{% endif %}>
-            <label for="spawn_monsters" class="form-check-label">Spawn Monsters</label>
-        </div>
+                        <div class="form-group">
+                            <label for="motd" class="form-label">
+                                <i class="fas fa-comment"></i> MOTD (Message of the Day)
+                            </label>
+                            <input type="text" name="motd" id="motd" class="form-control" 
+                                   value="{{ request.form.motd or '' }}" placeholder="Welcome to my server!"
+                                   data-tooltip="Message shown to players in the server list">
+                        </div>
 
-        <div class="form-group">
-            <label for="motd">MOTD:</label>
-            <input type="text" name="motd" id="motd" class="form-control" value="{{ request.form.motd or '' }}">
-        </div>
+                        <div class="form-group">
+                            <label for="memory_mb" class="form-label">
+                                <i class="fas fa-memory"></i> Memory Allocation (MB)
+                            </label>
+                            <input type="number" name="memory_mb" id="memory_mb" class="form-control" 
+                                   min="{{ memory_config.min_server_mb }}" 
+                                   max="{{ memory_config.max_server_mb }}"
+                                   value="{{ request.form.memory_mb or memory_config.default_server_mb }}" 
+                                   required data-tooltip="Amount of RAM allocated to this server">
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Min: {{ memory_config.min_server_mb }}MB, Max: {{ memory_config.max_server_mb }}MB, 
+                                Available: {{ memory_summary.available_memory_mb }}MB
+                            </small>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label for="memory_mb">Memory Allocation (MB):</label>
-            <input type="number" name="memory_mb" id="memory_mb" class="form-control" 
-                   min="{{ memory_config.min_server_mb }}" 
-                   max="{{ memory_config.max_server_mb }}"
-                   value="{{ request.form.memory_mb or memory_config.default_server_mb }}" 
-                   required>
-            <small class="form-text text-muted">
-                Min: {{ memory_config.min_server_mb }}MB, Max: {{ memory_config.max_server_mb }}MB, 
-                Available: {{ memory_summary.available_memory_mb }}MB
-            </small>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus"></i> Create Server
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <button type="submit" class="btn btn-primary">Create Server</button>
-    </form>
+    </div>
 {% endblock %}

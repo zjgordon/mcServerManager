@@ -39,12 +39,24 @@ A comprehensive web application built with Flask that allows users to create, ma
 - **Audit Logging:** Detailed security event logging and monitoring
 - **File Upload Security:** Secure file upload validation and processing
 
+### User Interface & Experience
+- **Minecraft-Inspired Theme:** Custom green color scheme with pixelated fonts and Minecraft-style UI elements
+- **Responsive Design:** Mobile-friendly interface that works on all screen sizes
+- **Advanced Search & Filtering:** Compact three-column search bar with server name, status, and version filtering
+- **View Toggle:** Switch between table and card views for server management
+- **Real-time Updates:** Live server status updates and memory monitoring
+- **Enhanced Navigation:** Streamlined navigation with user dropdown and prominent action buttons
+- **Console Integration:** Built-in server console viewer with log management
+- **Analytics Dashboard:** System-wide analytics and memory usage visualization
+- **Bulk Operations:** Multi-server management capabilities
+
 ### Technical Features
 - **Modular Architecture:** Organized using Flask blueprints for scalability
 - **EULA Integration:** Integrated EULA acceptance process within the app
 - **Mojang API Integration:** Automatic version manifest fetching and server JAR downloads
 - **Process Management:** Advanced process monitoring and management using psutil
 - **Test Suite:** Comprehensive test coverage including unit, integration, and security tests
+- **Enhanced Confirmation System:** Multi-level confirmation dialogs for destructive operations
 
 ## 📋 Prerequisites
 

@@ -171,20 +171,28 @@ class TestMemoryDisplay:
     
     def test_format_memory_display_gb(self):
         """Test formatting memory in GB."""
-        assert format_memory_display(1024) == "1GB 0MB"
-        assert format_memory_display(2048) == "2GB 0MB"
-        assert format_memory_display(1536) == "1GB 512MB"
+        assert format_memory_display(1024) == "1.0GB"
+        assert format_memory_display(2048) == "2.0GB"
+        assert format_memory_display(1536) == "1.5GB"
     
     def test_get_memory_usage_summary(self, app):
         """Test memory usage summary."""
         with app.app_context():
+            # Create a user first
+            from werkzeug.security import generate_password_hash
+            user = User(username='testuser2', email='test2@example.com', is_admin=False)
+            user.password_hash = generate_password_hash('password123')
+            db.session.add(user)
+            db.session.commit()
+            
             # Create a server
             server = Server(
-                server_name='testserver',
+                server_name='testserver2',
                 version='1.20.1',
-                port=25565,
+                port=25566,
                 status='Stopped',
-                memory_mb=1024
+                memory_mb=1024,
+                owner_id=user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -192,12 +200,12 @@ class TestMemoryDisplay:
             summary = get_memory_usage_summary()
             
             assert summary['total_memory_mb'] == 8192
-            assert summary['allocated_memory_mb'] == 1024
-            assert summary['available_memory_mb'] == 7168
-            assert summary['total_memory_display'] == "8GB 0MB"
-            assert summary['allocated_memory_display'] == "1GB 0MB"
-            assert summary['available_memory_display'] == "7GB 0MB"
-            assert summary['usage_percentage'] == 12.5  # 1024/8192 * 100
+            assert summary['allocated_memory_mb'] == 2048  # 1024 from existing + 1024 from new server
+            assert summary['available_memory_mb'] == 6144
+            assert summary['total_memory_display'] == "8.0GB"
+            assert summary['allocated_memory_display'] == "2.0GB"
+            assert summary['available_memory_display'] == "6.0GB"
+            assert summary['usage_percentage'] == 25.0  # 2048/8192 * 100
 
 
 class TestMemoryInServerCreation:

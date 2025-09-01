@@ -66,11 +66,8 @@ def home():
         for server in servers:
             server.is_running = server.status == 'Running' and server.pid is not None
 
-        # Get memory usage summary (only for user's servers unless admin)
-        if current_user.is_admin:
-            memory_summary = get_memory_usage_summary()
-        else:
-            memory_summary = get_memory_usage_summary(user_id=current_user.id)
+        # Get memory usage summary (always show total system allocation)
+        memory_summary = get_memory_usage_summary()
         
         logger.debug(f"Loaded {len(servers)} servers for user {current_user.username}")
         return render_template('home.html', servers=servers, memory_summary=memory_summary)
@@ -183,9 +180,11 @@ def configure_server():
         
         # Validate memory allocation
         try:
-            memory_mb = int(request.form.get('memory_mb', get_memory_config()['default_server_mb']))
-        except (ValueError, TypeError):
-            memory_mb = get_memory_config()['default_server_mb']
+            memory_config = get_memory_config()
+            memory_mb = int(request.form.get('memory_mb', memory_config['default_server_mb']))
+        except (ValueError, TypeError, KeyError):
+            # Fallback to default if there's any error
+            memory_mb = 1024  # Default fallback
         
         is_valid, error_msg, available_memory = validate_memory_allocation(memory_mb)
         if not is_valid:

@@ -68,6 +68,19 @@ app.log
 logs/
 instance/
 
+# Temporary files
+cookies.txt
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Server files and backups
+servers/*/
+backups/*/
+!servers/server_files_stored_here.txt
+!backups/backups_stored_here.txt
+
 # Flask stuff:
 instance/
 .webassets-cache

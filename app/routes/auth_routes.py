@@ -322,3 +322,50 @@ def reset_user_password(user_id):
     
     flash(f'Password for {user.username} reset successfully.', 'success')
     return redirect(url_for('auth.manage_users'))
+
+@auth_bp.route('/admin_config', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_config():
+    """Admin configuration page for system settings."""
+    from ..utils import get_memory_config, update_memory_config
+    
+    if request.method == 'POST':
+        try:
+            max_total_mb = int(request.form['max_total_mb'])
+            max_per_server_mb = int(request.form['max_per_server_mb'])
+            
+            # Validate the values
+            if max_total_mb < 1024:  # At least 1GB
+                flash('Total system memory must be at least 1GB (1024MB).', 'danger')
+                return redirect(url_for('auth.admin_config'))
+            
+            if max_per_server_mb < 512:  # At least 512MB per server
+                flash('Maximum memory per server must be at least 512MB.', 'danger')
+                return redirect(url_for('auth.admin_config'))
+            
+            if max_per_server_mb > max_total_mb:
+                flash('Maximum memory per server cannot exceed total system memory.', 'danger')
+                return redirect(url_for('auth.admin_config'))
+            
+            # Update the configuration
+            success = update_memory_config(max_total_mb, max_per_server_mb)
+            
+            if success:
+                flash('System configuration updated successfully.', 'success')
+            else:
+                flash('Failed to update system configuration.', 'danger')
+                
+        except ValueError:
+            flash('Invalid memory values provided.', 'danger')
+        except Exception as e:
+            flash(f'Error updating configuration: {str(e)}', 'danger')
+        
+        return redirect(url_for('auth.admin_config'))
+    
+    # Get current configuration
+    config = get_memory_config()
+    
+    return render_template('admin_config.html', 
+                         max_total_mb=config['max_total_mb'],
+                         max_per_server_mb=config['max_per_server_mb'])
