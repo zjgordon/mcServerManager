@@ -315,6 +315,15 @@ def configure_server():
             except Exception as cleanup_error:
                 logger.warning(f"Failed to cleanup server directory: {cleanup_error}")
             raise DatabaseError(f"Failed to save server to database: {str(e)}")
+        # Check Java version before attempting to start server
+        try:
+            java_version_output = subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT, text=True)
+            logger.info(f"Java version check: {java_version_output.split()[2]}")
+        except Exception as e:
+            logger.error(f"Java is not installed or not in PATH: {str(e)}")
+            flash('Java is not installed or not accessible. Please install Java to run Minecraft servers.', 'danger')
+            return redirect(url_for('server.home'))
+        
         # Run server for the first time to produce eula.txt with proper error handling
         try:
             logger.info(f"Running initial server startup to generate EULA for {server_name}")
@@ -326,10 +335,24 @@ def configure_server():
                 stderr=subprocess.PIPE,
                 text=True
             )
+            
+            # Give the process a moment to start and check for immediate errors
+            import time
+            time.sleep(2)
+            if process.poll() is not None:
+                # Process has already terminated, get the error
+                stdout, stderr = process.communicate()
+                error_msg = stderr if stderr else stdout
+                logger.error(f"Server process terminated immediately. Error: {error_msg}")
+                flash(f'Server failed to start: {error_msg[:200]}', 'danger')
+                return redirect(url_for('server.home'))
+            
             # Wait for a short time to ensure eula.txt is generated
             try:
                 stdout, stderr = process.communicate(timeout=10)
                 logger.debug(f"Initial server run output: {stdout[:200]}...")
+                if stderr:
+                    logger.warning(f"Initial server run stderr: {stderr[:200]}...")
             except subprocess.TimeoutExpired:
                 process.terminate()
                 try:
@@ -339,11 +362,20 @@ def configure_server():
                     process.wait()
             
         except subprocess.SubprocessError as e:
-            logger.warning(f"Subprocess error during initial server run: {str(e)}")
-            # Continue execution as this is not critical
+            logger.error(f"Subprocess error during initial server run: {str(e)}")
+            # Try to get more details about the error
+            try:
+                stdout, stderr = process.communicate(timeout=1)
+                if stderr:
+                    logger.error(f"Server startup error details: {stderr}")
+            except:
+                pass
+            flash(f'Error starting server: {str(e)}', 'danger')
+            return redirect(url_for('server.home'))
         except Exception as e:
-            logger.warning(f"Error starting server for EULA generation: {str(e)}")
-            # Continue execution as this is not critical
+            logger.error(f"Error starting server for EULA generation: {str(e)}")
+            flash(f'Error starting server: {str(e)}', 'danger')
+            return redirect(url_for('server.home'))
 
         # Check if eula.txt exists and eula is not accepted
         eula_file_path = os.path.join(server_dir, 'eula.txt')
@@ -387,11 +419,16 @@ def configure_server():
                          memory_config=memory_config,
                          memory_summary=memory_summary)
 
-@server_bp.route('/start/<int:server_id>', methods=['POST'])
+@server_bp.route('/start/<int:server_id>', methods=['GET', 'POST'])
 @login_required
 @route_error_handler
 def start_server(server_id):
     """Start the server if not running."""
+    # Handle GET requests by redirecting to home page
+    if request.method == 'GET':
+        flash('Please use the Start button on the server list to start the server.', 'info')
+        return redirect(url_for('server.home'))
+    
     logger.info(f"User {current_user.username} attempting to start server ID {server_id}")
     server = check_server_access(server_id)
     if not server:
@@ -485,12 +522,17 @@ def start_server(server_id):
 
     return redirect(url_for('server.home'))
 
-@server_bp.route('/stop/<int:server_id>', methods=['POST'])
+@server_bp.route('/stop/<int:server_id>', methods=['GET', 'POST'])
 @login_required
 @route_error_handler
 @handle_server_operations
 def stop_server(server_id):
     """Stop the server if running."""
+    # Handle GET requests by redirecting to home page
+    if request.method == 'GET':
+        flash('Please use the Stop button on the server list to stop the server.', 'info')
+        return redirect(url_for('server.home'))
+    
     logger.info(f"User {current_user.username} attempting to stop server ID {server_id}")
     server = check_server_access(server_id)
     if not server:
@@ -598,11 +640,16 @@ def delete_server(server_id):
         flash(f'Server {server.server_name} deleted successfully!')
     return redirect(url_for('server.home'))
 
-@server_bp.route('/backup/<int:server_id>', methods=['POST'])
+@server_bp.route('/backup/<int:server_id>', methods=['GET', 'POST'])
 @login_required
 @route_error_handler
 def backup_server(server_id):
     """Backup the server files."""
+    # Handle GET requests by redirecting to home page
+    if request.method == 'GET':
+        flash('Please use the Backup button on the server list to backup the server.', 'info')
+        return redirect(url_for('server.home'))
+    
     server = check_server_access(server_id)
     if not server:
         return redirect(url_for('server.home'))
