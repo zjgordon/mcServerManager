@@ -31,6 +31,14 @@ A comprehensive web application built with Flask that allows users to create, ma
 - **File Operation Safety:** Safe file operations with proper error handling
 - **Database Transaction Management:** Safe database operations with rollback capabilities
 
+### Security & Protection
+- **Strong Authentication:** Password hashing, rate limiting, and session security
+- **Input Validation:** Comprehensive input sanitization and validation
+- **CSRF Protection:** Cross-Site Request Forgery protection on all forms
+- **Security Headers:** HTTP security headers (CSP, HSTS, XSS protection)
+- **Audit Logging:** Detailed security event logging and monitoring
+- **File Upload Security:** Secure file upload validation and processing
+
 ### Technical Features
 - **Modular Architecture:** Organized using Flask blueprints for scalability
 - **EULA Integration:** Integrated EULA acceptance process within the app
@@ -43,6 +51,7 @@ A comprehensive web application built with Flask that allows users to create, ma
 - **Python 3.7 or higher**
 - **Java 8 or higher** (Required to run Minecraft servers)
 - **Linux/Unix system** (Tested on Linux, may work on other Unix-like systems)
+- **Network access** (For downloading Minecraft server files)
 
 ## 🛠️ Installation
 
@@ -69,7 +78,11 @@ MAX_TOTAL_MEMORY_MB=8192
 DEFAULT_SERVER_MEMORY_MB=1024
 MIN_SERVER_MEMORY_MB=512
 MAX_SERVER_MEMORY_MB=4096
-```
+
+# Security Settings (Optional)
+SESSION_COOKIE_SECURE=False  # Set to True for HTTPS
+RATELIMIT_DEFAULT=200 per day;50 per hour;10 per minute
+PASSWORD_MIN_LENGTH=8
 
 ### 3. Run the Application
 ```bash
@@ -155,6 +168,18 @@ python3 -m pytest tests/test_memory_management.py -v
 - **Admin Privileges:** Full system access and user management
 - **Regular Users:** Limited to their own servers
 - **Account Security:** Password hashing and session management
+
+## 🔒 Security
+
+For detailed security information, best practices, and configuration options, see [SECURITY.md](SECURITY.md).
+
+### Key Security Features:
+- **Strong Authentication:** Password hashing, rate limiting, session security
+- **Input Validation:** Comprehensive sanitization and validation
+- **CSRF Protection:** Cross-Site Request Forgery protection
+- **Security Headers:** HTTP security headers (CSP, HSTS, XSS protection)
+- **Audit Logging:** Detailed security event logging
+- **File Upload Security:** Secure file validation and processing
 
 ## 📝 License
 

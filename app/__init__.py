@@ -6,6 +6,7 @@ from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .utils import check_admin_password
 from .error_handlers import init_error_handlers
+from .security import add_security_headers, audit_log
 import os
 
 def create_app():
@@ -22,6 +23,20 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(server_bp)
+    
+    # Security middleware
+    @app.after_request
+    def security_headers(response):
+        return add_security_headers(response)
+    
+    @app.before_request
+    def log_request():
+        if current_user.is_authenticated:
+            audit_log('request', {
+                'method': request.method,
+                'endpoint': request.endpoint,
+                'path': request.path
+            })
 
     # Create database tables if they don't exist
     with app.app_context():

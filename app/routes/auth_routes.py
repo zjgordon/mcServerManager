@@ -1,10 +1,16 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..models import User
 from ..extensions import db, login_manager
 from datetime import datetime
 import re
+import psutil
+import os
+from ..security import (
+    rate_limit, audit_log, SecurityUtils, validate_password_policy,
+    rate_limiter, PasswordPolicyError
+)
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -39,13 +45,25 @@ def index():
     return redirect(url_for('auth.login'))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@rate_limit(max_attempts=5, window_seconds=300)  # 5 attempts per 5 minutes
 def login():
     """Handle login and sessions."""
     if current_user.is_authenticated:
         return redirect(url_for('server.home'))
+    
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = SecurityUtils.sanitize_input(request.form.get('username', ''))
+        password = request.form.get('password', '')
+        
+        # Check rate limiting for this specific username
+        remaining_attempts = rate_limiter.get_remaining_attempts(
+            f"login_{username}", 5, 300
+        )
+        
+        if remaining_attempts == 0:
+            flash('Too many login attempts. Please try again in 5 minutes.', 'danger')
+            return render_template('login.html')
+        
         user = User.query.filter_by(username=username).first()
         if user and user.password_hash and user.is_active:
             if check_password_hash(user.password_hash, password):
@@ -54,12 +72,16 @@ def login():
                 db.session.commit()
                 
                 login_user(user)
+                audit_log('login_success', {'username': username})
                 flash('Logged in successfully.', 'success')
                 return redirect(url_for('server.home'))
             else:
+                audit_log('login_failed', {'username': username, 'reason': 'invalid_password'})
                 flash('Invalid username or password.', 'danger')
         else:
+            audit_log('login_failed', {'username': username, 'reason': 'user_not_found_or_inactive'})
             flash('Invalid username or password.', 'danger')
+    
     return render_template('login.html')
 
 @auth_bp.route('/logout')
@@ -71,6 +93,7 @@ def logout():
     return redirect(url_for('auth.login'))
 
 @auth_bp.route('/set_admin_password', methods=['GET', 'POST'])
+@validate_password_policy
 def set_admin_password():
     """Set up the initial admin account on first run."""
     # Check if any admin user exists
@@ -82,18 +105,20 @@ def set_admin_password():
         return redirect(url_for('auth.login'))
     
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-        email = request.form.get('email', '').strip()
+        username = SecurityUtils.sanitize_input(request.form.get('username', ''))
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        email = SecurityUtils.sanitize_input(request.form.get('email', ''))
         
         # Validation
         if not username or len(username) < 3:
             flash('Username must be at least 3 characters long.', 'danger')
             return render_template('set_admin_password.html')
         
-        if len(password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
+        try:
+            SecurityUtils.validate_password(password, username)
+        except PasswordPolicyError as e:
+            flash(str(e), 'danger')
             return render_template('set_admin_password.html')
         
         if password != confirm_password:
@@ -120,6 +145,8 @@ def set_admin_password():
         )
         db.session.add(admin_user)
         db.session.commit()
+        
+        audit_log('admin_account_created', {'username': username, 'email': email})
         
         flash('Admin account created successfully. Please log in.', 'success')
         return redirect(url_for('auth.login'))
