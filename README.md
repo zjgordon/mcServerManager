@@ -1,6 +1,17 @@
 # Minecraft Server Manager
 
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha-blue.svg)](https://github.com/yourusername/mcServerManager/releases)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/flask-3.0.3-green.svg)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/yourusername/mcServerManager)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A professional web application for creating, managing, and monitoring Minecraft game servers with enterprise-grade process management and user administration.
+
+## 🏷️ Current Release: v0.1.0-alpha
+
+This is the alpha release of Minecraft Server Manager, featuring a complete server management system with advanced process monitoring, user administration, and security features.
 
 ## 🚀 Features
 
@@ -151,11 +162,20 @@ pip install -r requirements.txt --upgrade
 ## 🏗️ Architecture
 
 ### Technology Stack
+
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.0.3-000000?style=flat&logo=flask&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0.34-1C1C1C?style=flat&logo=sqlalchemy&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-4-7952B3?style=flat&logo=bootstrap&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)
+
 - **Backend**: Flask (Python web framework)
 - **Database**: SQLAlchemy ORM with SQLite/PostgreSQL support
 - **Frontend**: Bootstrap 4, jQuery, custom CSS
 - **Process Management**: psutil, subprocess
 - **Authentication**: Flask-Login with CSRF protection
+- **Security**: Flask-Limiter, PyJWT, CSRF protection
+- **Testing**: pytest, pytest-flask
 
 ### Directory Structure
 ```
@@ -231,8 +251,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔄 Version History
 
-- **v2.0.0**: Comprehensive process management and monitoring
-- **v1.0.0**: Initial release with basic server management
+- **v0.1.0-alpha** (Current): Alpha release with comprehensive server management, process monitoring, and security features
+- **v0.0.2**: Code review, cleanup, and AI-enhanced improvements (Sprint 2)
+- **v0.0.1**: Initial HarvardX school project implementation (Sprint 1)
 
 ---
 

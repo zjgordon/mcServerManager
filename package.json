@@ -1,0 +1,39 @@
+{
+  "name": "minecraft-server-manager",
+  "version": "0.1.0-alpha",
+  "description": "A Flask-based web application for managing Minecraft servers",
+  "main": "run.py",
+  "scripts": {
+    "start": "python run.py",
+    "test": "pytest",
+    "dev": "python run.py"
+  },
+  "keywords": [
+    "minecraft",
+    "server",
+    "management",
+    "flask",
+    "web",
+    "admin"
+  ],
+  "author": "Sparrowhawk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mcServerManager.git"
+  },
+  "engines": {
+    "python": ">=3.8"
+  },
+  "dependencies": {
+    "flask": "^2.0.0",
+    "flask-sqlalchemy": "^3.0.0",
+    "flask-login": "^0.6.0",
+    "flask-wtf": "^1.0.0",
+    "wtforms": "^3.0.0"
+  },
+  "devDependencies": {
+    "pytest": "^7.0.0",
+    "pytest-flask": "^1.2.0"
+  }
+}
