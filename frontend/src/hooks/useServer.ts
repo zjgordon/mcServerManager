@@ -205,3 +205,60 @@ export const useBackupServer = () => {
     },
   });
 };
+
+export const useAcceptEula = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiService.acceptEula(id);
+      if (response.success) {
+        return id;
+      }
+      throw new Error(response.message || 'Failed to accept EULA');
+    },
+    onSuccess: (serverId) => {
+      queryClient.invalidateQueries({ queryKey: ['server', serverId] });
+      toast({
+        title: 'EULA Accepted',
+        description: 'You can now start the server.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+export const useServerStatus = (id: number) => {
+  return useQuery({
+    queryKey: ['server-status', id],
+    queryFn: async () => {
+      const response = await apiService.getServerStatus(id);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(response.message || 'Failed to fetch server status');
+    },
+    enabled: !!id,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+};
+
+export const useAvailableVersions = () => {
+  return useQuery({
+    queryKey: ['versions'],
+    queryFn: async () => {
+      const response = await apiService.getAvailableVersions();
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(response.message || 'Failed to fetch available versions');
+    },
+  });
+};

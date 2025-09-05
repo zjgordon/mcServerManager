@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, User, Crown } from 'lucide-react';
+import { MobileNavigation } from './responsive';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -54,6 +55,11 @@ export const Header: React.FC = () => {
               Settings
             </Link>
           </nav>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <MobileNavigation />
+          </div>
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
