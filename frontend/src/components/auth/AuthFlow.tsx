@@ -52,6 +52,9 @@ const AuthFlow: React.FC<AuthFlowProps> = ({ children }) => {
             <p className="text-sm text-muted-foreground">
               Checking authentication status
             </p>
+                      <p className="text-xs text-muted-foreground">
+            Checking authentication status
+          </p>
           </div>
         </div>
       </div>

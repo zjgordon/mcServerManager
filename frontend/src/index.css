@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* shadcn/ui CSS Variables */
 @layer base {
@@ -52,6 +54,7 @@
 :root {
   --minecraft-green: #7CB342;
   --minecraft-dark-green: #558B2F;
+  --minecraft-blue: #2196F3;
   --minecraft-brown: #8D6E63;
   --minecraft-dark-brown: #5D4037;
   --minecraft-stone: #9E9E9E;

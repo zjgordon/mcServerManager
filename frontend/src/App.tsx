@@ -35,76 +35,77 @@ function App() {
         <WebSocketProvider>
           <Router>
             <div className="App">
-              <AuthFlow>
               <Routes>
-              {/* Authentication Routes */}
-              <Route path="/login" element={
-                <AuthLayout>
-                  <LoginPage />
-                </AuthLayout>
-              } />
-              
-              <Route path="/setup" element={
-                <AuthLayout>
-                  <SetupPage />
-                </AuthLayout>
-              } />
-              
-              {/* Protected Routes with Main Layout */}
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <DashboardPage />
-                  </MainLayout>
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/servers" element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <ServersPage />
-                  </MainLayout>
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/servers/create" element={
-                <ProtectedRoute>
-                  <CreateServerPage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/servers/:id" element={
-                <ProtectedRoute>
-                  <ServerDetailsPage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <SettingsPage />
-                  </MainLayout>
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/change-password" element={
-                <ProtectedRoute>
-                  <ChangePasswordPage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <AdminPage />
-                  </MainLayout>
-                </ProtectedRoute>
-              } />
-              
-              {/* Catch all route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Authentication Routes */}
+                <Route path="/login" element={
+                  <AuthLayout>
+                    <LoginPage />
+                  </AuthLayout>
+                } />
+                
+                <Route path="/setup" element={
+                  <AuthLayout>
+                    <SetupPage />
+                  </AuthLayout>
+                } />
+                
+                {/* Protected Routes with AuthFlow */}
+                <Route path="/*" element={
+                  <AuthFlow>
+                    <Routes>
+                      <Route path="/" element={
+                        <ProtectedRoute>
+                          <MainLayout>
+                            <DashboardPage />
+                          </MainLayout>
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/servers" element={
+                        <ProtectedRoute>
+                          <MainLayout>
+                            <ServersPage />
+                          </MainLayout>
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/servers/create" element={
+                        <ProtectedRoute>
+                          <CreateServerPage />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/servers/:id" element={
+                        <ProtectedRoute>
+                          <ServerDetailsPage />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/settings" element={
+                        <ProtectedRoute>
+                          <MainLayout>
+                            <SettingsPage />
+                          </MainLayout>
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/change-password" element={
+                        <ProtectedRoute>
+                          <ChangePasswordPage />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/admin" element={
+                        <ProtectedRoute>
+                          <MainLayout>
+                            <AdminPage />
+                          </MainLayout>
+                        </ProtectedRoute>
+                      } />
+                    </Routes>
+                  </AuthFlow>
+                } />
               </Routes>
-              </AuthFlow>
               <Toaster />
             </div>
           </Router>

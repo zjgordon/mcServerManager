@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import createWebSocketService, { 
-  WebSocketService, 
+  WebSocketService
+} from '../services/websocket';
+import type { 
+  SystemAlert, 
+  WebSocketConfig, 
   ServerStatusUpdate, 
   SystemStatsUpdate, 
-  UserUpdate, 
-  SystemAlert,
-  WebSocketConfig 
+  UserUpdate 
 } from '../services/websocket';
 import { useAuth } from './AuthContext';
 

@@ -18,7 +18,7 @@ import {
   Clock,
   Zap
 } from 'lucide-react';
-import { useSystemStats, useUsers, useServers } from '../../hooks/useAdmin';
+import { useSystemStats, useUsers } from '../../hooks/useAdmin';
 import { useServers as useServerData } from '../../hooks/useServer';
 import { useToast } from '../../hooks/use-toast';
 

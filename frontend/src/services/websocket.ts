@@ -1,4 +1,36 @@
-import { EventEmitter } from 'events';
+// Browser-compatible EventEmitter implementation
+class EventEmitter {
+  private events: { [key: string]: Function[] } = {};
+
+  on(event: string, listener: Function): this {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(listener);
+    return this;
+  }
+
+  off(event: string, listener: Function): this {
+    if (!this.events[event]) return this;
+    this.events[event] = this.events[event].filter(l => l !== listener);
+    return this;
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    if (!this.events[event]) return false;
+    this.events[event].forEach(listener => listener(...args));
+    return true;
+  }
+
+  removeAllListeners(event?: string): this {
+    if (event) {
+      delete this.events[event];
+    } else {
+      this.events = {};
+    }
+    return this;
+  }
+}
 
 export interface WebSocketMessage {
   type: string;
@@ -49,9 +81,9 @@ export interface WebSocketConfig {
 class WebSocketService extends EventEmitter {
   private ws: WebSocket | null = null;
   private config: WebSocketConfig;
-  private reconnectAttempts = 0;
-  private reconnectTimer: NodeJS.Timeout | null = null;
-  private heartbeatTimer: NodeJS.Timeout | null = null;
+  private _reconnectAttempts = 0;
+  private reconnectTimer: number | null = null;
+  private heartbeatTimer: number | null = null;
   private isConnecting = false;
   private isConnected = false;
   private messageQueue: WebSocketMessage[] = [];
@@ -82,7 +114,7 @@ class WebSocketService extends EventEmitter {
           console.log('WebSocket connected');
           this.isConnected = true;
           this.isConnecting = false;
-          this.reconnectAttempts = 0;
+          this._reconnectAttempts = 0;
           this.emit('connected');
           this.startHeartbeat();
           this.processMessageQueue();
@@ -105,7 +137,7 @@ class WebSocketService extends EventEmitter {
           this.stopHeartbeat();
           this.emit('disconnected', event);
           
-          if (!event.wasClean && this.reconnectAttempts < this.config.maxReconnectAttempts!) {
+          if (!event.wasClean && this._reconnectAttempts < this.config.maxReconnectAttempts!) {
             this.scheduleReconnect();
           }
         };
@@ -126,7 +158,7 @@ class WebSocketService extends EventEmitter {
 
   disconnect(): void {
     if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
+      window.clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
     
@@ -198,12 +230,12 @@ class WebSocketService extends EventEmitter {
       return;
     }
 
-    this.reconnectAttempts++;
-    const delay = this.config.reconnectInterval! * Math.pow(2, Math.min(this.reconnectAttempts - 1, 5));
+    this._reconnectAttempts++;
+    const delay = this.config.reconnectInterval! * Math.pow(2, Math.min(this._reconnectAttempts - 1, 5));
     
-    console.log(`Scheduling WebSocket reconnect attempt ${this.reconnectAttempts} in ${delay}ms`);
+    console.log(`Scheduling WebSocket reconnect attempt ${this._reconnectAttempts} in ${delay}ms`);
     
-    this.reconnectTimer = setTimeout(() => {
+    this.reconnectTimer = window.setTimeout(() => {
       this.reconnectTimer = null;
       this.connect().catch((error) => {
         console.error('Reconnect failed:', error);
@@ -214,7 +246,7 @@ class WebSocketService extends EventEmitter {
   private startHeartbeat(): void {
     this.stopHeartbeat();
     
-    this.heartbeatTimer = setInterval(() => {
+    this.heartbeatTimer = window.setInterval(() => {
       if (this.isConnected) {
         this.send({
           type: 'heartbeat',
@@ -227,7 +259,7 @@ class WebSocketService extends EventEmitter {
 
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
+      window.clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;
     }
   }
@@ -251,7 +283,7 @@ class WebSocketService extends EventEmitter {
   }
 
   get reconnectAttempts(): number {
-    return this.reconnectAttempts;
+    return this._reconnectAttempts;
   }
 }
 
@@ -260,4 +292,5 @@ const createWebSocketService = (config: WebSocketConfig): WebSocketService => {
   return new WebSocketService(config);
 };
 
+export { WebSocketService };
 export default createWebSocketService;

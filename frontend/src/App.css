@@ -45,15 +45,15 @@
 
 /* Minecraft-inspired button styles */
 .btn-minecraft {
-  @apply relative inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-minecraft-green border-2 border-minecraft-dark-green rounded-minecraft shadow-minecraft transition-all duration-150 ease-in-out;
+  @apply relative inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border-2 border-green-700 rounded shadow-md transition-all duration-150 ease-in-out;
 }
 
 .btn-minecraft:hover {
-  @apply bg-minecraft-dark-green shadow-minecraft-lg transform translate-y-0.5;
+  @apply bg-green-700 shadow-lg transform translate-y-0.5;
 }
 
 .btn-minecraft:active {
-  @apply shadow-minecraft transform translate-y-1;
+  @apply shadow-md transform translate-y-1;
 }
 
 .btn-minecraft:disabled {

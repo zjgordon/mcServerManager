@@ -20,7 +20,7 @@ import {
   Wifi,
   WifiOff
 } from 'lucide-react';
-import { useSystemStats, useUsers, useServers } from '../../hooks/useAdmin';
+import { useSystemStats, useUsers } from '../../hooks/useAdmin';
 import { useServers as useServerData } from '../../hooks/useServer';
 import { useRealtimeSystemStats, useRealtimeConnection } from '../../hooks/useRealtime';
 import { RealtimeStatusIndicator, RealtimeAlertsPanel } from '../realtime';

@@ -18,6 +18,14 @@ import os
 # Create authentication API blueprint
 auth_bp = Blueprint('auth_api', __name__, url_prefix='/auth')
 
+@auth_bp.route('/csrf-token', methods=['GET'])
+def get_csrf_token():
+    """Get CSRF token for API requests."""
+    from flask_wtf.csrf import generate_csrf
+    return jsonify({
+        'csrf_token': generate_csrf()
+    })
+
 @auth_bp.route('/login', methods=['POST'])
 @rate_limit(max_attempts=5, window_seconds=300)  # 5 attempts per 5 minutes
 def login():

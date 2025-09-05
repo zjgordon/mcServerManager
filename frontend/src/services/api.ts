@@ -21,6 +21,7 @@ import type {
 
 class ApiService {
   private api: AxiosInstance;
+  private csrfToken: string | null = null;
 
   constructor() {
     this.api = axios.create({
@@ -32,10 +33,24 @@ class ApiService {
     });
 
     // Add request interceptor for CSRF token
-    this.api.interceptors.request.use((config) => {
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-      if (csrfToken) {
-        config.headers['X-CSRFToken'] = csrfToken;
+    this.api.interceptors.request.use(async (config) => {
+      // Skip CSRF token for the CSRF token endpoint itself
+      if (config.url?.includes('/csrf-token')) {
+        return config;
+      }
+      
+      // Get CSRF token if we don't have it
+      if (!this.csrfToken) {
+        try {
+          const response = await axios.get('/api/v1/auth/csrf-token', { withCredentials: true });
+          this.csrfToken = response.data.csrf_token;
+        } catch (error) {
+          console.warn('Failed to get CSRF token:', error);
+        }
+      }
+      
+      if (this.csrfToken) {
+        config.headers['X-CSRFToken'] = this.csrfToken;
       }
       return config;
     });
