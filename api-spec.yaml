@@ -1,0 +1,1230 @@
+openapi: 3.0.3
+info:
+  title: Minecraft Server Manager API
+  description: RESTful API for managing Minecraft servers, user authentication, and administrative functions
+  version: 0.1.0-alpha
+  contact:
+    name: Minecraft Server Manager
+    url: https://github.com/your-username/mcServerManager
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Development server
+  - url: https://your-domain.com/api/v1
+    description: Production server
+
+security:
+  - sessionAuth: []
+
+paths:
+  # Authentication API
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate user
+      description: Login user and create session
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: admin
+                password:
+                  type: string
+                  format: password
+                  example: securepassword
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Logout user and clear session
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Get current user information
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/status:
+    get:
+      tags:
+        - Authentication
+      summary: Check authentication status
+      description: Check if user is authenticated
+      security: []
+      responses:
+        '200':
+          description: Authentication status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthStatusResponse'
+
+  /auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change password
+      description: Change user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - new_password
+                - confirm_password
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                new_password:
+                  type: string
+                  format: password
+                confirm_password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/setup:
+    post:
+      tags:
+        - Authentication
+      summary: Setup admin account
+      description: Create initial admin account (first run only)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - confirm_password
+              properties:
+                username:
+                  type: string
+                  example: admin
+                password:
+                  type: string
+                  format: password
+                confirm_password:
+                  type: string
+                  format: password
+                email:
+                  type: string
+                  format: email
+                  example: admin@example.com
+      responses:
+        '201':
+          description: Admin account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/setup/status:
+    get:
+      tags:
+        - Authentication
+      summary: Check setup status
+      description: Check if admin setup is required
+      security: []
+      responses:
+        '200':
+          description: Setup status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetupStatusResponse'
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password
+      description: Reset user password (admin or self)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - new_password
+                - confirm_password
+              properties:
+                user_id:
+                  type: integer
+                  description: User ID (admin only)
+                new_password:
+                  type: string
+                  format: password
+                confirm_password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # Server Management API
+  /servers/:
+    get:
+      tags:
+        - Server Management
+      summary: List servers
+      description: Get list of servers (admin sees all, users see only their own)
+      responses:
+        '200':
+          description: List of servers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServersResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Server Management
+      summary: Create server
+      description: Create a new Minecraft server
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerCreateRequest'
+      responses:
+        '201':
+          description: Server created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /servers/{id}:
+    get:
+      tags:
+        - Server Management
+      summary: Get server details
+      description: Get server information by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Server details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Server Management
+      summary: Update server
+      description: Update server configuration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerUpdateRequest'
+      responses:
+        '200':
+          description: Server updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Server Management
+      summary: Delete server
+      description: Delete server and all its files
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Server deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /servers/{id}/start:
+    post:
+      tags:
+        - Server Management
+      summary: Start server
+      description: Start a Minecraft server
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Server started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /servers/{id}/stop:
+    post:
+      tags:
+        - Server Management
+      summary: Stop server
+      description: Stop a Minecraft server
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Server stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /servers/{id}/status:
+    get:
+      tags:
+        - Server Management
+      summary: Get server status
+      description: Get server status and process information
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Server status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /servers/{id}/backup:
+    post:
+      tags:
+        - Server Management
+      summary: Backup server
+      description: Create a backup of the server files
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Backup created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /servers/{id}/accept-eula:
+    post:
+      tags:
+        - Server Management
+      summary: Accept EULA
+      description: Accept the EULA for a server
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: EULA accepted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /servers/versions:
+    get:
+      tags:
+        - Server Management
+      summary: Get available versions
+      description: Get available Minecraft versions
+      security: []
+      responses:
+        '200':
+          description: Available versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionsResponse'
+
+  /servers/memory-usage:
+    get:
+      tags:
+        - Server Management
+      summary: Get memory usage
+      description: Get system memory usage summary
+      responses:
+        '200':
+          description: Memory usage information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryUsageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Admin API
+  /admin/config:
+    get:
+      tags:
+        - Admin
+      summary: Get system configuration
+      description: Get system configuration (admin only)
+      responses:
+        '200':
+          description: System configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    put:
+      tags:
+        - Admin
+      summary: Update system configuration
+      description: Update system configuration (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigUpdateRequest'
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/stats:
+    get:
+      tags:
+        - Admin
+      summary: Get system statistics
+      description: Get system statistics (admin only)
+      responses:
+        '200':
+          description: System statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: List users
+      description: List all users (admin only)
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags:
+        - Admin
+      summary: Create user
+      description: Create a new user (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/users/{id}:
+    put:
+      tags:
+        - Admin
+      summary: Update user
+      description: Update user details (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Admin
+      summary: Delete user
+      description: Delete a user (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session-based authentication
+
+  schemas:
+    # Base schemas
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation completed successfully
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error description
+        error:
+          type: string
+          example: Detailed error information
+
+    # User schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: admin
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        is_admin:
+          type: boolean
+          example: true
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-09-04T16:20:00.000Z"
+        last_login:
+          type: string
+          format: date-time
+          example: "2025-09-04T16:20:00.000Z"
+
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    UserCreateRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: newuser
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        is_admin:
+          type: boolean
+          example: false
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: updateduser
+        email:
+          type: string
+          format: email
+          example: updated@example.com
+        is_admin:
+          type: boolean
+          example: false
+        is_active:
+          type: boolean
+          example: true
+
+    UsersResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+
+    # Authentication schemas
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    AuthStatusResponse:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+          example: true
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            username:
+              type: string
+              example: admin
+            is_admin:
+              type: boolean
+              example: true
+
+    SetupResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                username:
+                  type: string
+                  example: admin
+                is_admin:
+                  type: boolean
+                  example: true
+
+    SetupStatusResponse:
+      type: object
+      properties:
+        setup_required:
+          type: boolean
+          example: false
+        has_admin:
+          type: boolean
+          example: true
+
+    # Server schemas
+    Server:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        server_name:
+          type: string
+          example: My Server
+        version:
+          type: string
+          example: "1.21.8"
+        port:
+          type: integer
+          example: 25565
+        status:
+          type: string
+          enum: [Stopped, Running, Starting, Stopping]
+          example: Running
+        pid:
+          type: integer
+          nullable: true
+          example: 12345
+        memory_mb:
+          type: integer
+          example: 1024
+        owner_id:
+          type: integer
+          example: 1
+        level_seed:
+          type: string
+          nullable: true
+          example: "12345"
+        gamemode:
+          type: string
+          enum: [survival, creative, adventure, spectator]
+          example: survival
+        difficulty:
+          type: string
+          enum: [peaceful, easy, normal, hard]
+          example: normal
+        hardcore:
+          type: boolean
+          example: false
+        pvp:
+          type: boolean
+          example: true
+        spawn_monsters:
+          type: boolean
+          example: true
+        motd:
+          type: string
+          nullable: true
+          example: Welcome to my server!
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-09-04T16:20:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-09-04T16:20:00.000Z"
+
+    ServerResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            server:
+              $ref: '#/components/schemas/Server'
+
+    ServerCreateRequest:
+      type: object
+      required:
+        - server_name
+        - version
+      properties:
+        server_name:
+          type: string
+          example: My Server
+        version:
+          type: string
+          example: "1.21.8"
+        memory_mb:
+          type: integer
+          example: 1024
+        level_seed:
+          type: string
+          example: "12345"
+        gamemode:
+          type: string
+          enum: [survival, creative, adventure, spectator]
+          example: survival
+        difficulty:
+          type: string
+          enum: [peaceful, easy, normal, hard]
+          example: normal
+        hardcore:
+          type: boolean
+          example: false
+        pvp:
+          type: boolean
+          example: true
+        spawn_monsters:
+          type: boolean
+          example: true
+        motd:
+          type: string
+          example: Welcome to my server!
+
+    ServerUpdateRequest:
+      type: object
+      properties:
+        server_name:
+          type: string
+          example: Updated Server Name
+        memory_mb:
+          type: integer
+          example: 2048
+        gamemode:
+          type: string
+          enum: [survival, creative, adventure, spectator]
+          example: creative
+        difficulty:
+          type: string
+          enum: [peaceful, easy, normal, hard]
+          example: hard
+        motd:
+          type: string
+          example: Updated MOTD
+
+    ServersResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            servers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Server'
+
+    ServerActionResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            server:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                status:
+                  type: string
+                  example: Running
+                pid:
+                  type: integer
+                  nullable: true
+                  example: 12345
+
+    ServerStatusResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            status:
+              type: string
+              example: Running
+            pid:
+              type: integer
+              nullable: true
+              example: 12345
+            process_info:
+              type: object
+              properties:
+                cpu_percent:
+                  type: number
+                  example: 15.5
+                memory_mb:
+                  type: integer
+                  example: 512
+                create_time:
+                  type: string
+                  format: date-time
+                  example: "2025-09-04T16:20:00.000Z"
+
+    BackupResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            backup_file:
+              type: string
+              example: My_Server_20250904162000.tar.gz
+
+    VersionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            versions:
+              type: object
+              properties:
+                latest_release:
+                  type: string
+                  example: "1.21.8"
+                latest_snapshot:
+                  type: string
+                  example: "24w35a"
+                releases:
+                  type: array
+                  items:
+                    type: string
+                  example: ["1.21.8", "1.21.7", "1.21.6"]
+                snapshots:
+                  type: array
+                  items:
+                    type: string
+                  example: ["24w35a", "24w34a", "24w33a"]
+
+    MemoryUsageResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            memory_summary:
+              type: object
+              properties:
+                total_allocated:
+                  type: integer
+                  example: 2048
+                total_available:
+                  type: integer
+                  example: 8192
+                utilization_percentage:
+                  type: number
+                  example: 25.0
+                servers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      server_name:
+                        type: string
+                        example: My Server
+                      memory_mb:
+                        type: integer
+                        example: 1024
+                      status:
+                        type: string
+                        example: Running
+
+    # Admin schemas
+    Config:
+      type: object
+      properties:
+        app_title:
+          type: string
+          example: Minecraft Server Manager
+        server_hostname:
+          type: string
+          example: localhost
+        max_total_mb:
+          type: integer
+          example: 8192
+        max_server_mb:
+          type: integer
+          example: 4096
+        default_server_mb:
+          type: integer
+          example: 1024
+
+    ConfigResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            config:
+              $ref: '#/components/schemas/Config'
+
+    ConfigUpdateRequest:
+      type: object
+      properties:
+        app_title:
+          type: string
+          example: My Server Manager
+        server_hostname:
+          type: string
+          example: myserver.com
+        max_total_mb:
+          type: integer
+          example: 16384
+        max_server_mb:
+          type: integer
+          example: 8192
+
+    StatsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            stats:
+              type: object
+              properties:
+                total_servers:
+                  type: integer
+                  example: 5
+                running_servers:
+                  type: integer
+                  example: 2
+                total_users:
+                  type: integer
+                  example: 3
+                total_memory_allocated:
+                  type: integer
+                  example: 3072
+                system_memory_usage:
+                  type: number
+                  example: 45.5
+                disk_usage:
+                  type: object
+                  properties:
+                    total_gb:
+                      type: integer
+                      example: 100
+                    used_gb:
+                      type: integer
+                      example: 25
+                    free_gb:
+                      type: integer
+                      example: 75
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Server Management
+    description: Minecraft server management operations
+  - name: Admin
+    description: Administrative functions and system management

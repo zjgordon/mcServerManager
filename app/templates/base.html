@@ -2,77 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ app_title }}{% endblock %}</title>
-    <!-- Include Bootstrap CSS for styling -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <!-- Include Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- API Information for Frontend Development -->
+    <script>
+        window.API_CONFIG = {
+            baseUrl: '{{ request.url_root }}api/v1',
+            csrfToken: '{{ csrf_token() }}',
+            user: {% if current_user.is_authenticated %}{
+                id: {{ current_user.id }},
+                username: '{{ current_user.username }}',
+                is_admin: {{ current_user.is_admin|lower }}
+            }{% else %}null{% endif %}
+        };
+    </script>
+    
+    {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Minecraft-Inspired Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-mc">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand pixel-font" href="{{ url_for('server.home') }}">
-                <i class="fas fa-cube"></i> {{ app_title }}
-            </a>
+            <a class="navbar-brand" href="{{ url_for('server.home') }}">{{ app_title }}</a>
+            
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
+                <ul class="navbar-nav mr-auto">
                     {% if current_user.is_authenticated %}
-                        <!-- Prominent Create Server Button -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-mc create-server-btn" href="{{ url_for('server.create') }}">
-                                <i class="fas fa-plus"></i> Create Server
-                            </a>
+                            <a class="nav-link" href="{{ url_for('server.home') }}">Home</a>
                         </li>
-                        <!-- User Account Dropdown -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('server.create') }}">Create Server</a>
+                        </li>
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.manage_users') }}">Manage Users</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.admin_config') }}">Admin Config</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link nav-link-mc dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i> {{ current_user.username }}
-                                {% if current_user.is_admin %}
-                                    <span class="admin-badge">ADMIN</span>
-                                {% endif %}
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                                {{ current_user.username }}
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right user-dropdown" aria-labelledby="userDropdown">
-                                <div class="dropdown-header user-info-header">
-                                    <i class="fas fa-user"></i> {{ current_user.username }}
-                                    {% if current_user.is_admin %}
-                                        <span class="admin-badge">ADMIN</span>
-                                    {% endif %}
-                                </div>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">Change Password</a>
                                 <div class="dropdown-divider"></div>
-                                {% if current_user.is_admin %}
-                                    <a class="dropdown-item" href="{{ url_for('auth.manage_users') }}">
-                                        <i class="fas fa-users"></i> Users
-                                    </a>
-                                    <a class="dropdown-item" href="{{ url_for('auth.admin_config') }}">
-                                        <i class="fas fa-cog"></i> Config
-                                    </a>
-                                    <a class="dropdown-item" href="{{ url_for('auth.process_management') }}">
-                                        <i class="fas fa-server"></i> Process Management
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                {% endif %}
-                                <button class="dropdown-item btn-link" onclick="showAnalytics()" style="border: none; background: none; color: inherit; width: 100%; text-align: left;">
-                                    <i class="fas fa-chart-bar"></i> Analytics
-                                </button>
-                                <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">
-                                    <i class="fas fa-key"></i> Change Password
-                                </a>
-                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
-                                </a>
+                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
                             </div>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link nav-link-mc" href="{{ url_for('auth.login') }}">
-                                <i class="fas fa-sign-in-alt"></i> Login
-                            </a>
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -80,976 +78,101 @@
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <div class="mt-3">
-              {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                  {{ message }}
-                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-              {% endfor %}
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
             </div>
-          {% endif %}
-        {% endwith %}
+        {% endif %}
+    {% endwith %}
 
-        {% block content %}
-        <!-- Page-specific content will go here -->
-        {% endblock %}
+    <!-- Main Content -->
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="text-muted">&copy; 2025 {{ app_title }}. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-right">
+                    <p class="text-muted">
+                        <small>
+                            Legacy Interface | 
+                            <a href="#" onclick="showApiInfo()">API Available</a>
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- API Information Modal -->
+    <div class="modal fade" id="apiInfoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">API Information</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>The Minecraft Server Manager API is available for frontend development:</p>
+                    <ul>
+                        <li><strong>Base URL:</strong> <code>{{ request.url_root }}api/v1</code></li>
+                        <li><strong>Documentation:</strong> <a href="#" onclick="window.open('API_DOCUMENTATION.md')">API Documentation</a></li>
+                        <li><strong>OpenAPI Spec:</strong> <a href="#" onclick="window.open('api-spec.yaml')">api-spec.yaml</a></li>
+                        <li><strong>CORS:</strong> Enabled for localhost:3000, localhost:5173</li>
+                    </ul>
+                    <p><strong>Current User:</strong></p>
+                    <pre id="userInfo"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Include jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    
-    <!-- Custom JavaScript for UX improvements -->
     <script>
-        // Global functions for Phase 3 features
-        let currentConsoleServerId = null;
-        let consoleRefreshInterval = null;
-        
-        // Enhanced delete confirmation system
-        window.confirmDeleteServer = function(serverId, serverName, isOwner, ownerName) {
-            if (isOwner) {
-                // Regular user deleting their own server
-                return confirmDeleteOwnServer(serverName);
-            } else {
-                // Admin deleting another user's server
-                return confirmDeleteOtherUserServer(serverName, ownerName);
-            }
-        };
-        
-        function confirmDeleteOwnServer(serverName) {
-            const message = `⚠️ DELETE SERVER CONFIRMATION ⚠️\n\n` +
-                          `You are about to permanently delete your server:\n` +
-                          `"${serverName}"\n\n` +
-                          `This action will:\n` +
-                          `• Permanently delete ALL server files\n` +
-                          `• Remove world data, configurations, and backups\n` +
-                          `• Cannot be undone\n\n` +
-                          `Are you absolutely sure you want to proceed?\n\n` +
-                          `Type "DELETE" to confirm:`;
-            
-            const userInput = prompt(message);
-            return userInput === "DELETE";
+        function showApiInfo() {
+            document.getElementById('userInfo').textContent = JSON.stringify(window.API_CONFIG.user, null, 2);
+            $('#apiInfoModal').modal('show');
         }
         
-        function confirmDeleteOtherUserServer(serverName, ownerName) {
-            // First confirmation
-            const firstMessage = `🚨 ADMIN DELETE WARNING 🚨\n\n` +
-                               `You are about to delete another user's server:\n` +
-                               `Server: "${serverName}"\n` +
-                               `Owner: ${ownerName}\n\n` +
-                               `This is a serious administrative action that will permanently delete all data.\n\n` +
-                               `Type "I UNDERSTAND" to proceed to final confirmation:`;
-            
-            const firstInput = prompt(firstMessage);
-            if (firstInput !== "I UNDERSTAND") {
-                return false;
-            }
-            
-            // Second confirmation
-            const secondMessage = `🚨 FINAL ADMIN CONFIRMATION 🚨\n\n` +
-                                `You are about to PERMANENTLY DELETE:\n` +
-                                `Server: "${serverName}"\n` +
-                                `Owner: ${ownerName}\n\n` +
-                                `This action will:\n` +
-                                `• Permanently delete ALL server files\n` +
-                                `• Remove world data, configurations, and backups\n` +
-                                `• Cannot be undone\n` +
-                                `• The owner will lose all their data\n\n` +
-                                `This is your final chance to cancel.\n\n` +
-                                `Type "DELETE USER SERVER" to confirm:`;
-            
-            const secondInput = prompt(secondMessage);
-            return secondInput === "DELETE USER SERVER";
-        }
-        
-        // Make functions globally accessible
-        window.showConsole = function(serverId, serverName) {
-            console.log('showConsole called with:', serverId, serverName);
-            currentConsoleServerId = serverId;
-            const modal = document.getElementById('consoleModal');
-            const title = document.getElementById('consoleModalTitle');
-            console.log('Modal element:', modal);
-            console.log('Title element:', title);
-            
-            if (title) {
-                title.innerHTML = `<i class="fas fa-terminal"></i> Console - ${serverName}`;
-            }
-            if (modal) {
-                modal.classList.add('active');
-                console.log('Modal should be visible now');
-            } else {
-                console.error('Console modal not found!');
-            }
-            loadConsoleLogs();
-            startConsoleAutoRefresh();
-        };
-        
-        window.showAnalytics = function() {
-            console.log('showAnalytics called');
-            const modal = document.getElementById('analyticsModal');
-            console.log('Analytics modal element:', modal);
-            
-            if (modal) {
-                modal.classList.add('active');
-                console.log('Analytics modal should be visible now');
-                setTimeout(() => {
-                    drawAnalyticsCharts();
-                }, 100);
-            } else {
-                console.error('Analytics modal not found!');
-            }
-        };
-        
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            if (modalId === 'consoleModal') {
-                stopConsoleAutoRefresh();
-            }
-        };
-        
-        window.refreshConsole = function() {
-            loadConsoleLogs();
-        };
-        
-        window.clearConsole = function() {
-            document.getElementById('consoleOutput').innerHTML = '';
-        };
-        
-        window.downloadLogs = function() {
-            const logs = document.getElementById('consoleOutput').textContent;
-            const blob = new Blob([logs], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `server-${currentConsoleServerId}-logs.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        };
-        
-        // Server sharing functionality
-        window.copyServerLink = function(hostname, port, serverName) {
-            const serverLink = `${hostname}:${port}`;
-            
-            // Try to copy to clipboard using modern API
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(serverLink).then(() => {
-                    showCopySuccess(serverName, serverLink);
-                }).catch(err => {
-                    console.error('Failed to copy to clipboard:', err);
-                    fallbackCopyToClipboard(serverLink, serverName);
-                });
-            } else {
-                // Fallback for older browsers or non-secure contexts
-                fallbackCopyToClipboard(serverLink, serverName);
-            }
-        };
-        
-        function fallbackCopyToClipboard(text, serverName) {
-            // Create a temporary textarea element
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showCopySuccess(serverName, text);
-                } else {
-                    showCopyError(serverName);
-                }
-            } catch (err) {
-                console.error('Fallback copy failed:', err);
-                showCopyError(serverName);
-            }
-            
-            document.body.removeChild(textArea);
-        }
-        
-        function showCopySuccess(serverName, serverLink) {
-            // Create a temporary success message
-            const successDiv = document.createElement('div');
-            successDiv.className = 'copy-success-message';
-            successDiv.innerHTML = `
-                <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Server link copied!</strong><br>
-                    <small>${serverName}: <code>${serverLink}</code></small>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(successDiv);
-            
-            // Auto-remove after 4 seconds
-            setTimeout(() => {
-                if (successDiv.parentNode) {
-                    successDiv.parentNode.removeChild(successDiv);
-                }
-            }, 4000);
-        }
-        
-        function showCopyError(serverName) {
-            // Create a temporary error message
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'copy-error-message';
-            errorDiv.innerHTML = `
-                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Failed to copy link</strong><br>
-                    <small>Please manually copy the server address for ${serverName}</small>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(errorDiv);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.parentNode.removeChild(errorDiv);
-                }
-            }, 5000);
-        }
-
-        window.updateBulkSelection = function() {
-            const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
-            const checkedBoxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');
-            const bulkBar = document.getElementById('bulkOperationsBar');
-            const bulkCount = document.getElementById('bulkCount');
-            const selectAllCheckbox = document.getElementById('selectAll');
-            
-            if (checkedBoxes.length > 0) {
-                bulkBar.classList.add('active');
-                bulkCount.textContent = `${checkedBoxes.length} server${checkedBoxes.length !== 1 ? 's' : ''} selected`;
-            } else {
-                bulkBar.classList.remove('active');
-            }
-            
-            if (selectAllCheckbox) {
-                selectAllCheckbox.checked = checkedBoxes.length === checkboxes.length;
-                selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
-            }
-        };
-        
-        window.toggleAllSelection = function() {
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
-            
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
-            });
-            
-            updateBulkSelection();
-        };
-        
-        window.clearSelection = function() {
-            const checkboxes = document.querySelectorAll('.server-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            updateBulkSelection();
-        };
-        
-        window.bulkStart = function() {
-            const selectedIds = getSelectedServerIds();
-            if (selectedIds.length === 0) return;
-            
-            if (confirm(`Start ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
-                performBulkOperation('start', selectedIds);
-            }
-        };
-        
-        window.bulkStop = function() {
-            const selectedIds = getSelectedServerIds();
-            if (selectedIds.length === 0) return;
-            
-            if (confirm(`Stop ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
-                performBulkOperation('stop', selectedIds);
-            }
-        };
-        
-        window.bulkBackup = function() {
-            const selectedIds = getSelectedServerIds();
-            if (selectedIds.length === 0) return;
-            
-            if (confirm(`Backup ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
-                performBulkOperation('backup', selectedIds);
-            }
-        };
-        
-        window.bulkDelete = function() {
-            const selectedIds = getSelectedServerIds();
-            if (selectedIds.length === 0) return;
-            
-            if (confirm(`⚠️ Delete ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?\n\nThis action cannot be undone and will permanently delete all server files, including world data, configurations, and backups.`)) {
-                performBulkOperation('delete', selectedIds);
-            }
-        };
-        
-        // Helper functions
-        function getSelectedServerIds() {
-            const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');
-            return Array.from(checkboxes).map(cb => cb.dataset.serverId);
-        }
-        
-        function performBulkOperation(operation, serverIds) {
-            console.log(`Performing bulk ${operation} on servers:`, serverIds);
-            
-            serverIds.forEach(id => {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/server/${operation}/${id}`;
-                
-                const csrfToken = document.querySelector('input[name="csrf_token"]');
-                if (csrfToken) {
+        // Add API awareness to forms
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add CSRF token to all forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                if (!form.querySelector('input[name="csrf_token"]')) {
                     const csrfInput = document.createElement('input');
                     csrfInput.type = 'hidden';
                     csrfInput.name = 'csrf_token';
-                    csrfInput.value = csrfToken.value;
+                    csrfInput.value = window.API_CONFIG.csrfToken;
                     form.appendChild(csrfInput);
-                }
-                
-                document.body.appendChild(form);
-                form.submit();
-            });
-        }
-        
-        function loadConsoleLogs() {
-            const consoleOutput = document.getElementById('consoleOutput');
-            const sampleLogs = [
-                { timestamp: '12:34:56', level: 'info', message: 'Starting minecraft server version 1.21.8' },
-                { timestamp: '12:34:57', level: 'info', message: 'Loading properties' },
-                { timestamp: '12:34:58', level: 'info', message: 'Default game type: SURVIVAL' },
-                { timestamp: '12:34:59', level: 'info', message: 'Generating keypair' },
-                { timestamp: '12:35:00', level: 'info', message: 'Starting Minecraft server on *:25565' },
-                { timestamp: '12:35:01', level: 'info', message: 'Server started' },
-                { timestamp: '12:35:02', level: 'info', message: 'Done (3.456s)! For help, type "help"' }
-            ];
-            
-            consoleOutput.innerHTML = '';
-            sampleLogs.forEach(log => {
-                const line = document.createElement('div');
-                line.className = 'console-line';
-                line.innerHTML = `
-                    <span class="console-timestamp">[${log.timestamp}]</span>
-                    <span class="console-level-${log.level}">[${log.level.toUpperCase()}]</span>
-                    <span class="console-message">${log.message}</span>
-                `;
-                consoleOutput.appendChild(line);
-            });
-            
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-        }
-        
-        function startConsoleAutoRefresh() {
-            if (consoleRefreshInterval) clearInterval(consoleRefreshInterval);
-            consoleRefreshInterval = setInterval(loadConsoleLogs, 5000);
-            document.getElementById('consoleAutoRefresh').textContent = 'ON';
-        }
-        
-        function stopConsoleAutoRefresh() {
-            if (consoleRefreshInterval) {
-                clearInterval(consoleRefreshInterval);
-                consoleRefreshInterval = null;
-            }
-            document.getElementById('consoleAutoRefresh').textContent = 'OFF';
-        }
-        
-        function drawAnalyticsCharts() {
-            const statusCanvas = document.getElementById('statusChart');
-            const memoryCanvas = document.getElementById('memoryChart');
-            
-            if (statusCanvas) {
-                const ctx = statusCanvas.getContext('2d');
-                ctx.clearRect(0, 0, statusCanvas.width, statusCanvas.height);
-                ctx.fillStyle = '#007bff';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Status Chart', statusCanvas.width/2, statusCanvas.height/2);
-                ctx.fillText('(Chart.js integration needed)', statusCanvas.width/2, statusCanvas.height/2 + 20);
-            }
-            
-            if (memoryCanvas) {
-                const ctx = memoryCanvas.getContext('2d');
-                ctx.clearRect(0, 0, memoryCanvas.width, memoryCanvas.height);
-                ctx.fillStyle = '#28a745';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Memory Usage Chart', memoryCanvas.width/2, memoryCanvas.height/2);
-                ctx.fillText('(Chart.js integration needed)', memoryCanvas.width/2, memoryCanvas.height/2 + 20);
-            }
-        }
-
-        // Loading states for buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add loading states to all form buttons
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.classList.add('btn-loading');
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<span class="btn-text">' + originalText + '</span>';
-                        
-                        // Re-enable button after 5 seconds as fallback
-                        setTimeout(() => {
-                            submitBtn.classList.remove('btn-loading');
-                            submitBtn.innerHTML = originalText;
-                        }, 5000);
-                    }
-                });
-            });
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                // Ctrl+N or Cmd+N for new server
-                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-                    e.preventDefault();
-                    const createBtn = document.querySelector('a[href*="create"]');
-                    if (createBtn) {
-                        createBtn.click();
-                    }
-                }
-                
-                // Escape to close modals/alerts
-                if (e.key === 'Escape') {
-                    const alerts = document.querySelectorAll('.alert');
-                    alerts.forEach(alert => {
-                        const closeBtn = alert.querySelector('.close');
-                        if (closeBtn) {
-                            closeBtn.click();
-                        }
-                    });
-                }
-            });
-            
-            // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    const closeBtn = alert.querySelector('.close');
-                    if (closeBtn) {
-                        closeBtn.click();
-                    }
-                }, 5000);
-            });
-            
-            // Add fade-in animation to main content
-            const mainContent = document.querySelector('.container');
-            if (mainContent) {
-                mainContent.classList.add('fade-in');
-            }
-        });
-        
-        // Enhanced confirmation dialogs
-        function confirmAction(message, callback) {
-            if (confirm(message)) {
-                callback();
-            }
-        }
-        
-        // Tooltip initialization
-        function initTooltips() {
-            const tooltips = document.querySelectorAll('[data-tooltip]');
-            tooltips.forEach(element => {
-                element.classList.add('tooltip-custom');
-            });
-        }
-        
-        // Initialize tooltips when DOM is ready
-        document.addEventListener('DOMContentLoaded', initTooltips);
-        
-        // Phase 2 UX Improvements
-        document.addEventListener('DOMContentLoaded', function() {
-            // View Toggle Functionality
-            const viewToggleBtns = document.querySelectorAll('.view-toggle-btn');
-            const tableView = document.getElementById('tableView');
-            const cardView = document.getElementById('cardView');
-            
-            viewToggleBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const view = this.dataset.view;
-                    
-                    // Update active button
-                    viewToggleBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Toggle views
-                    if (view === 'table') {
-                        tableView.classList.remove('hidden');
-                        cardView.classList.add('hidden');
-                        localStorage.setItem('preferredView', 'table');
-                    } else {
-                        tableView.classList.add('hidden');
-                        cardView.classList.remove('hidden');
-                        localStorage.setItem('preferredView', 'cards');
-                    }
-                });
-            });
-            
-            // Restore preferred view
-            const preferredView = localStorage.getItem('preferredView') || 'table';
-            const preferredBtn = document.querySelector(`[data-view="${preferredView}"]`);
-            if (preferredBtn) {
-                preferredBtn.click();
-            }
-            
-            // Search and Filter Functionality
-            const searchInput = document.getElementById('serverSearch');
-            const statusFilter = document.getElementById('statusFilter');
-            const versionFilter = document.getElementById('versionFilter');
-            const clearFiltersBtn = document.getElementById('clearFilters');
-            
-            function filterServers() {
-                const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-                const statusValue = statusFilter ? statusFilter.value : '';
-                const versionValue = versionFilter ? versionFilter.value : '';
-                
-                const serverRows = document.querySelectorAll('.server-row, .server-card');
-                
-                serverRows.forEach(row => {
-                    const serverName = row.dataset.serverName.toLowerCase();
-                    const serverVersion = row.dataset.serverVersion;
-                    const serverStatus = row.dataset.serverStatus;
-                    const serverPort = row.dataset.serverPort;
-                    
-                    const matchesSearch = !searchTerm || 
-                        serverName.includes(searchTerm) || 
-                        serverVersion.includes(searchTerm) || 
-                        serverPort.includes(searchTerm);
-                    
-                    const matchesStatus = !statusValue || serverStatus === statusValue;
-                    const matchesVersion = !versionValue || serverVersion === versionValue;
-                    
-                    if (matchesSearch && matchesStatus && matchesVersion) {
-                        row.style.display = '';
-                        row.classList.add('fade-in');
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-                
-                // Update results count
-                const visibleCount = document.querySelectorAll('.server-row:not([style*="display: none"]), .server-card:not([style*="display: none"])').length;
-                updateResultsCount(visibleCount);
-            }
-            
-            function updateResultsCount(count) {
-                let countElement = document.getElementById('resultsCount');
-                if (!countElement) {
-                    countElement = document.createElement('div');
-                    countElement.id = 'resultsCount';
-                    countElement.className = 'text-muted small mt-2';
-                    const searchBar = document.querySelector('.search-filter-bar');
-                    if (searchBar) {
-                        searchBar.appendChild(countElement);
-                    }
-                }
-                countElement.textContent = `Showing ${count} server${count !== 1 ? 's' : ''}`;
-            }
-            
-            function clearFilters() {
-                if (searchInput) searchInput.value = '';
-                if (statusFilter) statusFilter.value = '';
-                if (versionFilter) versionFilter.value = '';
-                filterServers();
-            }
-            
-            // Event listeners
-            if (searchInput) {
-                searchInput.addEventListener('input', filterServers);
-            }
-            if (statusFilter) {
-                statusFilter.addEventListener('change', filterServers);
-            }
-            if (versionFilter) {
-                versionFilter.addEventListener('change', filterServers);
-            }
-            if (clearFiltersBtn) {
-                clearFiltersBtn.addEventListener('click', clearFilters);
-            }
-            
-            // Real-time Status Updates
-            let updateInterval;
-            const updateIndicator = document.getElementById('updateIndicator');
-            
-            function startAutoRefresh() {
-                if (updateInterval) clearInterval(updateInterval);
-                
-                updateInterval = setInterval(() => {
-                    if (updateIndicator) {
-                        updateIndicator.classList.add('updating');
-                        updateIndicator.querySelector('span').textContent = 'Updating...';
-                    }
-                    
-                    // Simulate status update (in real implementation, this would be an AJAX call)
-                    setTimeout(() => {
-                        if (updateIndicator) {
-                            updateIndicator.classList.remove('updating');
-                            updateIndicator.querySelector('span').textContent = 'Auto-refresh: ON';
-                        }
-                    }, 1000);
-                }, 30000); // Update every 30 seconds
-            }
-            
-            function stopAutoRefresh() {
-                if (updateInterval) {
-                    clearInterval(updateInterval);
-                    updateInterval = null;
-                }
-                if (updateIndicator) {
-                    updateIndicator.querySelector('span').textContent = 'Auto-refresh: OFF';
-                }
-            }
-            
-            // Toggle auto-refresh on indicator click
-            if (updateIndicator) {
-                updateIndicator.addEventListener('click', function() {
-                    if (updateInterval) {
-                        stopAutoRefresh();
-                    } else {
-                        startAutoRefresh();
-                    }
-                });
-            }
-            
-            // Start auto-refresh by default
-            startAutoRefresh();
-            
-            // Enhanced Form Validation
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                const inputs = form.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    input.addEventListener('blur', function() {
-                        validateField(this);
-                    });
-                    
-                    input.addEventListener('input', function() {
-                        if (this.classList.contains('is-invalid')) {
-                            validateField(this);
-                        }
-                    });
-                });
-            });
-            
-            function validateField(field) {
-                const value = field.value.trim();
-                let isValid = true;
-                let errorMessage = '';
-                
-                // Required field validation
-                if (field.hasAttribute('required') && !value) {
-                    isValid = false;
-                    errorMessage = 'This field is required';
-                }
-                
-                // Pattern validation
-                if (isValid && field.hasAttribute('pattern')) {
-                    const pattern = new RegExp(field.getAttribute('pattern'));
-                    if (!pattern.test(value)) {
-                        isValid = false;
-                        errorMessage = field.getAttribute('title') || 'Invalid format';
-                    }
-                }
-                
-                // Min length validation
-                if (isValid && field.hasAttribute('minlength')) {
-                    const minLength = parseInt(field.getAttribute('minlength'));
-                    if (value.length < minLength) {
-                        isValid = false;
-                        errorMessage = `Minimum length is ${minLength} characters`;
-                    }
-                }
-                
-                // Update field appearance
-                if (isValid) {
-                    field.classList.remove('is-invalid');
-                    field.classList.add('is-valid');
-                    removeFieldError(field);
-                } else {
-                    field.classList.remove('is-valid');
-                    field.classList.add('is-invalid');
-                    showFieldError(field, errorMessage);
-                }
-                
-                return isValid;
-            }
-            
-            function showFieldError(field, message) {
-                removeFieldError(field);
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'invalid-feedback';
-                errorDiv.textContent = message;
-                field.parentNode.appendChild(errorDiv);
-            }
-            
-            function removeFieldError(field) {
-                const existingError = field.parentNode.querySelector('.invalid-feedback');
-                if (existingError) {
-                    existingError.remove();
-                }
-            }
-            
-            // Phase 3: Advanced Features
-            // Bulk Operations
-            function updateBulkSelection() {
-                const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
-                const checkedBoxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');
-                const bulkBar = document.getElementById('bulkOperationsBar');
-                const bulkCount = document.getElementById('bulkCount');
-                const selectAllCheckbox = document.getElementById('selectAll');
-                
-                if (checkedBoxes.length > 0) {
-                    bulkBar.classList.add('active');
-                    bulkCount.textContent = `${checkedBoxes.length} server${checkedBoxes.length !== 1 ? 's' : ''} selected`;
-                } else {
-                    bulkBar.classList.remove('active');
-                }
-                
-                // Update select all checkbox
-                if (selectAllCheckbox) {
-                    selectAllCheckbox.checked = checkedBoxes.length === checkboxes.length;
-                    selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
-                }
-            }
-            
-            function toggleAllSelection() {
-                const selectAllCheckbox = document.getElementById('selectAll');
-                const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
-                
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllCheckbox.checked;
-                });
-                
-                updateBulkSelection();
-            }
-            
-            function clearSelection() {
-                const checkboxes = document.querySelectorAll('.server-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                updateBulkSelection();
-            }
-            
-            // Bulk operations
-            function bulkStart() {
-                const selectedIds = getSelectedServerIds();
-                if (selectedIds.length === 0) return;
-                
-                if (confirm(`Start ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
-                    performBulkOperation('start', selectedIds);
-                }
-            }
-            
-            function bulkStop() {
-                const selectedIds = getSelectedServerIds();
-                if (selectedIds.length === 0) return;
-                
-                if (confirm(`Stop ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
-                    performBulkOperation('stop', selectedIds);
-                }
-            }
-            
-            function bulkBackup() {
-                const selectedIds = getSelectedServerIds();
-                if (selectedIds.length === 0) return;
-                
-                if (confirm(`Backup ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
-                    performBulkOperation('backup', selectedIds);
-                }
-            }
-            
-            function bulkDelete() {
-                const selectedIds = getSelectedServerIds();
-                if (selectedIds.length === 0) return;
-                
-                if (confirm(`⚠️ Delete ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?\n\nThis action cannot be undone and will permanently delete all server files, including world data, configurations, and backups.`)) {
-                    performBulkOperation('delete', selectedIds);
-                }
-            }
-            
-            function getSelectedServerIds() {
-                const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');
-                return Array.from(checkboxes).map(cb => cb.dataset.serverId);
-            }
-            
-            function performBulkOperation(operation, serverIds) {
-                // In a real implementation, this would make AJAX calls to the server
-                console.log(`Performing bulk ${operation} on servers:`, serverIds);
-                
-                // Simulate operation
-                serverIds.forEach(id => {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/server/${operation}/${id}`;
-                    
-                    const csrfToken = document.querySelector('input[name="csrf_token"]');
-                    if (csrfToken) {
-                        const csrfInput = document.createElement('input');
-                        csrfInput.type = 'hidden';
-                        csrfInput.name = 'csrf_token';
-                        csrfInput.value = csrfToken.value;
-                        form.appendChild(csrfInput);
-                    }
-                    
-                    document.body.appendChild(form);
-                    form.submit();
-                });
-            }
-            
-            // Console functionality
-            let currentConsoleServerId = null;
-            let consoleRefreshInterval = null;
-            
-            function showConsole(serverId, serverName) {
-                currentConsoleServerId = serverId;
-                document.getElementById('consoleModalTitle').innerHTML = `<i class="fas fa-terminal"></i> Console - ${serverName}`;
-                document.getElementById('consoleModal').classList.add('active');
-                loadConsoleLogs();
-                startConsoleAutoRefresh();
-            }
-            
-            function closeModal(modalId) {
-                document.getElementById(modalId).classList.remove('active');
-                if (modalId === 'consoleModal') {
-                    stopConsoleAutoRefresh();
-                }
-            }
-            
-            function loadConsoleLogs() {
-                const consoleOutput = document.getElementById('consoleOutput');
-                // In a real implementation, this would fetch actual server logs
-                const sampleLogs = [
-                    { timestamp: '12:34:56', level: 'info', message: 'Starting minecraft server version 1.21.8' },
-                    { timestamp: '12:34:57', level: 'info', message: 'Loading properties' },
-                    { timestamp: '12:34:58', level: 'info', message: 'Default game type: SURVIVAL' },
-                    { timestamp: '12:34:59', level: 'info', message: 'Generating keypair' },
-                    { timestamp: '12:35:00', level: 'info', message: 'Starting Minecraft server on *:25565' },
-                    { timestamp: '12:35:01', level: 'info', message: 'Server started' },
-                    { timestamp: '12:35:02', level: 'info', message: 'Done (3.456s)! For help, type "help"' }
-                ];
-                
-                consoleOutput.innerHTML = '';
-                sampleLogs.forEach(log => {
-                    const line = document.createElement('div');
-                    line.className = 'console-line';
-                    line.innerHTML = `
-                        <span class="console-timestamp">[${log.timestamp}]</span>
-                        <span class="console-level-${log.level}">[${log.level.toUpperCase()}]</span>
-                        <span class="console-message">${log.message}</span>
-                    `;
-                    consoleOutput.appendChild(line);
-                });
-                
-                consoleOutput.scrollTop = consoleOutput.scrollHeight;
-            }
-            
-            function refreshConsole() {
-                loadConsoleLogs();
-            }
-            
-            function clearConsole() {
-                document.getElementById('consoleOutput').innerHTML = '';
-            }
-            
-            function downloadLogs() {
-                // In a real implementation, this would download actual log files
-                const logs = document.getElementById('consoleOutput').textContent;
-                const blob = new Blob([logs], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `server-${currentConsoleServerId}-logs.txt`;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-            
-            function startConsoleAutoRefresh() {
-                if (consoleRefreshInterval) clearInterval(consoleRefreshInterval);
-                consoleRefreshInterval = setInterval(loadConsoleLogs, 5000);
-                document.getElementById('consoleAutoRefresh').textContent = 'ON';
-            }
-            
-            function stopConsoleAutoRefresh() {
-                if (consoleRefreshInterval) {
-                    clearInterval(consoleRefreshInterval);
-                    consoleRefreshInterval = null;
-                }
-                document.getElementById('consoleAutoRefresh').textContent = 'OFF';
-            }
-            
-            // Analytics functionality
-            function showAnalytics() {
-                document.getElementById('analyticsModal').classList.add('active');
-                // In a real implementation, this would load actual analytics data
-                setTimeout(() => {
-                    drawAnalyticsCharts();
-                }, 100);
-            }
-            
-            function drawAnalyticsCharts() {
-                // Simple chart implementation (in real app, use Chart.js or similar)
-                const statusCanvas = document.getElementById('statusChart');
-                const memoryCanvas = document.getElementById('memoryChart');
-                
-                if (statusCanvas) {
-                    const ctx = statusCanvas.getContext('2d');
-                    ctx.clearRect(0, 0, statusCanvas.width, statusCanvas.height);
-                    ctx.fillStyle = '#007bff';
-                    ctx.font = '14px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Status Chart', statusCanvas.width/2, statusCanvas.height/2);
-                    ctx.fillText('(Chart.js integration needed)', statusCanvas.width/2, statusCanvas.height/2 + 20);
-                }
-                
-                if (memoryCanvas) {
-                    const ctx = memoryCanvas.getContext('2d');
-                    ctx.clearRect(0, 0, memoryCanvas.width, memoryCanvas.height);
-                    ctx.fillStyle = '#28a745';
-                    ctx.font = '14px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Memory Usage Chart', memoryCanvas.width/2, memoryCanvas.height/2);
-                    ctx.fillText('(Chart.js integration needed)', memoryCanvas.width/2, memoryCanvas.height/2 + 20);
-                }
-            }
-            
-            // Close modals on escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const modals = document.querySelectorAll('.modal-overlay.active');
-                    modals.forEach(modal => {
-                        modal.classList.remove('active');
-                    });
-                }
-            });
-            
-            // Close modals when clicking outside
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('modal-overlay')) {
-                    e.target.classList.remove('active');
                 }
             });
         });
     </script>
+    
+    {% block scripts %}{% endblock %}
 </body>
 </html>

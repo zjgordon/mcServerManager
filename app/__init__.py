@@ -1,10 +1,11 @@
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, make_response
 from flask_login import current_user
 from .config import Config
-from .extensions import db, login_manager, csrf
+from .extensions import db, login_manager, csrf, cors
 from .models import User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
+from .routes.api import api_bp
 from .utils import check_admin_password
 from .error_handlers import init_error_handlers
 from .security import add_security_headers, audit_log
@@ -21,6 +22,14 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    
+    # Configure CORS for API endpoints
+    cors.init_app(app, 
+                  origins=app.config['CORS_ORIGINS'],
+                  methods=app.config['CORS_METHODS'],
+                  allow_headers=app.config['CORS_ALLOW_HEADERS'],
+                  supports_credentials=app.config['CORS_SUPPORTS_CREDENTIALS'],
+                  expose_headers=app.config['CORS_EXPOSE_HEADERS'])
 
     # Initialize error handlers
     init_error_handlers(app)
@@ -28,6 +37,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(server_bp)
+    app.register_blueprint(api_bp)
     
     # Template context processor for global variables
     @app.context_processor
@@ -53,6 +63,18 @@ def create_app():
     @app.after_request
     def security_headers(response):
         return add_security_headers(response)
+    
+    # CORS preflight handler for API endpoints
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS" and request.path.startswith('/api/'):
+            response = make_response()
+            response.headers.add("Access-Control-Allow-Origin", request.headers.get('Origin', '*'))
+            response.headers.add('Access-Control-Allow-Headers', ', '.join(app.config['CORS_ALLOW_HEADERS']))
+            response.headers.add('Access-Control-Allow-Methods', ', '.join(app.config['CORS_METHODS']))
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            response.headers.add('Access-Control-Max-Age', '86400')  # 24 hours
+            return response
     
     @app.before_request
     def check_admin_setup():

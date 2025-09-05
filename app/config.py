@@ -53,6 +53,13 @@ class Config:
     APP_TITLE = os.environ.get('APP_TITLE', 'Minecraft Server Manager')
     SERVER_HOSTNAME = os.environ.get('SERVER_HOSTNAME', 'localhost')
     
+    # CORS Configuration
+    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173').split(',')
+    CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
+    CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+    CORS_SUPPORTS_CREDENTIALS = True
+    CORS_EXPOSE_HEADERS = ['Content-Range', 'X-Content-Range']
+    
     # Memory Management Configuration
     MAX_TOTAL_MEMORY_MB = int(os.environ.get('MAX_TOTAL_MEMORY_MB', '8192'))  # Default 8GB total
     DEFAULT_SERVER_MEMORY_MB = int(os.environ.get('DEFAULT_SERVER_MEMORY_MB', '1024'))  # Default 1GB per server

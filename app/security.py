@@ -272,6 +272,7 @@ def audit_log(action, details=None, user_id=None):
 def add_security_headers(response):
     """
     Add security headers to response.
+    For API endpoints, use more permissive headers to support CORS.
     
     Args:
         response: Flask response object
@@ -279,10 +280,28 @@ def add_security_headers(response):
     Returns:
         response: Response with security headers
     """
-    headers = current_app.config.get('SECURITY_HEADERS', {})
+    # Check if this is an API endpoint
+    is_api_endpoint = request.path.startswith('/api/')
     
-    for header, value in headers.items():
-        response.headers[header] = value
+    if is_api_endpoint:
+        # More permissive headers for API endpoints to support CORS
+        api_headers = {
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY',
+            'X-XSS-Protection': '1; mode=block',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
+        
+        for header, value in api_headers.items():
+            response.headers[header] = value
+    else:
+        # Full security headers for web interface
+        headers = current_app.config.get('SECURITY_HEADERS', {})
+        
+        for header, value in headers.items():
+            response.headers[header] = value
     
     return response
 
