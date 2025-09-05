@@ -1,254 +1,362 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedButton } from '../enhanced-button';
-import { useReducedMotion } from '../../../utils/animations';
-
-// Mock the useReducedMotion hook
-vi.mock('../../../utils/animations');
-const mockUseReducedMotion = vi.mocked(useReducedMotion);
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-};
+import { render, screen, fireEvent, waitFor, userEvent, vi } from '../../../test';
+import EnhancedButton from '../enhanced-button';
 
 describe('EnhancedButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseReducedMotion.mockReturnValue(false);
   });
 
-  it('renders with default props', () => {
-    render(<EnhancedButton>Click me</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toBeInTheDocument();
-    expect(screen.getByText('Click me')).toBeInTheDocument();
+  it('renders button with default props', () => {
+    render(<EnhancedButton>Click me</EnhancedButton>);
+
+    const button = screen.getByRole('button', { name: 'Click me' });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveClass('btn');
   });
 
-  it('renders with different variants', () => {
-    const { rerender } = render(<EnhancedButton variant="destructive">Delete</EnhancedButton>, { wrapper: createWrapper() });
-    expect(screen.getByRole('button')).toHaveClass('bg-destructive');
+  it('renders button with different variants', () => {
+    const { rerender } = render(<EnhancedButton variant="primary">Primary</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-primary');
+
+    rerender(<EnhancedButton variant="secondary">Secondary</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-secondary');
+
+    rerender(<EnhancedButton variant="destructive">Destructive</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-destructive');
 
     rerender(<EnhancedButton variant="outline">Outline</EnhancedButton>);
-    expect(screen.getByRole('button')).toHaveClass('border');
+    expect(screen.getByRole('button')).toHaveClass('btn-outline');
 
-    rerender(<EnhancedButton variant="minecraft">Minecraft</EnhancedButton>);
-    expect(screen.getByRole('button')).toHaveClass('bg-minecraft-green');
+    rerender(<EnhancedButton variant="ghost">Ghost</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-ghost');
   });
 
-  it('renders with different sizes', () => {
-    const { rerender } = render(<EnhancedButton size="sm">Small</EnhancedButton>, { wrapper: createWrapper() });
-    expect(screen.getByRole('button')).toHaveClass('h-9');
+  it('renders button with different sizes', () => {
+    const { rerender } = render(<EnhancedButton size="sm">Small</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-sm');
+
+    rerender(<EnhancedButton size="md">Medium</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-md');
 
     rerender(<EnhancedButton size="lg">Large</EnhancedButton>);
-    expect(screen.getByRole('button')).toHaveClass('h-11');
-
-    rerender(<EnhancedButton size="xl">Extra Large</EnhancedButton>);
-    expect(screen.getByRole('button')).toHaveClass('h-12');
-  });
-
-  it('shows loading state', () => {
-    render(<EnhancedButton loading>Loading</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toBeDisabled();
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-  });
-
-  it('shows success state', () => {
-    render(<EnhancedButton success>Success</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByTestId('success-icon')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toHaveClass('bg-green-600');
-  });
-
-  it('shows error state', () => {
-    render(<EnhancedButton error>Error</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByTestId('error-icon')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toHaveClass('bg-destructive');
-  });
-
-  it('renders with icon', () => {
-    render(
-      <EnhancedButton icon={<span data-testid="test-icon">Icon</span>}>
-        With Icon
-      </EnhancedButton>,
-      { wrapper: createWrapper() }
-    );
-    
-    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
-  });
-
-  it('renders with icon on the right', () => {
-    render(
-      <EnhancedButton 
-        icon={<span data-testid="test-icon">Icon</span>} 
-        iconPosition="right"
-      >
-        With Icon
-      </EnhancedButton>,
-      { wrapper: createWrapper() }
-    );
-    
-    const button = screen.getByRole('button');
-    const icon = screen.getByTestId('test-icon');
-    const text = screen.getByText('With Icon');
-    
-    expect(button).toContainElement(icon);
-    expect(button).toContainElement(text);
+    expect(screen.getByRole('button')).toHaveClass('btn-lg');
   });
 
   it('handles click events', () => {
     const handleClick = vi.fn();
-    render(<EnhancedButton onClick={handleClick}>Click me</EnhancedButton>, { wrapper: createWrapper() });
-    
-    fireEvent.click(screen.getByRole('button'));
+    render(<EnhancedButton onClick={handleClick}>Click me</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('creates ripple effect on click', async () => {
-    render(<EnhancedButton ripple>Click me</EnhancedButton>, { wrapper: createWrapper() });
-    
+  it('shows loading state', () => {
+    render(<EnhancedButton loading>Loading</EnhancedButton>);
+
     const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
-    await waitFor(() => {
-      expect(button.querySelector('.animate-ping')).toBeInTheDocument();
-    });
+    expect(button).toBeDisabled();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('does not create ripple when reduced motion is enabled', () => {
-    mockUseReducedMotion.mockReturnValue(true);
-    
-    render(<EnhancedButton ripple>Click me</EnhancedButton>, { wrapper: createWrapper() });
-    
+  it('shows disabled state', () => {
+    render(<EnhancedButton disabled>Disabled</EnhancedButton>);
+
     const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
-    expect(button.querySelector('.animate-ping')).not.toBeInTheDocument();
+    expect(button).toBeDisabled();
   });
 
-  it('handles keyboard events', () => {
+  it('shows ripple effect on click', async () => {
+    const user = userEvent.setup();
+    render(<EnhancedButton>Click me</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    await user.click(button);
+
+    // Check for ripple effect element
+    expect(button.querySelector('.ripple')).toBeInTheDocument();
+  });
+
+  it('handles keyboard events', async () => {
+    const user = userEvent.setup();
     const handleClick = vi.fn();
-    render(<EnhancedButton onClick={handleClick}>Click me</EnhancedButton>, { wrapper: createWrapper() });
-    
+    render(<EnhancedButton onClick={handleClick}>Click me</EnhancedButton>);
+
     const button = screen.getByRole('button');
-    fireEvent.keyDown(button, { key: 'Enter' });
+    button.focus();
+
+    await user.keyboard('{Enter}');
     expect(handleClick).toHaveBeenCalledTimes(1);
-    
-    fireEvent.keyDown(button, { key: ' ' });
+
+    await user.keyboard(' ');
     expect(handleClick).toHaveBeenCalledTimes(2);
   });
 
-  it('applies animation classes', () => {
-    render(<EnhancedButton animation="pulse">Pulse</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toHaveClass('animate-pulse-slow');
+  it('shows icon when provided', () => {
+    const TestIcon = () => <span data-testid="test-icon">Icon</span>;
+    render(<EnhancedButton icon={<TestIcon />}>With Icon</EnhancedButton>);
+
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
   });
 
-  it('does not apply animation when reduced motion is enabled', () => {
-    mockUseReducedMotion.mockReturnValue(true);
-    
-    render(<EnhancedButton animation="pulse">Pulse</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).not.toHaveClass('animate-pulse-slow');
+  it('shows icon on the left by default', () => {
+    const TestIcon = () => <span data-testid="test-icon">Icon</span>;
+    render(<EnhancedButton icon={<TestIcon />}>With Icon</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    const icon = screen.getByTestId('test-icon');
+    expect(button.firstChild).toBe(icon);
   });
 
-  it('renders as child component when asChild is true', () => {
-    render(
-      <EnhancedButton asChild>
-        <a href="/test">Link Button</a>
-      </EnhancedButton>,
-      { wrapper: createWrapper() }
-    );
-    
-    expect(screen.getByRole('link')).toBeInTheDocument();
-    expect(screen.getByText('Link Button')).toBeInTheDocument();
+  it('shows icon on the right when specified', () => {
+    const TestIcon = () => <span data-testid="test-icon">Icon</span>;
+    render(<EnhancedButton icon={<TestIcon />} iconPosition="right">With Icon</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    const icon = screen.getByTestId('test-icon');
+    expect(button.lastChild).toBe(icon);
   });
 
-  it('shows tooltip when provided', () => {
-    render(<EnhancedButton tooltip="This is a tooltip">Button</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toHaveAttribute('title', 'This is a tooltip');
+  it('shows only icon when iconOnly prop is true', () => {
+    const TestIcon = () => <span data-testid="test-icon">Icon</span>;
+    render(<EnhancedButton icon={<TestIcon />} iconOnly>Icon Only</EnhancedButton>);
+
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
+    expect(screen.queryByText('Icon Only')).not.toBeInTheDocument();
   });
 
-  it('is disabled when loading', () => {
-    render(<EnhancedButton loading>Loading</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toBeDisabled();
-  });
+  it('shows tooltip when provided', async () => {
+    const user = userEvent.setup();
+    render(<EnhancedButton tooltip="This is a tooltip">Hover me</EnhancedButton>);
 
-  it('is disabled when disabled prop is true', () => {
-    render(<EnhancedButton disabled>Disabled</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toBeDisabled();
-  });
+    const button = screen.getByRole('button');
+    await user.hover(button);
 
-  it('does not trigger click when disabled', () => {
-    const handleClick = vi.fn();
-    render(
-      <EnhancedButton disabled onClick={handleClick}>
-        Disabled
-      </EnhancedButton>,
-      { wrapper: createWrapper() }
-    );
-    
-    fireEvent.click(screen.getByRole('button'));
-    expect(handleClick).not.toHaveBeenCalled();
-  });
-
-  it('does not trigger click when loading', () => {
-    const handleClick = vi.fn();
-    render(
-      <EnhancedButton loading onClick={handleClick}>
-        Loading
-      </EnhancedButton>,
-      { wrapper: createWrapper() }
-    );
-    
-    fireEvent.click(screen.getByRole('button'));
-    expect(handleClick).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText('This is a tooltip')).toBeInTheDocument();
+    });
   });
 
   it('applies custom className', () => {
-    render(<EnhancedButton className="custom-class">Button</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toHaveClass('custom-class');
+    render(<EnhancedButton className="custom-class">Custom</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('custom-class');
   });
 
-  it('handles mouse events for pressed state', () => {
-    render(<EnhancedButton>Button</EnhancedButton>, { wrapper: createWrapper() });
-    
+  it('applies custom styles', () => {
+    render(<EnhancedButton style={{ backgroundColor: 'red' }}>Styled</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveStyle('background-color: red');
+  });
+
+  it('forwards ref correctly', () => {
+    const ref = React.createRef<HTMLButtonElement>();
+    render(<EnhancedButton ref={ref}>Ref Button</EnhancedButton>);
+
+    expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+    expect(ref.current).toHaveTextContent('Ref Button');
+  });
+
+  it('handles focus events', () => {
+    const handleFocus = vi.fn();
+    const handleBlur = vi.fn();
+    render(
+      <EnhancedButton onFocus={handleFocus} onBlur={handleBlur}>
+        Focus Button
+      </EnhancedButton>
+    );
+
+    const button = screen.getByRole('button');
+    fireEvent.focus(button);
+    expect(handleFocus).toHaveBeenCalledTimes(1);
+
+    fireEvent.blur(button);
+    expect(handleBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles mouse events', () => {
+    const handleMouseEnter = vi.fn();
+    const handleMouseLeave = vi.fn();
+    render(
+      <EnhancedButton onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        Mouse Button
+      </EnhancedButton>
+    );
+
+    const button = screen.getByRole('button');
+    fireEvent.mouseEnter(button);
+    expect(handleMouseEnter).toHaveBeenCalledTimes(1);
+
+    fireEvent.mouseLeave(button);
+    expect(handleMouseLeave).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows success state', () => {
+    render(<EnhancedButton success>Success</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('btn-success');
+  });
+
+  it('shows error state', () => {
+    render(<EnhancedButton error>Error</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('btn-error');
+  });
+
+  it('shows warning state', () => {
+    render(<EnhancedButton warning>Warning</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('btn-warning');
+  });
+
+  it('shows info state', () => {
+    render(<EnhancedButton info>Info</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('btn-info');
+  });
+
+  it('handles long text content', () => {
+    const longText = 'This is a very long button text that should wrap properly';
+    render(<EnhancedButton>{longText}</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveTextContent(longText);
+  });
+
+  it('handles empty text content', () => {
+    render(<EnhancedButton></EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeEmptyDOMElement();
+  });
+
+  it('shows loading spinner when loading', () => {
+    render(<EnhancedButton loading>Loading</EnhancedButton>);
+
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+  });
+
+  it('disables button when loading', () => {
+    render(<EnhancedButton loading>Loading</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeDisabled();
+  });
+
+  it('shows custom loading text', () => {
+    render(<EnhancedButton loading loadingText="Processing...">Submit</EnhancedButton>);
+
+    expect(screen.getByText('Processing...')).toBeInTheDocument();
+    expect(screen.queryByText('Submit')).not.toBeInTheDocument();
+  });
+
+  it('handles multiple rapid clicks gracefully', async () => {
+    const user = userEvent.setup();
+    const handleClick = vi.fn();
+    render(<EnhancedButton onClick={handleClick}>Click me</EnhancedButton>);
+
     const button = screen.getByRole('button');
     
-    fireEvent.mouseDown(button);
-    expect(button).toHaveClass('scale-95');
-    
-    fireEvent.mouseUp(button);
-    expect(button).not.toHaveClass('scale-95');
+    // Click multiple times rapidly
+    await user.click(button);
+    await user.click(button);
+    await user.click(button);
+
+    expect(handleClick).toHaveBeenCalledTimes(3);
   });
 
-  it('shows success animation', () => {
-    render(<EnhancedButton success>Success</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toHaveClass('animate-scale-in');
+  it('shows accessibility attributes', () => {
+    render(
+      <EnhancedButton 
+        aria-label="Custom label"
+        aria-describedby="description"
+        role="button"
+      >
+        Accessible Button
+      </EnhancedButton>
+    );
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('aria-label', 'Custom label');
+    expect(button).toHaveAttribute('aria-describedby', 'description');
   });
 
-  it('shows error animation', () => {
-    render(<EnhancedButton error>Error</EnhancedButton>, { wrapper: createWrapper() });
-    
-    expect(screen.getByRole('button')).toHaveClass('animate-wiggle');
+  it('handles form submission', () => {
+    const handleSubmit = vi.fn();
+    render(
+      <form onSubmit={handleSubmit}>
+        <EnhancedButton type="submit">Submit</EnhancedButton>
+      </form>
+    );
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    expect(handleSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles form reset', () => {
+    const handleReset = vi.fn();
+    render(
+      <form onReset={handleReset}>
+        <EnhancedButton type="reset">Reset</EnhancedButton>
+      </form>
+    );
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    expect(handleReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows different states based on props', () => {
+    const { rerender } = render(<EnhancedButton>Normal</EnhancedButton>);
+    expect(screen.getByRole('button')).not.toHaveClass('btn-loading');
+
+    rerender(<EnhancedButton loading>Loading</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-loading');
+
+    rerender(<EnhancedButton disabled>Disabled</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveClass('btn-disabled');
+  });
+
+  it('handles custom data attributes', () => {
+    render(<EnhancedButton data-testid="custom-button" data-custom="value">Custom</EnhancedButton>);
+
+    const button = screen.getByTestId('custom-button');
+    expect(button).toHaveAttribute('data-custom', 'value');
+  });
+
+  it('shows animation classes when animated', () => {
+    render(<EnhancedButton animated>Animated</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('btn-animated');
+  });
+
+  it('handles full width', () => {
+    render(<EnhancedButton fullWidth>Full Width</EnhancedButton>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('btn-full-width');
+  });
+
+  it('shows different button types', () => {
+    const { rerender } = render(<EnhancedButton type="button">Button</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveAttribute('type', 'button');
+
+    rerender(<EnhancedButton type="submit">Submit</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveAttribute('type', 'submit');
+
+    rerender(<EnhancedButton type="reset">Reset</EnhancedButton>);
+    expect(screen.getByRole('button')).toHaveAttribute('type', 'reset');
   });
 });

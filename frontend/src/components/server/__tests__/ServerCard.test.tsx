@@ -1,17 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { render, screen, fireEvent, waitFor, userEvent, vi } from '../../../test';
+import { TestDataFactory, setupApiMocks } from '../../../test';
 import ServerCard from '../ServerCard';
 import type { Server } from '../../../types/api';
 
-// Mock the API service
-jest.mock('../../../services/api', () => ({
-  apiService: {
-    getServerStatus: jest.fn(),
-  },
-}));
-
-const mockServer: Server = {
+const mockServer: Server = TestDataFactory.server({
   id: 1,
   server_name: 'Test Server',
   version: '1.21.8',
@@ -29,28 +22,21 @@ const mockServer: Server = {
   motd: 'Welcome to Test Server!',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
-};
-
-const renderWithRouter = (component: React.ReactElement) => {
-  return render(
-    <BrowserRouter>
-      {component}
-    </BrowserRouter>
-  );
-};
+});
 
 describe('ServerCard', () => {
-  const mockOnStart = jest.fn();
-  const mockOnStop = jest.fn();
-  const mockOnDelete = jest.fn();
-  const mockOnBackup = jest.fn();
+  const mockOnStart = vi.fn();
+  const mockOnStop = vi.fn();
+  const mockOnDelete = vi.fn();
+  const mockOnBackup = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    setupApiMocks.serversList();
   });
 
   it('renders server information correctly', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -69,7 +55,7 @@ describe('ServerCard', () => {
   });
 
   it('shows running status correctly', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -86,7 +72,7 @@ describe('ServerCard', () => {
   it('shows stopped status correctly', () => {
     const stoppedServer = { ...mockServer, status: 'Stopped' as const, pid: undefined };
     
-    renderWithRouter(
+    render(
       <ServerCard
         server={stoppedServer}
         onStart={mockOnStart}
@@ -101,7 +87,7 @@ describe('ServerCard', () => {
   });
 
   it('calls onStop when stop button is clicked', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -120,7 +106,7 @@ describe('ServerCard', () => {
   it('calls onStart when start button is clicked', () => {
     const stoppedServer = { ...mockServer, status: 'Stopped' as const, pid: undefined };
     
-    renderWithRouter(
+    render(
       <ServerCard
         server={stoppedServer}
         onStart={mockOnStart}
@@ -137,7 +123,7 @@ describe('ServerCard', () => {
   });
 
   it('calls onDelete when delete button is clicked', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -154,7 +140,7 @@ describe('ServerCard', () => {
   });
 
   it('calls onBackup when backup button is clicked', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -171,7 +157,7 @@ describe('ServerCard', () => {
   });
 
   it('disables buttons when loading', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -189,7 +175,7 @@ describe('ServerCard', () => {
   it('shows hardcore indicator when server is hardcore', () => {
     const hardcoreServer = { ...mockServer, hardcore: true };
     
-    renderWithRouter(
+    render(
       <ServerCard
         server={hardcoreServer}
         onStart={mockOnStart}
@@ -203,7 +189,7 @@ describe('ServerCard', () => {
   });
 
   it('renders in list view mode', () => {
-    renderWithRouter(
+    render(
       <ServerCard
         server={mockServer}
         onStart={mockOnStart}
@@ -224,7 +210,7 @@ describe('ServerCard', () => {
       created_at: '2024-01-01T00:00:00Z' // Very old date
     };
     
-    renderWithRouter(
+    render(
       <ServerCard
         server={oldServer}
         onStart={mockOnStart}
@@ -236,5 +222,103 @@ describe('ServerCard', () => {
 
     // Should show some time ago
     expect(screen.getByText(/ago/)).toBeInTheDocument();
+  });
+
+  it('handles click to select functionality', () => {
+    const mockOnSelect = vi.fn();
+    render(
+      <ServerCard
+        server={mockServer}
+        onStart={mockOnStart}
+        onStop={mockOnStop}
+        onDelete={mockOnDelete}
+        onBackup={mockOnBackup}
+        onSelect={mockOnSelect}
+        selectable={true}
+      />
+    );
+
+    const card = screen.getByRole('button', { name: /test server/i });
+    fireEvent.click(card);
+
+    expect(mockOnSelect).toHaveBeenCalledWith(1);
+  });
+
+  it('shows selected state when selected', () => {
+    render(
+      <ServerCard
+        server={mockServer}
+        onStart={mockOnStart}
+        onStop={mockOnStop}
+        onDelete={mockOnDelete}
+        onBackup={mockOnBackup}
+        selected={true}
+        selectable={true}
+      />
+    );
+
+    const card = screen.getByRole('button', { name: /test server/i });
+    expect(card).toHaveClass('selected');
+  });
+
+  it('shows confirmation dialog for delete action', async () => {
+    const user = userEvent.setup();
+    render(
+      <ServerCard
+        server={mockServer}
+        onStart={mockOnStart}
+        onStop={mockOnStop}
+        onDelete={mockOnDelete}
+        onBackup={mockOnBackup}
+      />
+    );
+
+    const deleteButton = screen.getByTitle('Delete Server');
+    await user.click(deleteButton);
+
+    expect(screen.getByText('Delete Server')).toBeInTheDocument();
+    expect(screen.getByText('Are you sure you want to delete this server?')).toBeInTheDocument();
+  });
+
+  it('cancels delete action when cancel is clicked', async () => {
+    const user = userEvent.setup();
+    render(
+      <ServerCard
+        server={mockServer}
+        onStart={mockOnStart}
+        onStop={mockOnStop}
+        onDelete={mockOnDelete}
+        onBackup={mockOnBackup}
+      />
+    );
+
+    const deleteButton = screen.getByTitle('Delete Server');
+    await user.click(deleteButton);
+
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    await user.click(cancelButton);
+
+    expect(mockOnDelete).not.toHaveBeenCalled();
+  });
+
+  it('confirms delete action when confirm is clicked', async () => {
+    const user = userEvent.setup();
+    render(
+      <ServerCard
+        server={mockServer}
+        onStart={mockOnStart}
+        onStop={mockOnStop}
+        onDelete={mockOnDelete}
+        onBackup={mockOnBackup}
+      />
+    );
+
+    const deleteButton = screen.getByTitle('Delete Server');
+    await user.click(deleteButton);
+
+    const confirmButton = screen.getByRole('button', { name: 'Delete' });
+    await user.click(confirmButton);
+
+    expect(mockOnDelete).toHaveBeenCalledWith(1);
   });
 });

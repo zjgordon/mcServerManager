@@ -243,11 +243,33 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 4. Add tests for new functionality
 5. Submit a pull request
 
+## 📚 Documentation
+
+### Quick Links
+- **[📖 Complete Documentation](docs/index.md)** - Full documentation overview and navigation
+- **[👤 User Guide](docs/guides/USER_GUIDE.md)** - Comprehensive user manual
+- **[👨‍💻 Developer Guide](docs/guides/DEVELOPER_GUIDE.md)** - Development setup and architecture
+- **[🔧 Troubleshooting Guide](docs/guides/TROUBLESHOOTING_GUIDE.md)** - Common issues and solutions
+- **[🚀 Production Guide](docs/guides/PRODUCTION_READINESS_GUIDE.md)** - Production deployment guide
+
+### API & Development
+- **[📡 API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete REST API reference
+- **[🧪 API Testing Guide](docs/api/API_TESTING_GUIDE.md)** - API testing procedures
+- **[🏗️ Process Management](docs/development/PROCESS_MANAGEMENT.md)** - Server process management
+- **[🔄 Migration Guide](docs/development/MIGRATION_GUIDE.md)** - Migration procedures
+
+### Project Information
+- **[📋 Project Status](PROJECT_STATUS.md)** - Current project overview
+- **[🏃 Current Sprint](CURRENT_SPRINT.md)** - Active sprint information
+- **[📈 UI Enhancement Plan](docs/plans/UI_ENHANCEMENT_PLAN.md)** - Complete project roadmap
+- **[📝 Changelog](docs/CHANGELOG.md)** - Version history and changes
+
 ## 📞 Support
 
-- **Documentation**: See [PROCESS_MANAGEMENT.md](PROCESS_MANAGEMENT.md) for detailed process management information
-- **Issues**: Report bugs and feature requests via GitHub issues
-- **Security**: Report security vulnerabilities privately
+- **Documentation**: Start with the [Complete Documentation](docs/index.md)
+- **Issues**: Report bugs and feature requests via [GitHub Issues](https://github.com/your-org/mcServerManager/issues)
+- **Security**: Report security vulnerabilities via [Security Policy](.github/SECURITY.md)
+- **Contributing**: See [Contributing Guidelines](.github/CONTRIBUTING.md) for how to contribute
 
 ## 🔄 Version History
 

@@ -1,304 +1,475 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, fireEvent, waitFor, userEvent, vi } from '../../../test';
+import { TestDataFactory, setupApiMocks } from '../../../test';
 import UserManagementPanel from '../UserManagementPanel';
-import type { User } from '../../../../types/api';
 
-// Mock the hooks
-jest.mock('../../../../hooks/useAdmin', () => ({
-  useUsers: () => ({
-    data: [
-      {
-        id: 1,
-        username: 'admin',
-        is_admin: true,
-        server_count: 3,
-        total_memory_allocated: 3072,
-        created_at: '2024-01-01T00:00:00Z'
-      },
-      {
-        id: 2,
-        username: 'user1',
-        is_admin: false,
-        server_count: 1,
-        total_memory_allocated: 1024,
-        created_at: '2024-01-02T00:00:00Z'
-      }
-    ],
-    isLoading: false,
-  }),
-  useCreateUser: () => ({
-    mutateAsync: jest.fn(),
-    isPending: false,
-  }),
-  useUpdateUser: () => ({
-    mutateAsync: jest.fn(),
-    isPending: false,
-  }),
-  useDeleteUser: () => ({
-    mutateAsync: jest.fn(),
-    isPending: false,
-  }),
+const mockUsers = TestDataFactory.users(5).map((user, index) => ({
+  ...user,
+  id: index + 1,
+  username: `user${index + 1}`,
+  email: `user${index + 1}@example.com`,
+  is_admin: index === 0, // First user is admin
 }));
-
-// Mock the auth context
-jest.mock('../../../../contexts/AuthContext', () => ({
-  useAuth: () => ({
-    user: {
-      id: 1,
-      username: 'admin',
-      is_admin: true
-    }
-  }),
-}));
-
-// Mock the toast hook
-jest.mock('../../../../hooks/use-toast', () => ({
-  useToast: () => ({
-    toast: jest.fn(),
-  }),
-}));
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        {children}
-      </BrowserRouter>
-    </QueryClientProvider>
-  );
-};
 
 describe('UserManagementPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    setupApiMocks.usersList(mockUsers);
   });
 
-  it('renders the user management panel correctly', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    expect(screen.getByText('User Management')).toBeInTheDocument();
-    expect(screen.getByText('Manage user accounts, permissions, and access control')).toBeInTheDocument();
-    expect(screen.getByText('Add User')).toBeInTheDocument();
-  });
-
-  it('displays users list correctly', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    expect(screen.getByText('admin')).toBeInTheDocument();
-    expect(screen.getByText('user1')).toBeInTheDocument();
-    expect(screen.getByText('3 servers • 3072 MB allocated')).toBeInTheDocument();
-    expect(screen.getByText('1 servers • 1024 MB allocated')).toBeInTheDocument();
-  });
-
-  it('shows admin badge for admin users', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    expect(screen.getByText('Admin')).toBeInTheDocument();
-  });
-
-  it('opens create user dialog when Add User button is clicked', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
+  it('renders user management panel correctly', async () => {
+    render(<UserManagementPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Create New User')).toBeInTheDocument();
-      expect(screen.getByText('Create a new user account with custom permissions')).toBeInTheDocument();
+      expect(screen.getByText('User Management')).toBeInTheDocument();
+      expect(screen.getByText('Create User')).toBeInTheDocument();
+      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.getByText('user2')).toBeInTheDocument();
     });
   });
 
-  it('validates username field in create user form', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
+  it('shows loading state initially', () => {
+    render(<UserManagementPanel />);
+
+    expect(screen.getByText('Loading users...')).toBeInTheDocument();
+  });
+
+  it('shows empty state when no users', async () => {
+    setupApiMocks.usersList([]);
+    render(<UserManagementPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Create New User')).toBeInTheDocument();
+      expect(screen.getByText('No users found')).toBeInTheDocument();
+      expect(screen.getByText('Create the first user to get started')).toBeInTheDocument();
+    });
+  });
+
+  it('opens create user dialog when create button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Create User')).toBeInTheDocument();
     });
 
     const createButton = screen.getByText('Create User');
-    fireEvent.click(createButton);
+    await user.click(createButton);
+
+    expect(screen.getByText('Create New User')).toBeInTheDocument();
+    expect(screen.getByLabelText('Username')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+  });
+
+  it('creates user successfully', async () => {
+    setupApiMocks.userCreateSuccess();
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Create User')).toBeInTheDocument();
+    });
+
+    const createButton = screen.getByText('Create User');
+    await user.click(createButton);
+
+    const usernameInput = screen.getByLabelText('Username');
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+
+    await user.type(usernameInput, 'newuser');
+    await user.type(emailInput, 'newuser@example.com');
+    await user.type(passwordInput, 'Password123');
+    await user.type(confirmPasswordInput, 'Password123');
+
+    const submitButton = screen.getByText('Create User');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('User created successfully')).toBeInTheDocument();
+    });
+  });
+
+  it('handles user creation error', async () => {
+    setupApiMocks.userCreateError();
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Create User')).toBeInTheDocument();
+    });
+
+    const createButton = screen.getByText('Create User');
+    await user.click(createButton);
+
+    const usernameInput = screen.getByLabelText('Username');
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Password');
+    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+
+    await user.type(usernameInput, 'newuser');
+    await user.type(emailInput, 'newuser@example.com');
+    await user.type(passwordInput, 'Password123');
+    await user.type(confirmPasswordInput, 'Password123');
+
+    const submitButton = screen.getByText('Create User');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to create user')).toBeInTheDocument();
+    });
+  });
+
+  it('validates user creation form', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Create User')).toBeInTheDocument();
+    });
+
+    const createButton = screen.getByText('Create User');
+    await user.click(createButton);
+
+    const submitButton = screen.getByText('Create User');
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText('Username is required')).toBeInTheDocument();
-    });
-  });
-
-  it('validates password field in create user form', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Create New User')).toBeInTheDocument();
-    });
-
-    const usernameInput = screen.getByLabelText('Username');
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
-
-    const createButton = screen.getByText('Create User');
-    fireEvent.click(createButton);
-
-    await waitFor(() => {
+      expect(screen.getByText('Email is required')).toBeInTheDocument();
       expect(screen.getByText('Password is required')).toBeInTheDocument();
     });
   });
 
-  it('validates username format', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
+  it('edits user successfully', async () => {
+    setupApiMocks.userUpdateSuccess();
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Create New User')).toBeInTheDocument();
+      expect(screen.getByText('user1')).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText('Username');
-    fireEvent.change(usernameInput, { target: { value: 'test user!' } });
+    const editButton = screen.getByTitle('Edit user1');
+    await user.click(editButton);
 
-    const createButton = screen.getByText('Create User');
-    fireEvent.click(createButton);
+    expect(screen.getByText('Edit User')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('user1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('user1@example.com')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByText('Username can only contain letters, numbers, and underscores')).toBeInTheDocument();
-    });
-  });
+    const usernameInput = screen.getByDisplayValue('user1');
+    await user.clear(usernameInput);
+    await user.type(usernameInput, 'updateduser');
 
-  it('validates username length', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
+    const submitButton = screen.getByText('Update User');
+    await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Create New User')).toBeInTheDocument();
-    });
-
-    const usernameInput = screen.getByLabelText('Username');
-    fireEvent.change(usernameInput, { target: { value: 'ab' } });
-
-    const createButton = screen.getByText('Create User');
-    fireEvent.click(createButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Username must be at least 3 characters long')).toBeInTheDocument();
+      expect(screen.getByText('User updated successfully')).toBeInTheDocument();
     });
   });
 
-  it('validates password length', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
+  it('deletes user successfully', async () => {
+    setupApiMocks.userDeleteSuccess();
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Create New User')).toBeInTheDocument();
+      expect(screen.getByText('user1')).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText('Username');
-    const passwordInput = screen.getByLabelText('Password');
-    
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
-    fireEvent.change(passwordInput, { target: { value: '123' } });
+    const deleteButton = screen.getByTitle('Delete user1');
+    await user.click(deleteButton);
 
-    const createButton = screen.getByText('Create User');
-    fireEvent.click(createButton);
+    expect(screen.getByText('Delete User')).toBeInTheDocument();
+    expect(screen.getByText('Are you sure you want to delete user1?')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByText('Password must be at least 8 characters long')).toBeInTheDocument();
-    });
-  });
-
-  it('shows admin checkbox in create user form', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const addButton = screen.getByText('Add User');
-    fireEvent.click(addButton);
+    const confirmButton = screen.getByText('Delete');
+    await user.click(confirmButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Admin privileges')).toBeInTheDocument();
-      expect(screen.getByLabelText('Admin privileges')).toBeInTheDocument();
+      expect(screen.getByText('User deleted successfully')).toBeInTheDocument();
     });
   });
 
-  it('opens edit user dialog when edit button is clicked', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const editButtons = screen.getAllByRole('button', { name: /edit/i });
-    fireEvent.click(editButtons[0]);
+  it('cancels user deletion', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Edit User')).toBeInTheDocument();
-      expect(screen.getByText('Update user information and permissions')).toBeInTheDocument();
+      expect(screen.getByText('user1')).toBeInTheDocument();
     });
+
+    const deleteButton = screen.getByTitle('Delete user1');
+    await user.click(deleteButton);
+
+    const cancelButton = screen.getByText('Cancel');
+    await user.click(cancelButton);
+
+    expect(screen.queryByText('Delete User')).not.toBeInTheDocument();
   });
 
-  it('opens delete user dialog when delete button is clicked', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-    fireEvent.click(deleteButtons[0]);
+  it('searches users by username', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
 
     await waitFor(() => {
-      expect(screen.getByText('Delete User')).toBeInTheDocument();
-      expect(screen.getByText(/Are you sure you want to delete "user1"/)).toBeInTheDocument();
+      expect(screen.getByText('user1')).toBeInTheDocument();
     });
-  });
 
-  it('shows warning in delete dialog', async () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-    fireEvent.click(deleteButtons[0]);
-
-    await waitFor(() => {
-      expect(screen.getByText(/This will permanently delete the user account and all associated servers/)).toBeInTheDocument();
-    });
-  });
-
-  it('filters users based on search term', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
     const searchInput = screen.getByPlaceholderText('Search users...');
-    fireEvent.change(searchInput, { target: { value: 'admin' } });
+    await user.type(searchInput, 'user1');
 
-    expect(screen.getByText('admin')).toBeInTheDocument();
-    expect(screen.queryByText('user1')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.queryByText('user2')).not.toBeInTheDocument();
+    });
   });
 
-  it('shows no users message when search returns no results', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
+  it('searches users by email', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
     const searchInput = screen.getByPlaceholderText('Search users...');
-    fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
+    await user.type(searchInput, 'user1@example.com');
 
-    expect(screen.getByText('No users found matching your search')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.queryByText('user2')).not.toBeInTheDocument();
+    });
   });
 
-  it('displays user creation dates', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
-    
-    expect(screen.getByText('Created: 1/1/2024')).toBeInTheDocument();
-    expect(screen.getByText('Created: 1/2/2024')).toBeInTheDocument();
+  it('filters users by admin status', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    const filterSelect = screen.getByLabelText('Filter by role');
+    await user.selectOptions(filterSelect, 'admin');
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.queryByText('user2')).not.toBeInTheDocument();
+    });
   });
 
-  it('shows server count and memory allocation for each user', () => {
-    render(<UserManagementPanel />, { wrapper: createWrapper() });
+  it('filters users by regular user status', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    const filterSelect = screen.getByLabelText('Filter by role');
+    await user.selectOptions(filterSelect, 'user');
+
+    await waitFor(() => {
+      expect(screen.queryByText('user1')).not.toBeInTheDocument();
+      expect(screen.getByText('user2')).toBeInTheDocument();
+      expect(screen.getByText('user3')).toBeInTheDocument();
+    });
+  });
+
+  it('sorts users by username', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    const sortSelect = screen.getByLabelText('Sort by');
+    await user.selectOptions(sortSelect, 'username');
+
+    await waitFor(() => {
+      const userElements = screen.getAllByText(/user\d+/);
+      expect(userElements[0]).toHaveTextContent('user1');
+      expect(userElements[1]).toHaveTextContent('user2');
+      expect(userElements[2]).toHaveTextContent('user3');
+    });
+  });
+
+  it('sorts users by creation date', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    const sortSelect = screen.getByLabelText('Sort by');
+    await user.selectOptions(sortSelect, 'created_at');
+
+    await waitFor(() => {
+      const userElements = screen.getAllByText(/user\d+/);
+      expect(userElements[0]).toHaveTextContent('user1');
+      expect(userElements[1]).toHaveTextContent('user2');
+    });
+  });
+
+  it('shows user statistics', async () => {
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('5 users')).toBeInTheDocument();
+      expect(screen.getByText('1 admin')).toBeInTheDocument();
+      expect(screen.getByText('4 regular users')).toBeInTheDocument();
+    });
+  });
+
+  it('handles error state', async () => {
+    setupApiMocks.usersList.mockRejectedValue(new Error('API Error'));
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load users')).toBeInTheDocument();
+      expect(screen.getByText('Try again')).toBeInTheDocument();
+    });
+  });
+
+  it('retries on error when retry button is clicked', async () => {
+    const user = userEvent.setup();
+    setupApiMocks.usersList
+      .mockRejectedValueOnce(new Error('API Error'))
+      .mockResolvedValueOnce(mockUsers);
     
-    expect(screen.getByText('3 servers • 3072 MB allocated')).toBeInTheDocument();
-    expect(screen.getByText('1 servers • 1024 MB allocated')).toBeInTheDocument();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load users')).toBeInTheDocument();
+    });
+
+    const retryButton = screen.getByText('Try again');
+    await user.click(retryButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.getByText('user2')).toBeInTheDocument();
+    });
+  });
+
+  it('shows admin badge for admin users', async () => {
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+  });
+
+  it('shows regular user badge for non-admin users', async () => {
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user2')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('User')).toBeInTheDocument();
+  });
+
+  it('prevents deletion of the last admin user', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByTitle('Delete user1');
+    await user.click(deleteButton);
+
+    expect(screen.getByText('Cannot delete the last admin user')).toBeInTheDocument();
+  });
+
+  it('toggles user admin status', async () => {
+    setupApiMocks.userUpdateSuccess();
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user2')).toBeInTheDocument();
+    });
+
+    const toggleButton = screen.getByTitle('Toggle admin status for user2');
+    await user.click(toggleButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('User status updated successfully')).toBeInTheDocument();
+    });
+  });
+
+  it('shows user creation date', async () => {
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/Created/)).toBeInTheDocument();
+  });
+
+  it('shows user last login date', async () => {
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/Last login/)).toBeInTheDocument();
+  });
+
+  it('handles bulk user operations', async () => {
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    // Select multiple users
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[1]); // user1
+    await user.click(checkboxes[2]); // user2
+
+    expect(screen.getByText('2 users selected')).toBeInTheDocument();
+    expect(screen.getByText('Delete Selected')).toBeInTheDocument();
+  });
+
+  it('performs bulk delete operation', async () => {
+    setupApiMocks.userDeleteSuccess();
+    const user = userEvent.setup();
+    render(<UserManagementPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    // Select multiple users
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[1]); // user1
+    await user.click(checkboxes[2]); // user2
+
+    const bulkDeleteButton = screen.getByText('Delete Selected');
+    await user.click(bulkDeleteButton);
+
+    expect(screen.getByText('Delete 2 Users')).toBeInTheDocument();
+    expect(screen.getByText('Are you sure you want to delete 2 users?')).toBeInTheDocument();
+
+    const confirmButton = screen.getByText('Delete');
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('2 users deleted successfully')).toBeInTheDocument();
+    });
   });
 });

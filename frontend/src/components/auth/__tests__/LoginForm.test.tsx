@@ -1,35 +1,16 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '../../../contexts/AuthContext';
+import { render, screen, fireEvent, waitFor, userEvent, vi } from '../../../test';
+import { setupApiMocks } from '../../../test';
 import LoginForm from '../LoginForm';
-
-// Mock the API service
-jest.mock('../../../services/api', () => ({
-  apiService: {
-    login: jest.fn(),
-    getAuthStatus: jest.fn(),
-    getCurrentUser: jest.fn(),
-  },
-}));
-
-const renderWithProviders = (component: React.ReactElement) => {
-  return render(
-    <BrowserRouter>
-      <AuthProvider>
-        {component}
-      </AuthProvider>
-    </BrowserRouter>
-  );
-};
 
 describe('LoginForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    setupApiMocks.loginSuccess();
   });
 
   it('renders login form correctly', () => {
-    renderWithProviders(<LoginForm />);
+    render(<LoginForm />);
     
     expect(screen.getByText('Sign In')).toBeInTheDocument();
     expect(screen.getByLabelText('Username')).toBeInTheDocument();
@@ -38,7 +19,7 @@ describe('LoginForm', () => {
   });
 
   it('shows validation errors for empty fields', async () => {
-    renderWithProviders(<LoginForm />);
+    render(<LoginForm />);
     
     const submitButton = screen.getByRole('button', { name: 'Sign In' });
     fireEvent.click(submitButton);
@@ -50,7 +31,7 @@ describe('LoginForm', () => {
   });
 
   it('shows validation error for short username', async () => {
-    renderWithProviders(<LoginForm />);
+    render(<LoginForm />);
     
     const usernameInput = screen.getByLabelText('Username');
     fireEvent.change(usernameInput, { target: { value: 'ab' } });
@@ -64,7 +45,7 @@ describe('LoginForm', () => {
   });
 
   it('shows validation error for short password', async () => {
-    renderWithProviders(<LoginForm />);
+    render(<LoginForm />);
     
     const passwordInput = screen.getByLabelText('Password');
     fireEvent.change(passwordInput, { target: { value: '123' } });
@@ -78,7 +59,7 @@ describe('LoginForm', () => {
   });
 
   it('toggles password visibility', () => {
-    renderWithProviders(<LoginForm />);
+    render(<LoginForm />);
     
     const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
     const toggleButton = screen.getByRole('button', { name: '' }); // Eye icon button
@@ -93,7 +74,7 @@ describe('LoginForm', () => {
   });
 
   it('clears field errors when user starts typing', async () => {
-    renderWithProviders(<LoginForm />);
+    render(<LoginForm />);
     
     const submitButton = screen.getByRole('button', { name: 'Sign In' });
     fireEvent.click(submitButton);
@@ -108,5 +89,56 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(screen.queryByText('Username is required')).not.toBeInTheDocument();
     });
+  });
+
+  it('handles successful login', async () => {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    
+    const usernameInput = screen.getByLabelText('Username');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByRole('button', { name: 'Sign In' });
+    
+    await user.type(usernameInput, 'testuser');
+    await user.type(passwordInput, 'password123');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Login successful')).toBeInTheDocument();
+    });
+  });
+
+  it('handles login error', async () => {
+    setupApiMocks.loginError();
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    
+    const usernameInput = screen.getByLabelText('Username');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByRole('button', { name: 'Sign In' });
+    
+    await user.type(usernameInput, 'testuser');
+    await user.type(passwordInput, 'wrongpassword');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+    });
+  });
+
+  it('shows loading state during login', async () => {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    
+    const usernameInput = screen.getByLabelText('Username');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByRole('button', { name: 'Sign In' });
+    
+    await user.type(usernameInput, 'testuser');
+    await user.type(passwordInput, 'password123');
+    await user.click(submitButton);
+
+    expect(submitButton).toBeDisabled();
+    expect(screen.getByText('Signing in...')).toBeInTheDocument();
   });
 });
