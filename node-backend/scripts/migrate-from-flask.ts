@@ -1,21 +1,17 @@
 #!/usr/bin/env ts-node
 
 /**
- * Database Migration Script
- * 
+ * Flask to Node.js Database Migration Script
+ *
  * This script migrates data from the existing Flask SQLite database
- * to the new Prisma database structure.
+ * to the new Node.js Prisma database.
  */
 
 import { PrismaClient } from '@prisma/client';
-import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
+import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs-extra';
 import { logger } from '../src/config/logger';
-
-// Configuration
-const FLASK_DB_PATH = path.join(__dirname, '../../instance/minecraft_manager.db');
-const PRISMA_DB_PATH = path.join(__dirname, '../dev.db');
 
 interface FlaskUser {
   id: number;
@@ -36,14 +32,16 @@ interface FlaskServer {
   status: string;
   pid: number | null;
   level_seed: string | null;
-  gamemode: string | null;
-  difficulty: string | null;
-  hardcore: boolean | null;
-  pvp: boolean | null;
-  spawn_monsters: boolean | null;
+  gamemode: string;
+  difficulty: string;
+  hardcore: boolean;
+  pvp: boolean;
+  spawn_monsters: boolean;
   motd: string | null;
   memory_mb: number;
   owner_id: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface FlaskConfiguration {
@@ -54,194 +52,203 @@ interface FlaskConfiguration {
   updated_by: number | null;
 }
 
-class DatabaseMigrator {
+class FlaskMigration {
   private prisma: PrismaClient;
-  private flaskDb: sqlite3.Database;
+  private flaskDb: Database.Database;
+  private projectRoot: string;
 
   constructor() {
     this.prisma = new PrismaClient();
-    this.flaskDb = new sqlite3.Database(FLASK_DB_PATH);
+    this.projectRoot = path.join(__dirname, '../..');
+    const flaskDbPath = path.join(this.projectRoot, 'instance/minecraft_manager.db');
+    
+    if (!fs.existsSync(flaskDbPath)) {
+      throw new Error(`Flask database not found at: ${flaskDbPath}`);
+    }
+    
+    this.flaskDb = new Database(flaskDbPath);
   }
 
   async migrate(): Promise<void> {
     try {
-      logger.info('🚀 Starting database migration from Flask to Prisma...');
-      
-      // Check if Flask database exists
-      if (!await this.checkFlaskDatabase()) {
-        throw new Error('Flask database not found');
-      }
+      logger.info('🔄 Starting Flask to Node.js database migration...');
 
-      // Clear existing Prisma database
-      await this.clearPrismaDatabase();
+      // Test connections
+      await this.testConnections();
 
       // Migrate users
       await this.migrateUsers();
 
-      // Migrate servers
-      await this.migrateServers();
-
       // Migrate configurations
       await this.migrateConfigurations();
 
-      logger.info('✅ Database migration completed successfully!');
-      
+      // Migrate servers
+      await this.migrateServers();
+
+      logger.info('✅ Migration completed successfully!');
     } catch (error) {
-      logger.error('❌ Database migration failed:', error);
+      logger.error('❌ Migration failed:', error);
       throw error;
     } finally {
       await this.cleanup();
     }
   }
 
-  private async checkFlaskDatabase(): Promise<boolean> {
-    return new Promise((resolve) => {
-      this.flaskDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='user'", (err: any, row: any) => {
-        resolve(!err && !!row);
-      });
-    });
-  }
+  private async testConnections(): Promise<void> {
+    logger.info('🔍 Testing database connections...');
 
-  private async clearPrismaDatabase(): Promise<void> {
-    logger.info('🧹 Clearing existing Prisma database...');
-    
-    // Delete in correct order to respect foreign key constraints
-    await this.prisma.configuration.deleteMany();
-    await this.prisma.server.deleteMany();
-    await this.prisma.user.deleteMany();
-    
-    logger.info('✅ Prisma database cleared');
+    // Test Prisma connection
+    await this.prisma.$connect();
+    logger.info('✅ Prisma connection successful');
+
+    // Test Flask database connection
+    const result = this.flaskDb.prepare('SELECT 1 as test').get() as { test: number };
+    if (result.test !== 1) {
+      throw new Error('Flask database connection test failed');
+    }
+    logger.info('✅ Flask database connection successful');
   }
 
   private async migrateUsers(): Promise<void> {
     logger.info('👥 Migrating users...');
-    
-    const users = await this.getFlaskUsers();
-    
-    for (const user of users) {
-      await this.prisma.user.create({
-        data: {
-          id: user.id,
-          username: user.username,
-          passwordHash: user.password_hash,
-          isAdmin: Boolean(user.is_admin),
-          email: user.email,
-          createdAt: new Date(user.created_at),
-          lastLogin: user.last_login ? new Date(user.last_login) : null,
-          isActive: Boolean(user.is_active),
-        },
-      });
-    }
-    
-    logger.info(`✅ Migrated ${users.length} users`);
-  }
 
-  private async migrateServers(): Promise<void> {
-    logger.info('🖥️ Migrating servers...');
+    const flaskUsers = this.flaskDb.prepare('SELECT * FROM user').all() as FlaskUser[];
     
-    const servers = await this.getFlaskServers();
-    
-    for (const server of servers) {
-      await this.prisma.server.create({
-        data: {
-          id: server.id,
-          serverName: server.server_name,
-          version: server.version,
-          port: server.port,
-          status: this.mapServerStatus(server.status),
-          pid: server.pid,
-          levelSeed: server.level_seed,
-          gamemode: server.gamemode || 'survival',
-          difficulty: server.difficulty || 'normal',
-          hardcore: Boolean(server.hardcore),
-          pvp: Boolean(server.pvp),
-          spawnMonsters: Boolean(server.spawn_monsters),
-          motd: server.motd,
-          memoryMb: server.memory_mb,
-          ownerId: server.owner_id,
-        },
-      });
+    for (const flaskUser of flaskUsers) {
+      try {
+        await this.prisma.user.upsert({
+          where: { id: flaskUser.id },
+          update: {
+            username: flaskUser.username,
+            passwordHash: flaskUser.password_hash,
+            isAdmin: flaskUser.is_admin,
+            email: flaskUser.email,
+            createdAt: new Date(flaskUser.created_at),
+            lastLogin: flaskUser.last_login ? new Date(flaskUser.last_login) : null,
+            isActive: flaskUser.is_active,
+          },
+          create: {
+            id: flaskUser.id,
+            username: flaskUser.username,
+            passwordHash: flaskUser.password_hash,
+            isAdmin: flaskUser.is_admin,
+            email: flaskUser.email,
+            createdAt: new Date(flaskUser.created_at),
+            lastLogin: flaskUser.last_login ? new Date(flaskUser.last_login) : null,
+            isActive: flaskUser.is_active,
+          },
+        });
+        logger.info(`✅ Migrated user: ${flaskUser.username}`);
+      } catch (error) {
+        logger.error(`❌ Failed to migrate user ${flaskUser.username}:`, error);
+        throw error;
+      }
     }
-    
-    logger.info(`✅ Migrated ${servers.length} servers`);
+
+    logger.info(`✅ Migrated ${flaskUsers.length} users`);
   }
 
   private async migrateConfigurations(): Promise<void> {
     logger.info('⚙️ Migrating configurations...');
+
+    const flaskConfigs = this.flaskDb.prepare('SELECT * FROM configuration').all() as FlaskConfiguration[];
     
-    const configurations = await this.getFlaskConfigurations();
-    
-    for (const config of configurations) {
-      await this.prisma.configuration.create({
-        data: {
-          id: config.id,
-          key: config.key,
-          value: config.value,
-          updatedAt: new Date(config.updated_at),
-          updatedBy: config.updated_by,
-        },
-      });
+    for (const flaskConfig of flaskConfigs) {
+      try {
+        await this.prisma.configuration.upsert({
+          where: { key: flaskConfig.key },
+          update: {
+            value: flaskConfig.value,
+            updatedAt: new Date(flaskConfig.updated_at),
+            updatedBy: flaskConfig.updated_by,
+          },
+          create: {
+            key: flaskConfig.key,
+            value: flaskConfig.value,
+            updatedAt: new Date(flaskConfig.updated_at),
+            updatedBy: flaskConfig.updated_by,
+          },
+        });
+        logger.info(`✅ Migrated configuration: ${flaskConfig.key}`);
+      } catch (error) {
+        logger.error(`❌ Failed to migrate configuration ${flaskConfig.key}:`, error);
+        throw error;
+      }
     }
+
+    logger.info(`✅ Migrated ${flaskConfigs.length} configurations`);
+  }
+
+  private async migrateServers(): Promise<void> {
+    logger.info('🖥️ Migrating servers...');
+
+    const flaskServers = this.flaskDb.prepare('SELECT * FROM server').all() as FlaskServer[];
     
-    logger.info(`✅ Migrated ${configurations.length} configurations`);
-  }
-
-  private mapServerStatus(status: string): 'Stopped' | 'Starting' | 'Running' | 'Stopping' | 'Error' {
-    switch (status.toLowerCase()) {
-      case 'running':
-        return 'Running';
-      case 'stopped':
-        return 'Stopped';
-      case 'starting':
-        return 'Starting';
-      case 'stopping':
-        return 'Stopping';
-      case 'error':
-        return 'Error';
-      default:
-        return 'Stopped';
+    for (const flaskServer of flaskServers) {
+      try {
+        await this.prisma.server.upsert({
+          where: { id: flaskServer.id },
+          update: {
+            serverName: flaskServer.server_name,
+            version: flaskServer.version,
+            port: flaskServer.port,
+            status: flaskServer.status,
+            pid: flaskServer.pid,
+            levelSeed: flaskServer.level_seed,
+            gamemode: flaskServer.gamemode,
+            difficulty: flaskServer.difficulty,
+            hardcore: flaskServer.hardcore,
+            pvp: flaskServer.pvp,
+            spawnMonsters: flaskServer.spawn_monsters,
+            motd: flaskServer.motd,
+            memoryMb: flaskServer.memory_mb,
+            ownerId: flaskServer.owner_id,
+            createdAt: new Date(flaskServer.created_at),
+            updatedAt: new Date(flaskServer.updated_at),
+          },
+          create: {
+            id: flaskServer.id,
+            serverName: flaskServer.server_name,
+            version: flaskServer.version,
+            port: flaskServer.port,
+            status: flaskServer.status,
+            pid: flaskServer.pid,
+            levelSeed: flaskServer.level_seed,
+            gamemode: flaskServer.gamemode,
+            difficulty: flaskServer.difficulty,
+            hardcore: flaskServer.hardcore,
+            pvp: flaskServer.pvp,
+            spawnMonsters: flaskServer.spawn_monsters,
+            motd: flaskServer.motd,
+            memoryMb: flaskServer.memory_mb,
+            ownerId: flaskServer.owner_id,
+            createdAt: new Date(flaskServer.created_at),
+            updatedAt: new Date(flaskServer.updated_at),
+          },
+        });
+        logger.info(`✅ Migrated server: ${flaskServer.server_name}`);
+      } catch (error) {
+        logger.error(`❌ Failed to migrate server ${flaskServer.server_name}:`, error);
+        throw error;
+      }
     }
-  }
 
-  private async getFlaskUsers(): Promise<FlaskUser[]> {
-    return new Promise((resolve, reject) => {
-      this.flaskDb.all("SELECT * FROM user", (err: any, rows: FlaskUser[]) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-  }
-
-  private async getFlaskServers(): Promise<FlaskServer[]> {
-    return new Promise((resolve, reject) => {
-      this.flaskDb.all("SELECT * FROM server", (err: any, rows: FlaskServer[]) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-  }
-
-  private async getFlaskConfigurations(): Promise<FlaskConfiguration[]> {
-    return new Promise((resolve, reject) => {
-      this.flaskDb.all("SELECT * FROM configuration", (err: any, rows: FlaskConfiguration[]) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    logger.info(`✅ Migrated ${flaskServers.length} servers`);
   }
 
   private async cleanup(): Promise<void> {
     await this.prisma.$disconnect();
     this.flaskDb.close();
+    logger.info('🔌 Database connections closed');
   }
 }
 
 // Main execution
 async function main() {
-  const migrator = new DatabaseMigrator();
-  
+  const migration = new FlaskMigration();
+
   try {
-    await migrator.migrate();
+    await migration.migrate();
     process.exit(0);
   } catch (error) {
     logger.error('Migration failed:', error);
@@ -254,5 +261,4 @@ if (require.main === module) {
   main();
 }
 
-export default DatabaseMigrator;
-
+export default FlaskMigration;

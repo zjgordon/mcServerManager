@@ -7,7 +7,7 @@ export const REDIS_NAMESPACES = {
   CACHE: 'mc:cache:',
   JOBS: 'mc:jobs:',
   WS_PUBSUB: 'mc:ws:',
-  SESSIONS: 'mc:sessions:'
+  SESSIONS: 'mc:sessions:',
 } as const;
 
 // Redis client instances
@@ -25,8 +25,8 @@ const redisOptions = {
         return new Error('Redis connection failed');
       }
       return Math.min(retries * 100, 3000);
-    }
-  }
+    },
+  },
 };
 
 // Create main Redis client
@@ -37,7 +37,7 @@ export function createRedisClient(): RedisClientType {
 
   redisClient = createClient(redisOptions);
 
-  redisClient.on('error', (error) => {
+  redisClient.on('error', error => {
     logger.error('Redis client error:', error);
   });
 
@@ -66,7 +66,7 @@ export function createPubSubClients(): { pubClient: RedisClientType; subClient: 
   subClient = pubClient.duplicate();
 
   // Event handlers for pub client
-  pubClient.on('error', (error) => {
+  pubClient.on('error', error => {
     logger.error('Redis pub client error:', error);
   });
 
@@ -75,7 +75,7 @@ export function createPubSubClients(): { pubClient: RedisClientType; subClient: 
   });
 
   // Event handlers for sub client
-  subClient.on('error', (error) => {
+  subClient.on('error', error => {
     logger.error('Redis sub client error:', error);
   });
 
@@ -91,11 +91,11 @@ export async function initializeRedis(): Promise<RedisClientType> {
   try {
     const client = createRedisClient();
     await client.connect();
-    
+
     // Test connection
     await client.ping();
     logger.info('✅ Redis connection established and tested');
-    
+
     return client;
   } catch (error) {
     logger.error('❌ Failed to initialize Redis:', error);
@@ -107,20 +107,14 @@ export async function initializeRedis(): Promise<RedisClientType> {
 export async function initializePubSubClients(): Promise<{ pubClient: RedisClientType; subClient: RedisClientType }> {
   try {
     const { pubClient: pub, subClient: sub } = createPubSubClients();
-    
-    await Promise.all([
-      pub.connect(),
-      sub.connect()
-    ]);
-    
+
+    await Promise.all([pub.connect(), sub.connect()]);
+
     // Test connections
-    await Promise.all([
-      pub.ping(),
-      sub.ping()
-    ]);
-    
+    await Promise.all([pub.ping(), sub.ping()]);
+
     logger.info('✅ Redis pub/sub clients established and tested');
-    
+
     return { pubClient: pub, subClient: sub };
   } catch (error) {
     logger.error('❌ Failed to initialize Redis pub/sub clients:', error);
@@ -234,10 +228,10 @@ export class CacheService {
       const info = await this.client.info('memory');
       const memoryMatch = info.match(/used_memory_human:([^\r\n]+)/);
       const memory = memoryMatch ? memoryMatch[1] : 'unknown';
-      
+
       return {
         keys: keys.length,
-        memory
+        memory,
       };
     } catch (error) {
       logger.error('Cache stats error:', error);
@@ -309,17 +303,17 @@ export async function shutdownRedis(): Promise<void> {
       await redisClient.quit();
       redisClient = null;
     }
-    
+
     if (pubClient) {
       await pubClient.quit();
       pubClient = null;
     }
-    
+
     if (subClient) {
       await subClient.quit();
       subClient = null;
     }
-    
+
     logger.info('🔌 Redis connections closed');
   } catch (error) {
     logger.error('Error closing Redis connections:', error);
@@ -327,4 +321,3 @@ export async function shutdownRedis(): Promise<void> {
 }
 
 export default redisClient;
-

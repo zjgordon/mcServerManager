@@ -32,16 +32,14 @@ const level = () => {
 const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
+  winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`),
 );
 
 // Define format for file output
 const fileFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 // Define transports
@@ -50,14 +48,14 @@ const transports = [
   new winston.transports.Console({
     format: consoleFormat,
   }),
-  
+
   // File transport for errors
   new winston.transports.File({
     filename: 'logs/error.log',
     level: 'error',
     format: fileFormat,
   }),
-  
+
   // File transport for all logs
   new winston.transports.File({
     filename: 'logs/combined.log',
@@ -81,4 +79,3 @@ export const morganStream = {
 };
 
 export default logger;
-

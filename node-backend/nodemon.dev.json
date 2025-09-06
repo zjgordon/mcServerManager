@@ -1,0 +1,44 @@
+{
+  "watch": ["src", "prisma"],
+  "ext": "ts,js,json,prisma",
+  "ignore": [
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/tests/**",
+    "src/__tests__/**",
+    "node_modules/**",
+    "dist/**",
+    "logs/**",
+    "*.log"
+  ],
+  "exec": "ts-node --transpile-only src/index.ts",
+  "env": {
+    "NODE_ENV": "development",
+    "DEBUG": "app:*",
+    "LOG_LEVEL": "debug"
+  },
+  "delay": 500,
+  "verbose": true,
+  "restartable": "rs",
+  "colours": true,
+  "legacyWatch": false,
+  "signal": "SIGTERM",
+  "stdout": false,
+  "events": {
+    "start": "echo '🚀 Starting development server...'",
+    "restart": "echo '🔄 Restarting server...'",
+    "crash": "echo '💥 Server crashed, restarting...'",
+    "exit": "echo '👋 Development server stopped'"
+  },
+  "watchOptions": {
+    "usePolling": false,
+    "interval": 1000,
+    "binaryInterval": 1000,
+    "alwaysStat": false,
+    "depth": 10,
+    "awaitWriteFinish": {
+      "stabilityThreshold": 100,
+      "pollInterval": 100
+    }
+  }
+}

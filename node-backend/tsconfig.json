@@ -4,7 +4,7 @@
     "module": "commonjs",
     "lib": ["ES2022"],
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -39,13 +39,12 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "src/**/*",
-    "scripts/**/*",
-    "prisma/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "scripts",
     "**/*.test.ts",
     "**/*.spec.ts"
   ]

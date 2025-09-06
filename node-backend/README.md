@@ -1,299 +1,357 @@
-# Minecraft Server Manager - Node.js/Express Backend
+# Minecraft Server Manager - Node.js Backend
 
-This is the Node.js/Express backend for the Minecraft Server Manager, implementing the strangler pattern migration from Flask to Node.js.
+A modern Node.js/Express backend for the Minecraft Server Manager, built with TypeScript and designed for production scalability.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 20.19+ (required for Vite compatibility)
-- npm or yarn
-- SQLite3 (for development)
-- Redis (for caching and background jobs)
-- Docker (optional, for Redis container)
+- Node.js 20+ 
+- npm 9+
+- Redis 7+
+- SQLite (development) / PostgreSQL (production)
 
 ### Installation
 
-1. **Install dependencies:**
+1. **Clone and navigate to the backend directory:**
+   ```bash
+   cd node-backend
+   ```
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Set up environment:**
+3. **Set up environment variables:**
    ```bash
    cp env.example .env
    # Edit .env with your configuration
    ```
 
-3. **Set up database:**
+4. **Set up the database:**
    ```bash
    npm run setup:db
    ```
 
-4. **Set up Redis:**
+5. **Start Redis (using Docker):**
    ```bash
-   # Option 1: Using Docker (recommended)
    npm run redis:start
-   
-   # Option 2: Install Redis locally
-   ./scripts/install-redis.sh
-   
-   # Setup Redis with namespaces
-   npm run redis:setup setup
    ```
 
-5. **Start development server:**
+6. **Start the development server:**
    ```bash
    npm run dev
    ```
 
-The server will start on `http://localhost:5001`
+The server will be available at `http://localhost:5001`
 
 ## 📁 Project Structure
 
 ```
 node-backend/
-├── src/
-│   ├── config/           # Configuration files
-│   ├── middleware/       # Express middleware
-│   ├── routes/          # API routes
-│   ├── controllers/     # Route controllers
-│   ├── services/        # Business logic
-│   ├── models/          # Prisma models and types
-│   ├── utils/           # Utility functions
-│   ├── types/           # TypeScript type definitions
-│   └── schemas/         # Zod validation schemas
-├── prisma/
-│   ├── schema.prisma    # Database schema
-│   └── migrations/      # Database migrations
-├── scripts/
-│   ├── setup-database.ts    # Database setup script
-│   ├── migrate-from-flask.ts # Flask data migration
-│   └── generate-openapi.ts  # OpenAPI generation
-├── docs/                # API documentation
-└── logs/                # Application logs
+├── src/                    # Source code
+│   ├── config/            # Configuration management
+│   ├── controllers/       # Route controllers
+│   ├── middleware/        # Express middleware
+│   ├── models/           # Data models and types
+│   ├── routes/           # API routes
+│   ├── schemas/          # Zod validation schemas
+│   ├── services/         # Business logic
+│   ├── types/            # TypeScript type definitions
+│   ├── utils/            # Utility functions
+│   ├── tests/            # Test setup and utilities
+│   ├── app.ts            # Express app configuration
+│   └── index.ts          # Application entry point
+├── prisma/               # Database schema and migrations
+├── scripts/              # Utility scripts
+├── docs/                 # Documentation
+├── dist/                 # Compiled JavaScript (generated)
+└── logs/                 # Application logs
 ```
 
-## 🗄️ Database
+## 🛠️ Development
 
-### SQLite (Development)
+### Available Scripts
 
-The development environment uses SQLite for simplicity:
-
-```bash
-# Database file location
-./dev.db
-
-# View database in Prisma Studio
-npm run db:studio
-
-# Reset database
-npm run db:reset
-```
-
-### PostgreSQL (Production)
-
-Production will use PostgreSQL (Phase 5):
-
-```bash
-# Update DATABASE_URL in .env
-DATABASE_URL=postgresql://user:password@localhost:5432/mcserver
-```
-
-## 🔧 Available Scripts
-
-### Development
+#### Development
 - `npm run dev` - Start development server with hot reload
+- `npm run dev:debug` - Start development server with debugging
 - `npm run build` - Build for production
-- `npm run start` - Start production server
+- `npm run build:watch` - Build with file watching
 
-### Database
+#### Testing
+- `npm run test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:ui` - Run tests with UI interface
+- `npm run test:contract` - Run contract tests
+- `npm run test:all` - Run all tests
+
+#### Code Quality
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
+- `npm run format` - Format code with Prettier
+- `npm run type-check` - Run TypeScript type checking
+- `npm run validate` - Run all quality checks
+
+#### Database
 - `npm run db:migrate` - Run database migrations
 - `npm run db:generate` - Generate Prisma client
 - `npm run db:seed` - Seed database with test data
 - `npm run db:studio` - Open Prisma Studio
 - `npm run db:reset` - Reset database
-- `npm run setup:db` - Complete database setup
 
-### Redis
-- `npm run redis:start` - Start Redis with Docker Compose
-- `npm run redis:stop` - Stop Redis Docker container
-- `npm run redis:logs` - View Redis logs
-- `npm run redis:setup` - Setup Redis with namespaces
-- `npm run redis:test` - Test Redis functionality
+#### Redis
+- `npm run redis:start` - Start Redis with Docker
+- `npm run redis:stop` - Stop Redis
+- `npm run redis:test` - Test Redis connection
 
-### Testing
-- `npm run test` - Run tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage
-- `npm run test:contract` - Run contract tests
+#### Docker
+- `npm run docker:build` - Build Docker image
+- `npm run docker:up` - Start with Docker Compose
+- `npm run docker:down` - Stop Docker services
+- `npm run docker:logs` - View Docker logs
 
-### Code Quality
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
+### Environment Variables
 
-### API Documentation
-- `npm run openapi:gen` - Generate OpenAPI specification
-- `npm run openapi:check` - Check if OpenAPI spec is up to date
-
-## 🔐 Environment Variables
-
-### Required
-- `DATABASE_URL` - Database connection string
-- `SESSION_SECRET` - Session encryption secret
-- `CSRF_SECRET` - CSRF protection secret
-
-### Optional
-- `NODE_ENV` - Environment (development/production)
-- `PORT` - Server port (default: 5001)
-- `REDIS_URL` - Redis connection string (default: redis://localhost:6379)
-- `REDIS_HOST` - Redis host (default: localhost)
-- `REDIS_PORT` - Redis port (default: 6379)
-- `FRONTEND_URL` - Frontend URL for CORS
-- `WS_USE_REDIS_ADAPTER` - Enable Redis adapter for Socket.IO (default: false)
-- `LOG_LEVEL` - Logging level (debug/info/warn/error)
-
-## 🚦 API Endpoints
-
-### Authentication (`/api/v1/auth`)
-- `GET /csrf-token` - Get CSRF token
-- `POST /login` - User login
-- `POST /logout` - User logout
-- `GET /me` - Get current user
-- `POST /change-password` - Change password
-- `GET /status` - Authentication status
-- `POST /setup` - Admin setup
-- `GET /setup/status` - Setup status
-- `POST /reset-password` - Reset password
-
-### Servers (`/api/v1/servers`)
-- `GET /` - List servers
-- `POST /` - Create server
-- `GET /:id` - Get server details
-- `PUT /:id` - Update server
-- `DELETE /:id` - Delete server
-- `POST /:id/start` - Start server
-- `POST /:id/stop` - Stop server
-- `GET /:id/status` - Get server status
-- `POST /:id/backup` - Backup server
-- `POST /:id/accept-eula` - Accept EULA
-- `GET /versions` - Get available versions
-- `GET /memory-usage` - Get memory usage
-
-### Admin (`/api/v1/admin`)
-- `GET /users` - List users
-- `POST /users` - Create user
-- `PUT /users/:id` - Update user
-- `DELETE /users/:id` - Delete user
-- `GET /config` - Get system config
-- `PUT /config` - Update system config
-- `GET /stats` - Get system stats
-
-## 🔄 Migration from Flask
-
-This backend implements the strangler pattern to gradually replace the Flask backend:
-
-1. **Phase 0**: Contract testing and infrastructure setup ✅
-2. **Phase 1**: Foundation and core setup
-3. **Phase 2**: API migration with contract testing
-4. **Phase 3**: Process management and system integration
-5. **Phase 4**: Real-time features and background processing
-6. **Phase 5**: Production readiness and cutover
-
-### Contract Testing
-
-The migration uses contract testing to ensure API compatibility:
+Create a `.env` file based on `env.example`:
 
 ```bash
-# Capture Flask API baseline
-python3 ../scripts/contract_testing.py --baseline-capture
+# Application
+NODE_ENV=development
+PORT=5001
 
-# Compare with Express API
-python3 ../scripts/contract_testing.py --compare http://localhost:5001
+# Database
+DATABASE_URL=file:./dev.db
+
+# Redis
+REDIS_URL=redis://localhost:6379
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Security
+SESSION_SECRET=your-secure-session-secret
+CSRF_SECRET=your-secure-csrf-secret
+
+# Frontend
+FRONTEND_URL=http://localhost:3000
+
+# WebSocket
+WS_USE_REDIS_ADAPTER=false
+
+# Logging
+LOG_LEVEL=debug
 ```
+
+## 🏗️ Architecture
+
+### Technology Stack
+
+- **Runtime**: Node.js 20+ with TypeScript
+- **Framework**: Express.js 4.18+
+- **Database**: Prisma ORM with SQLite (dev) / PostgreSQL (prod)
+- **Cache/Sessions**: Redis 7+
+- **Real-time**: Socket.io for WebSocket, SSE for logs
+- **Background Jobs**: BullMQ with Redis
+- **Validation**: Zod schemas with OpenAPI generation
+- **Testing**: Vitest with Supertest
+- **Code Quality**: ESLint, Prettier, TypeScript strict mode
+
+### Key Features
+
+- **Type Safety**: Full TypeScript integration with strict mode
+- **API Validation**: Zod schemas with automatic OpenAPI generation
+- **Real-time Updates**: WebSocket for stats, SSE for logs
+- **Background Processing**: BullMQ for async tasks
+- **Security**: Helmet, CORS, rate limiting, CSRF protection
+- **Monitoring**: Health checks, metrics, structured logging
+- **Testing**: Comprehensive test suite with contract testing
+- **Docker**: Production-ready containerization
+
+## 🔧 Configuration
+
+### Database Configuration
+
+The application uses Prisma ORM with support for:
+- SQLite (development)
+- PostgreSQL (production)
+
+Database configuration is managed in `prisma/schema.prisma` and environment variables.
+
+### Redis Configuration
+
+Redis is used for:
+- Session storage
+- Caching
+- WebSocket pub/sub
+- Background job queues
+
+Configuration is managed in `src/config/redis.ts` with namespace separation.
+
+### Security Configuration
+
+Security features include:
+- Helmet.js for security headers
+- CORS configuration
+- Rate limiting
+- CSRF protection
+- Session management
+- Input validation with Zod
 
 ## 🧪 Testing
 
-### Contract Tests
-Ensure API compatibility with Flask backend:
+### Test Structure
+
+- **Unit Tests**: `src/**/*.test.ts`
+- **Integration Tests**: `src/**/*.spec.ts`
+- **Contract Tests**: `scripts/**/*.test.ts`
+
+### Running Tests
+
 ```bash
+# Run all tests
+npm run test:all
+
+# Run with coverage
+npm run test:coverage
+
+# Run contract tests
 npm run test:contract
 ```
 
-### Unit Tests
-Test individual components:
-```bash
-npm run test
-```
+### Test Configuration
 
-### Integration Tests
-Test complete workflows:
-```bash
-npm run test:integration
-```
+- **Vitest**: Main testing framework
+- **Supertest**: HTTP testing
+- **Test Database**: Separate SQLite database
+- **Test Redis**: Isolated Redis instance
+
+## 🚀 Deployment
+
+### Docker Deployment
+
+1. **Build the image:**
+   ```bash
+   npm run docker:build
+   ```
+
+2. **Run with Docker Compose:**
+   ```bash
+   npm run docker:up
+   ```
+
+### Production Deployment
+
+1. **Set production environment:**
+   ```bash
+   export NODE_ENV=production
+   ```
+
+2. **Build the application:**
+   ```bash
+   npm run build
+   ```
+
+3. **Start the server:**
+   ```bash
+   npm run start:prod
+   ```
+
+### Environment Setup
+
+For production deployment:
+- Use PostgreSQL instead of SQLite
+- Configure Redis with persistence
+- Set secure session secrets
+- Enable Redis adapter for WebSocket scaling
+- Configure proper logging levels
 
 ## 📊 Monitoring
 
 ### Health Checks
-- `GET /healthz` - Quick health check
-- `GET /readyz` - Readiness check (DB, Redis, etc.)
+
+- `/healthz` - Quick health check
+- `/readyz` - Readiness check (database, Redis)
+- `/live` - Liveness check
 
 ### Metrics
-- Prometheus metrics available at `/metrics`
-- Custom gauges for servers, memory usage, etc.
 
-## 🔒 Security
+The application exposes Prometheus metrics for:
+- HTTP request duration
+- Request counts
+- Server status
+- Memory usage
+- Active connections
 
-- CSRF protection on state-changing operations
-- Rate limiting on authentication endpoints
-- Input validation with Zod schemas
-- SQL injection protection via Prisma
-- XSS protection via Helmet.js
-- Secure session management
+### Logging
 
-## 📝 Logging
+Structured logging with Winston:
+- Console output (development)
+- File rotation (production)
+- Different log levels
+- Request/response logging
 
-Logs are written to:
-- Console (development)
-- `logs/combined.log` (all logs)
-- `logs/error.log` (errors only)
+## 🔄 Migration from Flask
 
-Log levels: `debug`, `info`, `warn`, `error`
+This backend is designed to replace the existing Flask backend using a strangler pattern:
 
-## 🚀 Deployment
+1. **Phase 0**: Infrastructure setup ✅
+2. **Phase 1**: Foundation & Setup (current)
+3. **Phase 2**: API Migration
+4. **Phase 3**: Process Management
+5. **Phase 4**: Real-time Features
+6. **Phase 5**: Production Cutover
 
-### Development
-```bash
-npm run dev
-```
+### Contract Testing
 
-### Production
-```bash
-npm run build
-npm start
-```
-
-### Docker
-```bash
-docker build -t mcserver-backend .
-docker run -p 5001:5001 mcserver-backend
-```
+API contracts are validated against the Flask baseline to ensure compatibility during migration.
 
 ## 🤝 Contributing
 
-1. Follow the existing code style
-2. Add tests for new features
-3. Update documentation
-4. Run contract tests before submitting
+1. **Code Style**: Follow ESLint and Prettier configurations
+2. **Testing**: Write tests for new features
+3. **Documentation**: Update README and code comments
+4. **Type Safety**: Maintain strict TypeScript compliance
 
-## 📚 Documentation
+### Development Workflow
 
-- [API Documentation](./docs/openapi.json)
-- [Contract Testing Guide](../docs/contracts/README.md)
-- [Backend Enhancement Plan](../docs/plans/BACKEND_ENHANCEMENT_PLAN.md)
+1. Create feature branch
+2. Make changes with tests
+3. Run quality checks: `npm run validate`
+4. Run tests: `npm run test:all`
+5. Submit pull request
 
----
+## 📚 API Documentation
 
-**Status**: Phase 0, Task 0.2 - SQLite Database Setup ✅
+API documentation is automatically generated from Zod schemas and available at:
+- OpenAPI JSON: `/docs/openapi.json`
+- OpenAPI YAML: `/docs/openapi.yaml`
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+1. **Database Connection**: Ensure SQLite file permissions
+2. **Redis Connection**: Check Redis is running on correct port
+3. **Port Conflicts**: Verify port 5001 is available
+4. **Type Errors**: Run `npm run type-check`
+
+### Debug Mode
+
+Start with debugging enabled:
+```bash
+npm run dev:debug
+```
+
+Then attach debugger to `localhost:9229`
+
+### Logs
+
+Check application logs in:
+- `logs/combined.log` - All logs
+- `logs/error.log` - Error logs only
+
+## 📄 License
+
+This project is part of the Minecraft Server Manager and follows the same license terms.

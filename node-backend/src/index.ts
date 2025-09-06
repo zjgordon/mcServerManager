@@ -3,22 +3,51 @@ import { config } from './config';
 import { logger } from './config/logger';
 import { createApp } from './app';
 import { initializeDatabase } from './config/database';
-import { initializeRedis } from './config/redis';
+import { webSocketService } from './services/websocketService';
+import { jobQueueManager } from './services/jobQueue';
+import { shutdownRedis } from './config/redis';
+
+// Graceful shutdown function
+async function gracefulShutdown(server: any): Promise<void> {
+  try {
+    logger.info('🔄 Starting graceful shutdown...');
+    
+    // Close HTTP server
+    server.close(() => {
+      logger.info('✅ HTTP server closed');
+    });
+    
+    // Shutdown WebSocket service
+    await webSocketService.shutdown();
+    
+    // Shutdown job queues
+    await jobQueueManager.shutdown();
+    
+    // Shutdown Redis connections
+    await shutdownRedis();
+    
+    logger.info('✅ Graceful shutdown complete');
+    process.exit(0);
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+}
 
 async function startServer() {
   try {
     // Initialize database
     initializeDatabase();
-    
-    // Initialize Redis
-    await initializeRedis();
-    
-    // Create Express app
-    const app = createApp();
-    
+
+    // Create Express app (includes Redis initialization)
+    const app = await createApp();
+
     // Create HTTP server
     const server = createServer(app);
-    
+
+    // Initialize WebSocket service
+    await webSocketService.initialize(server);
+
     // Start server
     const PORT = config.port;
     server.listen(PORT, () => {
@@ -29,22 +58,15 @@ async function startServer() {
     });
 
     // Graceful shutdown
-    process.on('SIGTERM', () => {
+    process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
-      server.close(() => {
-        logger.info('Server closed');
-        process.exit(0);
-      });
+      await gracefulShutdown(server);
     });
 
-    process.on('SIGINT', () => {
+    process.on('SIGINT', async () => {
       logger.info('SIGINT received, shutting down gracefully');
-      server.close(() => {
-        logger.info('Server closed');
-        process.exit(0);
-      });
+      await gracefulShutdown(server);
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

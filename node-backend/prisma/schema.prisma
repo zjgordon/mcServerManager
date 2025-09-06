@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -12,13 +13,14 @@ datasource db {
 
 // Note: SQLite doesn't support enums, so we use string with validation
 // Valid values: "Stopped", "Starting", "Running", "Stopping", "Error"
+// These are validated in the application layer using Zod schemas
 
 model User {
   id                Int      @id @default(autoincrement())
-  username          String   @unique @map("username")
-  passwordHash      String?  @map("password_hash")
+  username          String   @unique @map("username") @db.VarChar(50)
+  passwordHash      String?  @map("password_hash") @db.VarChar(255)
   isAdmin           Boolean  @default(false) @map("is_admin")
-  email             String?  @unique @map("email")
+  email             String?  @unique @map("email") @db.VarChar(255)
   createdAt         DateTime @default(now()) @map("created_at")
   lastLogin         DateTime? @map("last_login")
   isActive          Boolean  @default(true) @map("is_active")
@@ -26,44 +28,50 @@ model User {
   servers           Server[]
   configurations    Configuration[]
   
+  @@index([username])
+  @@index([email])
+  @@index([isActive])
   @@map("user")
 }
 
 model Server {
   id                Int          @id @default(autoincrement())
-  serverName        String       @unique @map("server_name")
-  version           String       @map("version")
+  serverName        String       @unique @map("server_name") @db.VarChar(100)
+  version           String       @map("version") @db.VarChar(50)
   port              Int          @unique @map("port")
-  status            String       @default("Stopped") @map("status")
+  status            String       @default("Stopped") @map("status") @db.VarChar(20)
   pid               Int?         @map("pid")
-  levelSeed         String?      @map("level_seed")
-  gamemode          String       @default("survival") @map("gamemode")
-  difficulty        String       @default("normal") @map("difficulty")
+  levelSeed         String?      @map("level_seed") @db.VarChar(100)
+  gamemode          String       @default("survival") @map("gamemode") @db.VarChar(20)
+  difficulty        String       @default("normal") @map("difficulty") @db.VarChar(20)
   hardcore          Boolean      @default(false) @map("hardcore")
   pvp               Boolean      @default(true) @map("pvp")
   spawnMonsters     Boolean      @default(true) @map("spawn_monsters")
-  motd              String?      @map("motd")
+  motd              String?      @map("motd") @db.VarChar(255)
   memoryMb          Int          @default(1024) @map("memory_mb")
   ownerId           Int          @map("owner_id")
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
   
-  owner             User         @relation(fields: [ownerId], references: [id])
+  owner             User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   
   @@index([status])
   @@index([ownerId])
+  @@index([port])
+  @@index([serverName])
   @@map("server")
 }
 
 model Configuration {
   id                Int      @id @default(autoincrement())
-  key               String   @unique @map("key")
-  value             String   @map("value")
+  key               String   @unique @map("key") @db.VarChar(100)
+  value             String   @map("value") @db.Text
   updatedAt         DateTime @updatedAt @map("updated_at")
   updatedBy         Int?     @map("updated_by")
   
-  updatedByUser     User?    @relation(fields: [updatedBy], references: [id])
+  updatedByUser     User?    @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
   
+  @@index([key])
   @@map("configuration")
 }
 

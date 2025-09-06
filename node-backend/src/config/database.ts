@@ -14,6 +14,11 @@ export function createPrismaClient(): PrismaClient {
     return new PrismaClient({
       log: ['error', 'warn'],
       errorFormat: 'minimal',
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
     });
   } else {
     // In development, use global variable to prevent multiple instances
@@ -21,6 +26,11 @@ export function createPrismaClient(): PrismaClient {
       global.__prisma = new PrismaClient({
         log: ['query', 'info', 'warn', 'error'],
         errorFormat: 'pretty',
+        datasources: {
+          db: {
+            url: process.env.DATABASE_URL,
+          },
+        },
       });
     }
     return global.__prisma;
@@ -31,14 +41,17 @@ export function createPrismaClient(): PrismaClient {
 export function initializeDatabase(): PrismaClient {
   try {
     prisma = createPrismaClient();
-    
+
     // Test database connection
-    prisma.$connect().then(() => {
-      logger.info('✅ Database connected successfully');
-    }).catch((error: any) => {
-      logger.error('❌ Database connection failed:', error);
-      process.exit(1);
-    });
+    prisma
+      .$connect()
+      .then(() => {
+        logger.info('✅ Database connected successfully');
+      })
+      .catch((error: any) => {
+        logger.error('❌ Database connection failed:', error);
+        process.exit(1);
+      });
 
     // Handle graceful shutdown
     process.on('beforeExit', async () => {
@@ -87,4 +100,3 @@ export async function runMigrations(): Promise<void> {
 
 // Export the getPrismaClient function instead of the variable
 export default getPrismaClient;
-

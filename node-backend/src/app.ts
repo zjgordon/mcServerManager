@@ -1,146 +1,199 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import compression from 'compression';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
 import session from 'express-session';
-import csurf from 'csurf';
 import { config } from './config';
 import { logger } from './config/logger';
-import { getRedisClient } from './config/redis';
+import { getRedisClient, initializeRedis, initializePubSubClients } from './config/redis';
+import { initializeJobQueues, jobQueueManager } from './services/jobQueue';
+import { webSocketService } from './services/websocketService';
+import { cacheMiddleware } from './middleware/cache';
+import { authMiddleware } from './middleware/auth';
+import { csrfMiddleware } from './middleware/csrf';
+
+// Import comprehensive middleware
+import {
+  setupSecurityMiddleware,
+  customSecurityMiddleware,
+  sanitizeRequest,
+  securityAuditMiddleware,
+  setupCorsMiddleware,
+  corsErrorHandler,
+  corsLoggingMiddleware,
+  createRateLimiters,
+  rateLimitLoggingMiddleware,
+  rateLimitErrorHandler,
+  errorHandler,
+  notFoundHandler,
+  requestLoggingMiddleware,
+  detailedRequestLoggingMiddleware,
+  performanceLoggingMiddleware,
+  securityLoggingMiddleware,
+  errorLoggingMiddleware,
+  requestIdMiddleware,
+  responseTimeMiddleware,
+  requestSizeMiddleware,
+  healthCheckMiddleware,
+} from './middleware';
 
 // Import routes (will be created in Phase 2)
-// import authRoutes from './routes/auth';
+import authRoutes from './routes/auth';
+import authContractRoutes from './routes/authContract';
+import serverContractRoutes from './routes/serverContract';
+import adminContractRoutes from './routes/adminContract';
 // import serverRoutes from './routes/servers';
 // import adminRoutes from './routes/admin';
 import healthRoutes from './routes/health';
+import docsRoutes from './routes/docs';
 
-export function createApp(): express.Application {
+export async function createApp(): Promise<express.Application> {
   const app = express();
+
+  // Initialize Redis services
+  try {
+    logger.info('🔄 Initializing Redis services...');
+    
+    // Initialize Redis connection
+    await initializeRedis();
+    
+    // Initialize pub/sub clients for WebSocket scaling
+    if (config.wsUseRedisAdapter) {
+      await initializePubSubClients();
+    }
+    
+    // Initialize job queues
+    await initializeJobQueues();
+    
+    logger.info('✅ Redis services initialized successfully');
+  } catch (error) {
+    logger.error('❌ Failed to initialize Redis services:', error);
+    throw error;
+  }
 
   // Trust proxy for rate limiting and security headers
   app.set('trust proxy', 1);
 
+  // Request ID middleware (must be first)
+  app.use(requestIdMiddleware());
+
+  // Response time middleware
+  app.use(responseTimeMiddleware());
+
+  // Request size limiting
+  app.use(requestSizeMiddleware(10 * 1024 * 1024)); // 10MB
+
+  // Health check middleware (early exit for health checks)
+  app.use(healthCheckMiddleware());
+
   // Security middleware
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:"],
-        connectSrc: ["'self'", "ws:", "wss:"],
-      },
-    },
-    crossOriginEmbedderPolicy: false, // Disable for development
-  }));
+  app.use(setupSecurityMiddleware());
+  app.use(customSecurityMiddleware);
+  app.use(sanitizeRequest);
+  app.use(securityAuditMiddleware);
 
   // CORS configuration
-  app.use(cors({
-    origin: config.frontendUrl,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRFToken'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  }));
+  app.use(setupCorsMiddleware());
+  app.use(corsErrorHandler);
+  app.use(corsLoggingMiddleware);
 
   // Compression
   app.use(compression());
 
   // Request logging
-  app.use(morgan('combined', {
-    stream: {
-      write: (message: string) => logger.info(message.trim())
-    }
-  }));
+  app.use(requestLoggingMiddleware());
+  app.use(detailedRequestLoggingMiddleware);
+  app.use(performanceLoggingMiddleware);
+  app.use(securityLoggingMiddleware);
+  app.use(errorLoggingMiddleware);
 
   // Rate limiting
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: {
-      success: false,
-      message: 'Too many requests from this IP, please try again later.'
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-  app.use('/api/', limiter);
+  const rateLimiters = createRateLimiters();
+  app.use('/api/', rateLimiters.general);
+  app.use('/api/v1/auth/', rateLimiters.auth);
+  app.use('/api/v1/servers/', rateLimiters.servers);
+  app.use('/api/v1/admin/', rateLimiters.admin);
+  app.use(rateLimitLoggingMiddleware);
+  app.use(rateLimitErrorHandler);
 
   // Body parsing
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // Session configuration
-  app.use(session({
-    secret: config.sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: config.nodeEnv === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax',
-    },
-    name: 'mcserver_session',
-  }));
+  // Session configuration with Redis store
+  app.use(
+    session({
+      secret: config.sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: config.nodeEnv === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax',
+      },
+      name: 'mcserver_session',
+      // Note: In production, you'd want to use a Redis session store
+      // For now, we're using the default memory store
+    }),
+  );
 
-  // CSRF protection (will be configured in Phase 2)
-  // app.use(csurf({
-  //   cookie: {
-  //     httpOnly: true,
-  //     secure: config.nodeEnv === 'production',
-  //     sameSite: 'lax',
-  //   },
-  // }));
+  // CSRF protection
+  app.use(csrfMiddleware.protection);
 
   // Health check route (always available)
+  // Cache middleware for API routes
+  app.use('/api/', cacheMiddleware.api);
+  
   app.use('/healthz', healthRoutes);
+  
+  // API documentation routes
+  app.use('/docs', docsRoutes);
 
+  // Authentication routes
+  app.use('/api/v1/auth', authRoutes);
+  
+  // Contract-compatible authentication routes (Phase 2 migration)
+  app.use('/api/v1/auth', authContractRoutes);
+  
+  // Contract-compatible server management routes (Phase 2 migration)
+  app.use('/api/v1/servers', serverContractRoutes);
+  
+  // Contract-compatible admin routes (Phase 2 migration)
+  app.use('/api/v1/admin', adminContractRoutes);
+  
   // API routes (will be implemented in Phase 2)
-  // app.use('/api/v1/auth', authRoutes);
   // app.use('/api/v1/servers', serverRoutes);
   // app.use('/api/v1/admin', adminRoutes);
 
   // Root endpoint
-  app.get('/', (req, res) => {
+  app.get('/', authMiddleware.optionalAuth, (req, res) => {
+    const user = (req as any).user;
+    
     res.json({
       success: true,
       message: 'Minecraft Server Manager API v2.0.0',
       version: '2.0.0',
       environment: config.nodeEnv,
       timestamp: new Date().toISOString(),
+      user: user ? {
+        id: user.id,
+        username: user.username,
+        isAdmin: user.isAdmin,
+      } : null,
       endpoints: {
         health: '/healthz',
         api: '/api/v1',
-        // auth: '/api/v1/auth',
+        auth: '/api/v1/auth',
         // servers: '/api/v1/servers',
         // admin: '/api/v1/admin',
-      }
+      },
     });
   });
 
   // 404 handler
-  app.use('*', (req, res) => {
-    res.status(404).json({
-      success: false,
-      message: 'Endpoint not found',
-      path: req.originalUrl,
-      method: req.method,
-    });
-  });
+  app.use(notFoundHandler);
 
   // Error handler
-  app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    logger.error('Unhandled error:', error);
-    
-    res.status(error.status || 500).json({
-      success: false,
-      message: config.nodeEnv === 'production' ? 'Internal server error' : error.message,
-      ...(config.nodeEnv === 'development' && { stack: error.stack }),
-    });
-  });
+  app.use(errorHandler);
 
   return app;
 }

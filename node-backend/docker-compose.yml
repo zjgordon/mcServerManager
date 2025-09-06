@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Node.js/Express Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: mcserver-backend
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - DATABASE_URL=file:/app/data/production.db
+      - REDIS_URL=redis://redis:6379
+      - SESSION_SECRET=${SESSION_SECRET:-your-secure-session-secret}
+      - CSRF_SECRET=${CSRF_SECRET:-your-secure-csrf-secret}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - WS_USE_REDIS_ADAPTER=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOG_LEVEL=info
+    volumes:
+      - backend_data:/app/data
+      - server_files:/app/servers
+      - backend_logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/healthz', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for caching, sessions, and WebSocket pub/sub
+  redis:
+    image: redis:7-alpine
+    container_name: mcserver-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Redis Commander for Redis management (optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: mcserver-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - mcserver-network
+    profiles:
+      - tools
+
+volumes:
+  backend_data:
+    driver: local
+  server_files:
+    driver: local
+  backend_logs:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  mcserver-network:
+    driver: bridge
