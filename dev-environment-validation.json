@@ -1,0 +1,100 @@
+{
+  "timestamp": "2025-09-05 19:46:05",
+  "flask": {
+    "health": {
+      "service": "Flask",
+      "url": "http://localhost:5000",
+      "running": true,
+      "healthy": false,
+      "response_time": 4.22,
+      "error": "HTTP 500",
+      "details": {}
+    },
+    "endpoints": {
+      "root": {
+        "status_code": 200,
+        "available": true,
+        "content_type": "text/html; charset=utf-8",
+        "text": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Login</title>\n    \n    <!-- Bootstrap CSS -->\n "
+      },
+      "api_root": {
+        "status_code": 500,
+        "available": false,
+        "content_type": "text/html; charset=utf-8",
+        "text": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>AttributeError: &#39;NoneType&#39; object has no attribute &#39;startswith&#39;\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__deb"
+      },
+      "health": {
+        "status_code": 500,
+        "available": false,
+        "content_type": "text/html; charset=utf-8",
+        "text": "<!doctype html>\n<html lang=en>\n  <head>\n    <title>AttributeError: &#39;NoneType&#39; object has no attribute &#39;startswith&#39;\n // Werkzeug Debugger</title>\n    <link rel=\"stylesheet\" href=\"?__deb"
+      }
+    }
+  },
+  "express": {
+    "health": {
+      "service": "Express",
+      "url": "http://localhost:5001",
+      "running": true,
+      "healthy": true,
+      "response_time": 2.88,
+      "error": null,
+      "details": {
+        "success": true,
+        "status": "healthy",
+        "timestamp": "2025-09-06T02:46:05.707Z",
+        "version": "2.0.0",
+        "environment": "development"
+      }
+    },
+    "endpoints": {
+      "root": {
+        "status_code": 200,
+        "available": true,
+        "content_type": "application/json; charset=utf-8",
+        "json": {
+          "success": true,
+          "message": "Minecraft Server Manager API v2.0.0",
+          "version": "2.0.0",
+          "environment": "development",
+          "timestamp": "2025-09-06T02:46:05.709Z",
+          "endpoints": {
+            "health": "/healthz",
+            "api": "/api/v1"
+          }
+        }
+      },
+      "api_root": {
+        "status_code": 404,
+        "available": true,
+        "content_type": "application/json; charset=utf-8",
+        "json": {
+          "success": false,
+          "message": "Endpoint not found",
+          "path": "/api/v1",
+          "method": "GET"
+        }
+      },
+      "health": {
+        "status_code": 200,
+        "available": true,
+        "content_type": "application/json; charset=utf-8",
+        "json": {
+          "success": true,
+          "status": "healthy",
+          "timestamp": "2025-09-06T02:46:05.717Z",
+          "version": "2.0.0",
+          "environment": "development"
+        }
+      }
+    }
+  },
+  "summary": {
+    "flask_running": true,
+    "flask_healthy": false,
+    "express_running": true,
+    "express_healthy": true,
+    "both_running": true,
+    "both_healthy": false
+  }
+}

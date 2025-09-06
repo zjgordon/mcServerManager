@@ -1,0 +1,251 @@
+# Caddy Development Configuration for Minecraft Server Manager
+# This configuration is optimized for development with hot reloading
+
+{
+    # Global options
+    auto_https off
+    log {
+        output file /var/log/caddy/access.log
+        format json
+        level DEBUG
+    }
+    servers {
+        metrics
+    }
+}
+
+# Relaxed rate limiting for development
+(rate_limit) {
+    rate_limit {
+        zone static {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
+}
+
+(auth_rate_limit) {
+    rate_limit {
+        zone auth {
+            key {remote_host}
+            events 50
+            window 1m
+        }
+    }
+}
+
+(admin_rate_limit) {
+    rate_limit {
+        zone admin {
+            key {remote_host}
+            events 20
+            window 1m
+        }
+    }
+}
+
+# Development security headers (relaxed)
+(security_headers) {
+    header {
+        X-Frame-Options SAMEORIGIN
+        X-Content-Type-Options nosniff
+        X-XSS-Protection "1; mode=block"
+    }
+}
+
+# Main server
+:80 {
+    # Apply security headers
+    import security_headers
+
+    # Frontend static files with hot reloading
+    handle {
+        reverse_proxy frontend-dev:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # API routing with strangler pattern
+    handle /api/v1/* {
+        import rate_limit
+        
+        # Default to Flask backend (Phase 0-1)
+        reverse_proxy flask-dev:5000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            
+            # Health check
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+        }
+    }
+
+    # Authentication endpoints - migrate to Express (Phase 2)
+    handle /api/v1/auth/* {
+        import auth_rate_limit
+        
+        # Phase 0-1: Route to Flask
+        reverse_proxy flask-dev:5000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+        
+        # Phase 2+: Uncomment to route to Express
+        # reverse_proxy express-dev:5001 {
+        #     header_up Host {host}
+        #     header_up X-Real-IP {remote_host}
+        #     header_up X-Forwarded-For {remote_host}
+        #     header_up X-Forwarded-Proto {scheme}
+        # }
+    }
+
+    # Server management endpoints - migrate to Express (Phase 2)
+    handle /api/v1/servers/* {
+        import rate_limit
+        
+        # Phase 0-1: Route to Flask
+        reverse_proxy flask-dev:5000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+        
+        # Phase 2+: Uncomment to route to Express
+        # reverse_proxy express-dev:5001 {
+        #     header_up Host {host}
+        #     header_up X-Real-IP {remote_host}
+        #     header_up X-Forwarded-For {remote_host}
+        #     header_up X-Forwarded-Proto {scheme}
+        # }
+    }
+
+    # Admin endpoints - migrate to Express (Phase 2)
+    handle /api/v1/admin/* {
+        import admin_rate_limit
+        
+        # Phase 0-1: Route to Flask
+        reverse_proxy flask-dev:5000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+        
+        # Phase 2+: Uncomment to route to Express
+        # reverse_proxy express-dev:5001 {
+        #     header_up Host {host}
+        #     header_up X-Real-IP {remote_host}
+        #     header_up X-Forwarded-For {remote_host}
+        #     header_up X-Forwarded-Proto {scheme}
+        # }
+    }
+
+    # SSE endpoints - Express only (Phase 4)
+    handle /api/v1/servers/*/logs {
+        # Disable buffering for SSE
+        reverse_proxy express-dev:5001 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            
+            # SSE specific headers
+            header_up Cache-Control "no-cache"
+            header_up Connection ""
+        }
+    }
+
+    # WebSocket endpoints - Express only (Phase 4)
+    handle /socket.io/* {
+        reverse_proxy express-dev:5001 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            
+            # WebSocket support
+            header_up Upgrade {>Upgrade}
+            header_up Connection {>Connection}
+        }
+    }
+
+    # Health check endpoints
+    handle /healthz {
+        respond "healthy" 200 {
+            header Content-Type "text/plain"
+        }
+    }
+
+    handle /readyz {
+        reverse_proxy flask-dev:5000/health {
+            header_up Host {host}
+        }
+    }
+
+    # Metrics endpoint (Express only)
+    handle /metrics {
+        reverse_proxy express-dev:5001 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Development endpoints
+    handle /dev/* {
+        reverse_proxy express-dev:5001 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Error handling
+    handle_errors {
+        @5xx expression {http.error.status_code} >= 500
+        handle @5xx {
+            respond "Internal Server Error" 500
+        }
+        
+        @4xx expression {http.error.status_code} >= 400
+        handle @4xx {
+            respond "Not Found" 404
+        }
+    }
+}
+
+# Development server
+:8080 {
+    # Development API routing
+    handle /api/v1/* {
+        reverse_proxy flask-dev:5000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+    
+    # Development frontend
+    handle {
+        reverse_proxy frontend-dev:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}
+

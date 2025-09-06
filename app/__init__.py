@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    
+    # Ensure session configuration is properly set
+    app.config['SESSION_COOKIE_NAME'] = 'mcserver_session'
+    app.config['SESSION_COOKIE_PATH'] = '/'
 
     # Initialize extensions
     db.init_app(app)

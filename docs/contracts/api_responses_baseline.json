@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-09-05T14:37:21.985369",
+  "base_url": "http://localhost:5000",
+  "responses": {
+    "GET /api/v1/": {
+      "error": "Request failed: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "GET /api/v1/health": {
+      "error": "Request failed: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "GET /api/v1/auth/csrf-token": {
+      "error": "Request failed: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "GET /api/v1/auth/status": {
+      "error": "Request failed: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "GET /api/v1/auth/setup/status": {
+      "error": "Request failed: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    }
+  }
+}

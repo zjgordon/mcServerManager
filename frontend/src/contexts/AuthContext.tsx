@@ -24,15 +24,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuth = async () => {
     try {
       setIsLoading(true);
+      console.log('AuthContext: Checking auth status...');
       const response = await apiService.getAuthStatus();
+      console.log('AuthContext: Auth status response:', response);
       
       if (response.authenticated && response.user) {
-        // Get full user details
+        // The auth status already includes user info, but let's get full details
         const userResponse = await apiService.getCurrentUser();
-        if (userResponse.success && userResponse.data) {
-          setUser(userResponse.data);
+        console.log('AuthContext: Current user response:', userResponse);
+        if (userResponse.success && userResponse.user) {
+          console.log('AuthContext: Setting user from getCurrentUser:', userResponse.user);
+          setUser(userResponse.user);
+        } else if (response.user) {
+          // Fallback to user info from auth status
+          console.log('AuthContext: Setting user from auth status:', response.user);
+          setUser(response.user);
         }
       } else {
+        console.log('AuthContext: Not authenticated, setting user to null');
         setUser(null);
       }
     } catch (error) {

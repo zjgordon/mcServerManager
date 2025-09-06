@@ -88,8 +88,9 @@ def login():
                 user.last_login = datetime.utcnow()
                 db.session.commit()
                 
-                # Login user
+                # Login user with permanent session
                 login_user(user, remember=True)
+                session.permanent = True
                 audit_log('login_success', {'username': username})
                 
                 return jsonify({
@@ -279,7 +280,12 @@ def auth_status():
     }
     """
     try:
+        logger.info(f"Auth status check - User authenticated: {current_user.is_authenticated}")
+        logger.info(f"Session data: {dict(session)}")
+        logger.info(f"Request cookies: {dict(request.cookies)}")
+        
         if current_user.is_authenticated:
+            logger.info(f"User {current_user.username} is authenticated")
             return jsonify({
                 'authenticated': True,
                 'user': {
@@ -289,6 +295,7 @@ def auth_status():
                 }
             }), 200
         else:
+            logger.info("User is not authenticated")
             return jsonify({
                 'authenticated': False
             }), 200

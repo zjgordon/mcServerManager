@@ -1,0 +1,150 @@
+{
+  "timestamp": "2025-09-05T20:05:19.980301",
+  "backends": {
+    "flask": {
+      "name": "Flask",
+      "base_url": "http://localhost:5000",
+      "health_endpoint": "/healthz",
+      "api_endpoint": "/api/v1",
+      "auth_required": true
+    },
+    "express": {
+      "name": "Express",
+      "base_url": "http://localhost:5001",
+      "health_endpoint": "/healthz",
+      "api_endpoint": "/api/v1",
+      "auth_required": true
+    }
+  },
+  "tests": {
+    "health_checks": {
+      "status": "FAIL",
+      "tests": [
+        {
+          "backend": "Flask",
+          "test": "health_check",
+          "status": "FAIL",
+          "error": "Status 500"
+        },
+        {
+          "backend": "Express",
+          "test": "health_check",
+          "status": "PASS",
+          "response_time": 0.002161,
+          "data": {
+            "success": true,
+            "status": "healthy",
+            "timestamp": "2025-09-06T03:05:19.986Z",
+            "version": "2.0.0",
+            "environment": "development"
+          }
+        }
+      ],
+      "errors": [
+        "Flask health check failed"
+      ]
+    },
+    "flask_backend": {
+      "status": "PASS",
+      "backend": "Flask",
+      "tests": [
+        {
+          "test": "connectivity",
+          "status": "PASS",
+          "response_time": 0.010352
+        },
+        {
+          "test": "api_endpoint",
+          "status": "FAIL",
+          "error": "Status 500"
+        },
+        {
+          "test": "readiness",
+          "status": "FAIL",
+          "error": "Status 500"
+        }
+      ],
+      "errors": [
+        "API endpoint test failed",
+        "Readiness check failed"
+      ]
+    },
+    "express_backend": {
+      "status": "PASS",
+      "backend": "Express",
+      "tests": [
+        {
+          "test": "connectivity",
+          "status": "PASS",
+          "response_time": 0.00197
+        },
+        {
+          "test": "api_endpoint",
+          "status": "PASS",
+          "response_time": 0.003093,
+          "status_code": 404
+        },
+        {
+          "test": "readiness",
+          "status": "PASS",
+          "response_time": 0.00417,
+          "data": {
+            "success": true,
+            "status": "ready",
+            "checks": {
+              "database": true,
+              "redis": true,
+              "timestamp": "2025-09-06T03:05:20.021Z"
+            }
+          }
+        }
+      ],
+      "errors": []
+    },
+    "backend_comparison": {
+      "status": "PASS",
+      "tests": [
+        {
+          "test": "health_comparison",
+          "status": "FAIL",
+          "error": "Could not retrieve health data from both backends"
+        },
+        {
+          "test": "api_comparison",
+          "status": "SKIP",
+          "reason": "API endpoints not fully implemented in Express yet"
+        }
+      ],
+      "errors": [
+        "Health comparison failed"
+      ]
+    },
+    "dual_backend": {
+      "status": "PASS",
+      "tests": [
+        {
+          "test": "port_separation",
+          "status": "PASS",
+          "flask_port": "5000",
+          "express_port": "5001"
+        },
+        {
+          "test": "concurrent_access",
+          "status": "PASS",
+          "concurrent_time": 0.008745908737182617,
+          "flask_response_time": 0.002927,
+          "express_response_time": 0.003224
+        }
+      ],
+      "errors": []
+    }
+  },
+  "summary": {
+    "total_tests": 12,
+    "passed_tests": 7,
+    "failed_tests": 4,
+    "skipped_tests": 1,
+    "success_rate": 58.333333333333336,
+    "overall_status": "FAIL"
+  }
+}

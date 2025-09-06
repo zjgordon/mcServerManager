@@ -1,0 +1,166 @@
+version: '3.8'
+
+services:
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: mcserver-nginx
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - flask
+      - express
+      - frontend
+    restart: unless-stopped
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Caddy reverse proxy (alternative to Nginx)
+  caddy:
+    image: caddy:alpine
+    container_name: mcserver-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/logs:/var/log/caddy
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - flask
+      - express
+      - frontend
+    restart: unless-stopped
+    networks:
+      - mcserver-network
+    profiles:
+      - caddy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Flask backend
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.flask
+    container_name: mcserver-flask
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./instance:/app/instance
+      - ./servers:/app/servers
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app
+    restart: unless-stopped
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Express backend
+  express:
+    build:
+      context: ./node-backend
+      dockerfile: Dockerfile
+    container_name: mcserver-express
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./node-backend/instance:/app/instance
+      - ./servers:/app/servers
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - DATABASE_URL=file:./instance/dev.db
+      - REDIS_URL=redis://redis:6379
+      - SESSION_SECRET=your-secure-session-secret
+      - CSRF_SECRET=your-secure-csrf-secret
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # React frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mcserver-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost/api/v1
+      - REACT_APP_WS_URL=http://localhost/socket.io
+    restart: unless-stopped
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: mcserver-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./node-backend/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - mcserver-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  redis_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  mcserver-network:
+    driver: bridge
+

@@ -30,6 +30,7 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
+      timeout: 10000, // 10 second timeout
     });
 
     // Add request interceptor for CSRF token
@@ -42,7 +43,7 @@ class ApiService {
       // Get CSRF token if we don't have it
       if (!this.csrfToken) {
         try {
-          const response = await axios.get('/api/v1/auth/csrf-token', { withCredentials: true });
+          const response = await this.api.get('/auth/csrf-token');
           this.csrfToken = response.data.csrf_token;
         } catch (error) {
           console.warn('Failed to get CSRF token:', error);

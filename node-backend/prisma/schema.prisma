@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite doesn't support enums, so we use string with validation
+// Valid values: "Stopped", "Starting", "Running", "Stopping", "Error"
+
+model User {
+  id                Int      @id @default(autoincrement())
+  username          String   @unique @map("username")
+  passwordHash      String?  @map("password_hash")
+  isAdmin           Boolean  @default(false) @map("is_admin")
+  email             String?  @unique @map("email")
+  createdAt         DateTime @default(now()) @map("created_at")
+  lastLogin         DateTime? @map("last_login")
+  isActive          Boolean  @default(true) @map("is_active")
+  
+  servers           Server[]
+  configurations    Configuration[]
+  
+  @@map("user")
+}
+
+model Server {
+  id                Int          @id @default(autoincrement())
+  serverName        String       @unique @map("server_name")
+  version           String       @map("version")
+  port              Int          @unique @map("port")
+  status            String       @default("Stopped") @map("status")
+  pid               Int?         @map("pid")
+  levelSeed         String?      @map("level_seed")
+  gamemode          String       @default("survival") @map("gamemode")
+  difficulty        String       @default("normal") @map("difficulty")
+  hardcore          Boolean      @default(false) @map("hardcore")
+  pvp               Boolean      @default(true) @map("pvp")
+  spawnMonsters     Boolean      @default(true) @map("spawn_monsters")
+  motd              String?      @map("motd")
+  memoryMb          Int          @default(1024) @map("memory_mb")
+  ownerId           Int          @map("owner_id")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+  
+  owner             User         @relation(fields: [ownerId], references: [id])
+  
+  @@index([status])
+  @@index([ownerId])
+  @@map("server")
+}
+
+model Configuration {
+  id                Int      @id @default(autoincrement())
+  key               String   @unique @map("key")
+  value             String   @map("value")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  updatedBy         Int?     @map("updated_by")
+  
+  updatedByUser     User?    @relation(fields: [updatedBy], references: [id])
+  
+  @@map("configuration")
+}
+

@@ -1,0 +1,181 @@
+version: '3.8'
+
+services:
+  # Nginx reverse proxy for development
+  nginx-dev:
+    image: nginx:alpine
+    container_name: mcserver-nginx-dev
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - flask-dev
+      - express-dev
+      - frontend-dev
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+    profiles:
+      - nginx
+
+  # Caddy reverse proxy for development
+  caddy-dev:
+    image: caddy:alpine
+    container_name: mcserver-caddy-dev
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - ./caddy/logs:/var/log/caddy
+      - caddy_dev_data:/data
+      - caddy_dev_config:/config
+    depends_on:
+      - flask-dev
+      - express-dev
+      - frontend-dev
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+    profiles:
+      - caddy
+
+  # Flask backend for development
+  flask-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.flask.dev
+    container_name: mcserver-flask-dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - ./instance:/app/instance
+      - ./servers:/app/servers
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app
+      - FLASK_DEBUG=1
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Express backend for development
+  express-dev:
+    build:
+      context: ./node-backend
+      dockerfile: Dockerfile.dev
+    container_name: mcserver-express-dev
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./node-backend:/app
+      - ./node-backend/instance:/app/instance
+      - ./servers:/app/servers
+      - ./logs:/app/logs
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - DATABASE_URL=file:./instance/dev.db
+      - REDIS_URL=redis://redis-dev:6379
+      - SESSION_SECRET=dev-session-secret
+      - CSRF_SECRET=dev-csrf-secret
+      - FRONTEND_URL=http://localhost:3000
+      - LOG_LEVEL=debug
+    depends_on:
+      - redis-dev
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # React frontend for development
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: mcserver-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost/api/v1
+      - REACT_APP_WS_URL=http://localhost/socket.io
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis for development
+  redis-dev:
+    image: redis:7-alpine
+    container_name: mcserver-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+      - ./node-backend/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis Commander for development
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: mcserver-redis-commander-dev
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis-dev:6379
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=admin123
+    depends_on:
+      - redis-dev
+    restart: unless-stopped
+    networks:
+      - mcserver-dev-network
+
+volumes:
+  redis_dev_data:
+    driver: local
+  caddy_dev_data:
+    driver: local
+  caddy_dev_config:
+    driver: local
+
+networks:
+  mcserver-dev-network:
+    driver: bridge
+

@@ -1,0 +1,64 @@
+{
+  "timestamp": "2024-12-20T14:40:00Z",
+  "base_url": "http://localhost:5000",
+  "responses": {
+    "GET /api/v1/": {
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      },
+      "body": {
+        "name": "Minecraft Server Manager API",
+        "version": "1.0.0",
+        "description": "RESTful API for Minecraft server management",
+        "endpoints": {
+          "auth": "/api/v1/auth",
+          "servers": "/api/v1/servers",
+          "admin": "/api/v1/admin"
+        },
+        "documentation": "/api/v1/docs"
+      }
+    },
+    "GET /api/v1/health": {
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "status": "healthy",
+        "timestamp": "2024-12-20T14:40:00Z",
+        "version": "1.0.0"
+      }
+    },
+    "GET /api/v1/auth/csrf-token": {
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "csrf_token": "IjE2NzA5NzI4MDAuMjM0NTY3ODkwOjEyMzQ1Njc4OTA6YWJjZGVmZ2hpamsifQ.XYZ123"
+      }
+    },
+    "GET /api/v1/auth/status": {
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "authenticated": false
+      }
+    },
+    "GET /api/v1/auth/setup/status": {
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "setup_required": false,
+        "has_admin": true
+      }
+    }
+  }
+}
+
