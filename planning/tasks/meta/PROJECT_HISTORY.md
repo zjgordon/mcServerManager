@@ -968,3 +968,13 @@ line length standards work correctly across the entire codebase. This
 eliminates line length conflicts between different tools and creates a more
 reasonable standard for Minecraft server management code with long
 configuration strings and server names.
+
+**CARD-024 (2025-01-09):** Removed unnecessary hooks from pre-commit configuration to
+simplify development workflow and focus on essential code quality. Removed pydocstyle
+hook (documentation standards not critical for server management), mypy hook (type
+checking overhead for rapid development), safety hook (dependency scanning not critical
+for gaming application), and bandit hook (security scanning overkill for Minecraft
+server management). Kept essential hooks: black, isort, flake8 for core Python
+formatting and basic linting, plus basic file quality hooks. Configuration reduced from
+25+ hooks to 16 essential hooks, creating a more appropriate setup for rapid development
+and "vibe-coding" methodology focused on Minecraft server management needs.
