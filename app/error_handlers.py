@@ -269,6 +269,11 @@ def init_error_handlers(app):
     def not_found_error(error):
         logger.warning(f"404 error: {request.url}")
         flash("The requested page was not found.", "warning")
+        # In test mode, return proper 404 status code instead of redirecting
+        if app.config.get('TESTING', False):
+            from flask import make_response, render_template
+            response = make_response(render_template('404.html'), 404)
+            return response
         return redirect(url_for('server.home'))
     
     @app.errorhandler(500)

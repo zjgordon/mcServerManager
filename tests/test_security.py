@@ -194,7 +194,8 @@ class TestSecurityVulnerabilities:
             
             # Try to access admin-only functionality
             response = client.get('/add_user', follow_redirects=True)
-            assert b'Only the admin can add new users' in response.data
+            # Check for flash message about admin privileges required
+            assert b'Admin privileges required' in response.data
             
             # Verify user is still not admin
             user = User.query.filter_by(username='regularuser').first()

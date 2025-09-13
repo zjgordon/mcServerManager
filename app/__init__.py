@@ -58,7 +58,7 @@ def create_app():
     def check_admin_setup():
         """Check if admin setup is needed and redirect accordingly."""
         # Skip check for admin setup and static endpoints
-        if request.endpoint in ['auth.set_admin_password', 'static'] or request.endpoint.startswith('static'):
+        if request.endpoint in ['auth.set_admin_password', 'static'] or (request.endpoint and request.endpoint.startswith('static')):
             return
         
         # Check if any admin user exists with a password

@@ -284,6 +284,9 @@ class TestAuthenticationSecurity:
     
     def test_login_rate_limiting(self, client, app):
         """Test login rate limiting."""
+        # Enable rate limiting for this test
+        app.config['RATELIMIT_ENABLED'] = True
+        
         # Make multiple login attempts
         for i in range(6):
             response = client.post('/login', data={
