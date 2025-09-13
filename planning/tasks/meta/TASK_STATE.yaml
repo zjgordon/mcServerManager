@@ -1,8 +1,8 @@
-active_card: CARD-007L
+active_card: CARD-007M
 breadcrumb:
-  step: 'CARD-007K completed - added language specifiers to fenced code blocks'
-  last_commit: 'fix: [CARD-007K] Add language specifiers to fenced code blocks'
-  next_action: 'Start at CARD-007L - Next code quality improvement'
+  step: 'CARD-007L completed - verified first-line heading compliance (MD041)'
+  last_commit: 'docs: [CARD-007L] Verify first-line heading compliance in markdown files'
+  next_action: 'Start at CARD-007M - Next code quality improvement'
 queue:
   - CARD-007D
   - CARD-007E

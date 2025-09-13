@@ -67,3 +67,5 @@ RELEASE_NOTES.md)
   other files
 - CARD-007J: ✅ Completed - fixed duplicate headings (MD024) in markdown files
 - CARD-007K: ✅ Completed - added language specifiers to fenced code blocks (MD040)
+- CARD-007L: ✅ Completed - verified first-line heading compliance (MD041) -
+  already compliant
