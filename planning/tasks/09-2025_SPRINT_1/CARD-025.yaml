@@ -1,0 +1,38 @@
+id: CARD-025
+title: Test and validate simplified pre-commit configuration
+epic: Epic 7 – Development Workflow Optimization
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Run pre-commit on all files successfully
+  - Verify Python files pass new 100-character line length
+  - Test documentation commits work without markdown linting issues
+  - Verify flake8 passes with new ignore patterns
+  - Test commit process works smoothly for typical development tasks
+  - Document any remaining issues or edge cases
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-025]
+artifacts:
+  - test-results.md (validation report)
+  - .pre-commit-config.yaml (final validated version)
+notes: |
+  Phase 2: Testing and Validation (1 day)
+  
+  This card thoroughly tests the simplified pre-commit configuration to
+  ensure it works correctly and provides the intended development experience.
+  
+  Test scenarios:
+  - Run pre-commit --all-files on entire codebase
+  - Test typical Python development commits
+  - Test documentation updates (README, CHANGELOG, etc.)
+  - Verify no false positives from overly strict rules
+  - Test edge cases and long lines that previously caused issues
+  
+  Expected outcomes:
+  - Faster commit times
+  - Fewer pre-commit failures
+  - Better development experience for agents
+  - Maintained code quality standards appropriate for the application

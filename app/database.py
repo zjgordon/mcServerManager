@@ -35,9 +35,7 @@ class DatabaseManager:
                     if os.path.exists(db_path):
                         file_size_bytes = os.path.getsize(db_path)
                         stats["file_size_bytes"] = file_size_bytes
-                        stats["file_size_mb"] = round(
-                            file_size_bytes / (1024 * 1024), 2
-                        )
+                        stats["file_size_mb"] = round(file_size_bytes / (1024 * 1024), 2)
 
                 # Get table statistics
                 tables = ["user", "server", "configuration"]
@@ -172,9 +170,7 @@ class DatabaseManager:
 
                 # Check user table
                 result = conn.execute(
-                    text(
-                        "SELECT COUNT(*) FROM user WHERE username IS NULL OR username = ''"
-                    )
+                    text("SELECT COUNT(*) FROM user WHERE username IS NULL OR username = ''")
                 )
                 null_usernames = result.scalar()
                 if null_usernames > 0:
@@ -193,9 +189,7 @@ class DatabaseManager:
                 )
                 null_server_fields = result.scalar()
                 if null_server_fields > 0:
-                    issues.append(
-                        f"Servers with null required fields: {null_server_fields}"
-                    )
+                    issues.append(f"Servers with null required fields: {null_server_fields}")
 
                 # Check configuration table
                 result = conn.execute(
@@ -208,9 +202,7 @@ class DatabaseManager:
                 )
                 null_config_fields = result.scalar()
                 if null_config_fields > 0:
-                    issues.append(
-                        f"Configurations with null required fields: {null_config_fields}"
-                    )
+                    issues.append(f"Configurations with null required fields: {null_config_fields}")
 
                 return {
                     "status": "passed" if not issues else "failed",
@@ -240,9 +232,7 @@ class DatabaseManager:
                 )
                 duplicate_usernames = result.fetchall()
                 if duplicate_usernames:
-                    issues.append(
-                        f"Duplicate usernames: {[row[0] for row in duplicate_usernames]}"
-                    )
+                    issues.append(f"Duplicate usernames: {[row[0] for row in duplicate_usernames]}")
 
                 # Check user email uniqueness (if not null)
                 result = conn.execute(
@@ -258,9 +248,7 @@ class DatabaseManager:
                 )
                 duplicate_emails = result.fetchall()
                 if duplicate_emails:
-                    issues.append(
-                        f"Duplicate emails: {[row[0] for row in duplicate_emails]}"
-                    )
+                    issues.append(f"Duplicate emails: {[row[0] for row in duplicate_emails]}")
 
                 # Check server name uniqueness
                 result = conn.execute(
@@ -292,9 +280,7 @@ class DatabaseManager:
                 )
                 duplicate_ports = result.fetchall()
                 if duplicate_ports:
-                    issues.append(
-                        f"Duplicate ports: {[row[0] for row in duplicate_ports]}"
-                    )
+                    issues.append(f"Duplicate ports: {[row[0] for row in duplicate_ports]}")
 
                 # Check configuration key uniqueness
                 result = conn.execute(
@@ -352,9 +338,7 @@ class DatabaseManager:
                 )
                 invalid_memory = result.scalar()
                 if invalid_memory > 0:
-                    issues.append(
-                        f"Servers with invalid memory allocation: {invalid_memory}"
-                    )
+                    issues.append(f"Servers with invalid memory allocation: {invalid_memory}")
 
                 # Check user email format (basic validation)
                 result = conn.execute(
@@ -399,9 +383,7 @@ class DatabaseManager:
 
                 # Set pragma optimizations
                 conn.execute(text("PRAGMA optimize"))
-                optimization_results["operations"].append(
-                    "Pragma optimizations applied"
-                )
+                optimization_results["operations"].append("Pragma optimizations applied")
 
                 conn.commit()
 
@@ -422,9 +404,7 @@ class DatabaseManager:
                 # Get query execution time
                 start_time = time.time()
                 conn.execute(text("SELECT 1"))
-                query_time = (
-                    time.time() - start_time
-                ) * 1000  # Convert to milliseconds
+                query_time = (time.time() - start_time) * 1000  # Convert to milliseconds
                 metrics["query_response_time_ms"] = round(query_time, 2)
 
                 # Get database page count and size
@@ -436,9 +416,7 @@ class DatabaseManager:
 
                 metrics["page_count"] = page_count
                 metrics["page_size_bytes"] = page_size
-                metrics["total_pages_mb"] = round(
-                    (page_count * page_size) / (1024 * 1024), 2
-                )
+                metrics["total_pages_mb"] = round((page_count * page_size) / (1024 * 1024), 2)
 
                 # Get cache size
                 result = conn.execute(text("PRAGMA cache_size"))

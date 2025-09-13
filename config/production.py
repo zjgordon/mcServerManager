@@ -30,18 +30,12 @@ class ProductionConfig(BaseConfig):
     RATELIMIT_LOGIN = "3 per minute"
 
     # Production memory settings (configurable via environment)
-    MAX_TOTAL_MEMORY_MB = int(
-        os.environ.get("MAX_TOTAL_MEMORY_MB", "16384")
-    )  # 16GB default
+    MAX_TOTAL_MEMORY_MB = int(os.environ.get("MAX_TOTAL_MEMORY_MB", "16384"))  # 16GB default
     DEFAULT_SERVER_MEMORY_MB = int(
         os.environ.get("DEFAULT_SERVER_MEMORY_MB", "2048")
     )  # 2GB default
-    MIN_SERVER_MEMORY_MB = int(
-        os.environ.get("MIN_SERVER_MEMORY_MB", "1024")
-    )  # 1GB minimum
-    MAX_SERVER_MEMORY_MB = int(
-        os.environ.get("MAX_SERVER_MEMORY_MB", "8192")
-    )  # 8GB maximum
+    MIN_SERVER_MEMORY_MB = int(os.environ.get("MIN_SERVER_MEMORY_MB", "1024"))  # 1GB minimum
+    MAX_SERVER_MEMORY_MB = int(os.environ.get("MAX_SERVER_MEMORY_MB", "8192"))  # 8GB maximum
 
     # Production logging
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
@@ -88,9 +82,7 @@ class ProductionConfig(BaseConfig):
         required_vars = ["SECRET_KEY", "DATABASE_URL"]
         for var in required_vars:
             if not os.environ.get(var):
-                issues.append(
-                    f"Required environment variable {var} not set in production"
-                )
+                issues.append(f"Required environment variable {var} not set in production")
 
         # Validate database URL format
         if cls.SQLALCHEMY_DATABASE_URI and not cls.SQLALCHEMY_DATABASE_URI.startswith(

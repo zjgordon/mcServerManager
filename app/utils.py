@@ -112,9 +112,7 @@ def find_next_available_port():
     try:
         # Get a list of all ports already assigned to servers
         assigned_ports = {server.port for server in Server.query.all()}
-        logger.info(
-            f"Found {len(assigned_ports)} ports already assigned: {assigned_ports}"
-        )
+        logger.info(f"Found {len(assigned_ports)} ports already assigned: {assigned_ports}")
 
         for i in range(max_checks):
             port_to_check = base_port + (i * increment)
@@ -201,9 +199,7 @@ def get_version_info(version_id):
             raise NetworkError("Invalid manifest structure received")
 
         # Find the selected version's metadata URL
-        version_info = next(
-            (v for v in manifest["versions"] if v["id"] == version_id), None
-        )
+        version_info = next((v for v in manifest["versions"] if v["id"] == version_id), None)
         if not version_info:
             available_versions = [
                 v["id"] for v in manifest["versions"][:10]
@@ -232,9 +228,7 @@ def get_version_info(version_id):
             raise NetworkError(f"Invalid metadata structure for version {version_id}")
 
         if "server" not in metadata["downloads"]:
-            raise ValidationError(
-                f"Version {version_id} does not have a server download available"
-            )
+            raise ValidationError(f"Version {version_id} does not have a server download available")
 
         logger.info(f"Successfully fetched metadata for version {version_id}")
         return metadata
@@ -246,9 +240,7 @@ def get_version_info(version_id):
     except (ValidationError, NetworkError):
         raise
     except Exception as e:
-        logger.error(
-            f"Unexpected error getting version info for {version_id}: {str(e)}"
-        )
+        logger.error(f"Unexpected error getting version info for {version_id}: {str(e)}")
         raise NetworkError(f"Failed to get version information: {str(e)}")
 
 
@@ -263,9 +255,8 @@ def check_admin_password():
             allowed_endpoints = ["auth.set_admin_password", "static"]
             current_endpoint = request.endpoint or ""
 
-            if (
-                current_endpoint not in allowed_endpoints
-                and not current_endpoint.startswith("static")
+            if current_endpoint not in allowed_endpoints and not current_endpoint.startswith(
+                "static"
             ):
                 logger.info("Redirecting to admin password setup")
                 return redirect(url_for("auth.set_admin_password"))
@@ -296,9 +287,7 @@ def load_exclusion_list(filename="app/static/excluded_versions.json"):
 
         # Validate the loaded data
         if not isinstance(excluded_versions, list):
-            logger.warning(
-                f"Exclusion list is not a list, got {type(excluded_versions)}"
-            )
+            logger.warning(f"Exclusion list is not a list, got {type(excluded_versions)}")
             return []
 
         # Validate each version string
@@ -313,9 +302,7 @@ def load_exclusion_list(filename="app/static/excluded_versions.json"):
         return valid_versions
 
     except FileNotFoundError:
-        logger.info(
-            f"Exclusion list file not found: {safe_filename}, returning empty list"
-        )
+        logger.info(f"Exclusion list file not found: {safe_filename}, returning empty list")
         return []
     except json.JSONDecodeError as e:
         logger.error(f"Invalid JSON in exclusion list file: {str(e)}")
@@ -390,9 +377,7 @@ def get_total_allocated_memory(user_id=None):
         else:
             # Get total for specific user
             total = (
-                db.session.query(db.func.sum(Server.memory_mb))
-                .filter_by(owner_id=user_id)
-                .scalar()
+                db.session.query(db.func.sum(Server.memory_mb)).filter_by(owner_id=user_id).scalar()
                 or 0
             )
             logger.debug(f"Total allocated memory for user {user_id}: {total}MB")
@@ -541,9 +526,7 @@ def update_app_config(
 def update_memory_config(max_total_mb, max_per_server_mb):
     """Update memory configuration by setting environment variables
     (backward compatibility)."""
-    return update_app_config(
-        max_total_mb=max_total_mb, max_per_server_mb=max_per_server_mb
-    )
+    return update_app_config(max_total_mb=max_total_mb, max_per_server_mb=max_per_server_mb)
 
 
 def format_memory_display(memory_mb):
@@ -727,9 +710,7 @@ def find_orphaned_minecraft_processes():
                         # Check if this process is managed by our app
                         from .models import Server
 
-                        managed_server = Server.query.filter_by(
-                            pid=process.info["pid"]
-                        ).first()
+                        managed_server = Server.query.filter_by(pid=process.info["pid"]).first()
 
                         if not managed_server:
                             # This is an orphaned process
@@ -750,8 +731,7 @@ def find_orphaned_minecraft_processes():
                 continue
             except Exception as e:
                 logger.debug(
-                    f"Error checking process "
-                    f"{process.info.get('pid', 'unknown')}: {str(e)}"
+                    f"Error checking process " f"{process.info.get('pid', 'unknown')}: {str(e)}"
                 )
                 continue
 
@@ -803,8 +783,7 @@ def reconcile_server_statuses():
                         logger.info(f"Updated status for server {server.server_name}")
                     except Exception as e:
                         error_msg = (
-                            f"Failed to update status for server "
-                            f"{server.server_name}: {str(e)}"
+                            f"Failed to update status for server " f"{server.server_name}: {str(e)}"
                         )
                         logger.error(error_msg)
                         summary["errors"].append(error_msg)
@@ -828,9 +807,7 @@ def reconcile_server_statuses():
         if orphaned:
             logger.warning(f"Found {len(orphaned)} orphaned Minecraft processes")
             for orphan in orphaned:
-                logger.warning(
-                    f"Orphaned process: PID {orphan['pid']}, CWD: {orphan['cwd']}"
-                )
+                logger.warning(f"Orphaned process: PID {orphan['pid']}, CWD: {orphan['cwd']}")
 
         logger.info(
             f"Server status reconciliation complete: "
@@ -890,8 +867,7 @@ def periodic_status_check():
                         )
                     except Exception as e:
                         error_msg = (
-                            f"Failed to update status for server "
-                            f"{server.server_name}: {str(e)}"
+                            f"Failed to update status for server " f"{server.server_name}: {str(e)}"
                         )
                         logger.error(error_msg)
                         summary["errors"].append(error_msg)
@@ -944,9 +920,7 @@ def get_server_process_info(server):
     except (psutil.NoSuchProcess, psutil.AccessDenied):
         return None
     except Exception as e:
-        logger.error(
-            f"Error getting process info for server {server.server_name}: {str(e)}"
-        )
+        logger.error(f"Error getting process info for server {server.server_name}: {str(e)}")
         return None
 
     return None

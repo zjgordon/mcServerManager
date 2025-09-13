@@ -18,9 +18,7 @@ class DevelopmentConfig(BaseConfig):
     TESTING = False
 
     # Development database (in-memory for faster testing)
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL") or "sqlite:///dev_minecraft_manager.db"
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "sqlite:///dev_minecraft_manager.db"
 
     # Relaxed security for development
     SESSION_COOKIE_SECURE = False  # Allow HTTP in development
@@ -31,18 +29,12 @@ class DevelopmentConfig(BaseConfig):
     RATELIMIT_LOGIN = "20 per minute"
 
     # Development-specific memory settings (smaller for local testing)
-    MAX_TOTAL_MEMORY_MB = int(
-        os.environ.get("MAX_TOTAL_MEMORY_MB", "2048")
-    )  # 2GB for dev
+    MAX_TOTAL_MEMORY_MB = int(os.environ.get("MAX_TOTAL_MEMORY_MB", "2048"))  # 2GB for dev
     DEFAULT_SERVER_MEMORY_MB = int(
         os.environ.get("DEFAULT_SERVER_MEMORY_MB", "512")
     )  # 512MB for dev
-    MIN_SERVER_MEMORY_MB = int(
-        os.environ.get("MIN_SERVER_MEMORY_MB", "256")
-    )  # 256MB min for dev
-    MAX_SERVER_MEMORY_MB = int(
-        os.environ.get("MAX_SERVER_MEMORY_MB", "1024")
-    )  # 1GB max for dev
+    MIN_SERVER_MEMORY_MB = int(os.environ.get("MIN_SERVER_MEMORY_MB", "256"))  # 256MB min for dev
+    MAX_SERVER_MEMORY_MB = int(os.environ.get("MAX_SERVER_MEMORY_MB", "1024"))  # 1GB max for dev
 
     # Development logging
     LOG_LEVEL = "DEBUG"

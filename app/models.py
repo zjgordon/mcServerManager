@@ -87,23 +87,17 @@ class Server(db.Model):
     pvp = db.Column(db.Boolean)
     spawn_monsters = db.Column(db.Boolean)
     motd = db.Column(db.String(150))
-    memory_mb = db.Column(
-        db.Integer, nullable=False, default=1024
-    )  # Memory allocation in MB
+    memory_mb = db.Column(db.Integer, nullable=False, default=1024)  # Memory allocation in MB
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     owner = db.relationship("User", backref=db.backref("servers", lazy=True))
 
     # Add constraints
     __table_args__ = (
         CheckConstraint("LENGTH(server_name) >= 1", name="check_server_name_length"),
-        CheckConstraint(
-            "LENGTH(server_name) <= 150", name="check_server_name_max_length"
-        ),
+        CheckConstraint("LENGTH(server_name) <= 150", name="check_server_name_max_length"),
         CheckConstraint("port >= 1 AND port <= 65535", name="check_port_range"),
         CheckConstraint("status IN ('Running', 'Stopped')", name="check_status_values"),
-        CheckConstraint(
-            "memory_mb >= 512 AND memory_mb <= 32768", name="check_memory_range"
-        ),
+        CheckConstraint("memory_mb >= 512 AND memory_mb <= 32768", name="check_memory_range"),
         CheckConstraint(
             "gamemode IS NULL OR gamemode IN ('survival', 'creative', 'adventure', 'spectator')",
             name="check_gamemode_values",
@@ -166,9 +160,7 @@ class Server(db.Model):
             errors.append("Status must be 'Running' or 'Stopped'")
 
         if not self.validate_gamemode():
-            errors.append(
-                "Gamemode must be one of: survival, creative, adventure, spectator"
-            )
+            errors.append("Gamemode must be one of: survival, creative, adventure, spectator")
 
         if not self.validate_difficulty():
             errors.append("Difficulty must be one of: peaceful, easy, normal, hard")
@@ -184,9 +176,7 @@ class Configuration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(100), unique=True, nullable=False)
     value = db.Column(db.Text, nullable=False)
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     updated_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
     # Add constraints

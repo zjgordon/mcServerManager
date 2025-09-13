@@ -1,0 +1,37 @@
+id: CARD-024
+title: Remove unnecessary hooks and simplify pre-commit configuration
+epic: Epic 7 – Development Workflow Optimization
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Remove pydocstyle hook (documentation standards not critical)
+  - Remove mypy hook (type checking overhead for rapid development)
+  - Remove safety hook (dependency scanning not critical for gaming app)
+  - Remove bandit hook (security scanning overkill for Minecraft server)
+  - Keep only essential hooks: black, isort, flake8, basic file quality
+  - Pre-commit configuration reduced from 25+ hooks to ~8 essential hooks
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-024]
+artifacts:
+  - .pre-commit-config.yaml (simplified)
+  - requirements-dev.txt (updated if needed)
+notes: |
+  This card removes hooks that are inappropriate for a Minecraft server
+  management application, focusing on development velocity over perfect
+  formatting and security.
+  
+  Hooks to remove:
+  - pydocstyle: Documentation standards not critical for server management
+  - mypy: Type checking overhead for rapid development cycles
+  - safety: Dependency scanning not critical for gaming application
+  - bandit: Security scanning overkill for Minecraft server management
+  
+  Keep essential hooks:
+  - black, isort, flake8: Core Python formatting and basic linting
+  - Basic file quality hooks: trailing-whitespace, end-of-file-fixer, etc.
+  
+  This creates a more appropriate configuration for rapid development
+  and "vibe-coding" methodology.

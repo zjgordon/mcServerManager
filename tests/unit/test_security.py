@@ -39,9 +39,7 @@ class TestSecurityVulnerabilities:
         ]
 
         for name in malicious_names:
-            assert not is_valid_server_name(
-                name
-            ), f"'{name}' should be rejected for security"
+            assert not is_valid_server_name(name), f"'{name}' should be rejected for security"
 
     def test_sql_injection_username(self, client, app):
         """Test that usernames are protected against SQL injection."""
@@ -92,9 +90,7 @@ class TestSecurityVulnerabilities:
                 xss_payload
             ), f"XSS payload '{xss_payload}' should be rejected"
 
-    def test_command_injection_server_operations(
-        self, authenticated_client, app, test_server
-    ):
+    def test_command_injection_server_operations(self, authenticated_client, app, test_server):
         """Test that server operations are protected against command injection."""
         # Test with malicious server name that could be used in command injection
         malicious_names = [
@@ -118,9 +114,7 @@ class TestSecurityVulnerabilities:
         # This test ensures that server directories are properly contained
         with patch("os.makedirs") as mock_makedirs, patch(
             "app.routes.server_routes.find_next_available_port"
-        ) as mock_port, patch(
-            "app.routes.server_routes.get_version_info"
-        ) as mock_version, patch(
+        ) as mock_port, patch("app.routes.server_routes.get_version_info") as mock_version, patch(
             "requests.get"
         ) as mock_requests, patch(
             "subprocess.Popen"
@@ -154,12 +148,8 @@ class TestSecurityVulnerabilities:
                 assert called_path.startswith(
                     "servers/"
                 ), f"Path '{called_path}' should be contained in servers directory"
-                assert (
-                    "../" not in called_path
-                ), f"Path '{called_path}' should not contain ../"
-                assert (
-                    ".." not in called_path
-                ), f"Path '{called_path}' should not contain .."
+                assert "../" not in called_path, f"Path '{called_path}' should not contain ../"
+                assert ".." not in called_path, f"Path '{called_path}' should not contain .."
 
     def test_file_upload_restrictions(self):
         """Test that file operations have proper restrictions."""
@@ -244,9 +234,7 @@ class TestSecurityVulnerabilities:
             assert check_password_hash(hash2, password)  # pragma: allowlist secret
 
             # Wrong password should not verify
-            assert not check_password_hash(
-                hash1, "wrongpassword"
-            )  # pragma: allowlist secret
+            assert not check_password_hash(hash1, "wrongpassword")  # pragma: allowlist secret
 
     def test_process_security(self, authenticated_client, app, test_server):
         """Test that server processes are started securely."""
@@ -279,9 +267,7 @@ class TestSecurityVulnerabilities:
                     command_str = " ".join(args)
                     dangerous_chars = [";", "&", "|", "`", "$", "<", ">", "(", ")"]
                     for char in dangerous_chars:
-                        assert (
-                            char not in command_str
-                        ), f"Command should not contain '{char}'"
+                        assert char not in command_str, f"Command should not contain '{char}'"
         finally:
             # Cleanup
             import shutil

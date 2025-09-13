@@ -210,9 +210,7 @@ def get_process_metrics() -> Dict[str, Any]:
         }
 
 
-def check_disk_space(
-    path: str = "/", threshold_percent: float = 90.0
-) -> Dict[str, Any]:
+def check_disk_space(path: str = "/", threshold_percent: float = 90.0) -> Dict[str, Any]:
     """
     Check disk space for a given path and return status.
 

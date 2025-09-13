@@ -62,9 +62,7 @@ class SecurityUtils:
             "monkey",
         }
         if password.lower() in weak_passwords:
-            raise PasswordPolicyError(
-                "Password is too common. Please choose a stronger password"
-            )
+            raise PasswordPolicyError("Password is too common. Please choose a stronger password")
 
         # Prevent username in password (before other validations)
         if username and username.lower() in password.lower():
@@ -72,35 +70,21 @@ class SecurityUtils:
 
         min_length = current_app.config["PASSWORD_MIN_LENGTH"]
         if len(password) < min_length:
-            raise PasswordPolicyError(
-                f"Password must be at least {min_length} characters long"
-            )
+            raise PasswordPolicyError(f"Password must be at least {min_length} characters long")
 
-        if current_app.config["PASSWORD_REQUIRE_UPPERCASE"] and not re.search(
-            r"[A-Z]", password
-        ):
-            raise PasswordPolicyError(
-                "Password must contain at least one uppercase letter"
-            )
+        if current_app.config["PASSWORD_REQUIRE_UPPERCASE"] and not re.search(r"[A-Z]", password):
+            raise PasswordPolicyError("Password must contain at least one uppercase letter")
 
-        if current_app.config["PASSWORD_REQUIRE_LOWERCASE"] and not re.search(
-            r"[a-z]", password
-        ):
-            raise PasswordPolicyError(
-                "Password must contain at least one lowercase letter"
-            )
+        if current_app.config["PASSWORD_REQUIRE_LOWERCASE"] and not re.search(r"[a-z]", password):
+            raise PasswordPolicyError("Password must contain at least one lowercase letter")
 
-        if current_app.config["PASSWORD_REQUIRE_DIGITS"] and not re.search(
-            r"\d", password
-        ):
+        if current_app.config["PASSWORD_REQUIRE_DIGITS"] and not re.search(r"\d", password):
             raise PasswordPolicyError("Password must contain at least one digit")
 
         if current_app.config["PASSWORD_REQUIRE_SPECIAL"] and not re.search(
             r'[!@#$%^&*(),.?":{}|<>]', password
         ):
-            raise PasswordPolicyError(
-                "Password must contain at least one special character"
-            )
+            raise PasswordPolicyError("Password must contain at least one special character")
 
         return True
 
@@ -175,9 +159,7 @@ class SecurityUtils:
             dict: Decoded data or None if invalid
         """
         try:
-            payload = jwt.decode(
-                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
-            )
+            payload = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
             return payload["data"]
         except jwt.ExpiredSignatureError:
             return None
@@ -363,9 +345,7 @@ def validate_file_upload(filename, allowed_extensions=None, max_size=None):
 
     # Check file extension
     if allowed_extensions is None:
-        allowed_extensions = current_app.config.get(
-            "ALLOWED_EXTENSIONS", {"jar", "zip", "tar.gz"}
-        )
+        allowed_extensions = current_app.config.get("ALLOWED_EXTENSIONS", {"jar", "zip", "tar.gz"})
 
     # Handle compound extensions like .tar.gz
     filename_lower = filename.lower()
@@ -383,9 +363,7 @@ def validate_file_upload(filename, allowed_extensions=None, max_size=None):
         max_size = current_app.config.get("MAX_CONTENT_LENGTH", 16 * 1024 * 1024)
 
     if request.content_length and request.content_length > max_size:
-        raise SecurityError(
-            f"File size exceeds maximum allowed size of {max_size} bytes"
-        )
+        raise SecurityError(f"File size exceeds maximum allowed size of {max_size} bytes")
 
     return True
 

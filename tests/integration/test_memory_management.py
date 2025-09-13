@@ -183,9 +183,7 @@ class TestMemoryValidation:
             is_valid, error_msg, available = validate_memory_allocation(
                 2048, exclude_server_id=server.id
             )
-            assert (
-                is_valid is True
-            )  # Should be valid since we're excluding the existing allocation
+            assert is_valid is True  # Should be valid since we're excluding the existing allocation
             assert available == 8192 - 2048  # Should be based on new allocation only
 
 
@@ -236,9 +234,7 @@ class TestMemoryInServerCreation:
         """Test server creation with valid memory allocation."""
         with app.app_context():
             # Create admin user
-            admin = User(
-                username="admin_memory", password_hash="test_hash", is_admin=True
-            )
+            admin = User(username="admin_memory", password_hash="test_hash", is_admin=True)
             db.session.add(admin)
             db.session.commit()
 
@@ -248,13 +244,9 @@ class TestMemoryInServerCreation:
                 sess["_fresh"] = True
 
             # Mock the necessary functions
-            with patch(
-                "app.routes.server_routes.find_next_available_port"
-            ) as mock_port, patch(
+            with patch("app.routes.server_routes.find_next_available_port") as mock_port, patch(
                 "app.routes.server_routes.get_version_info"
-            ) as mock_version, patch(
-                "requests.get"
-            ) as mock_requests, patch(
+            ) as mock_version, patch("requests.get") as mock_requests, patch(
                 "subprocess.Popen"
             ) as mock_popen, patch(
                 "subprocess.check_output"
@@ -291,20 +283,14 @@ class TestMemoryInServerCreation:
                 mock_popen.return_value = mock_process
 
                 mock_file = MagicMock()
-                mock_file.__enter__.return_value.read.return_value = (
-                    "template {server_port}"
-                )
+                mock_file.__enter__.return_value.read.return_value = "template {server_port}"
                 mock_file.__enter__.return_value.write.return_value = None
                 mock_open.return_value = mock_file
 
                 # Mock file existence checks
                 def mock_exists_side_effect(path):
                     # Return True for server JAR file and EULA file
-                    if (
-                        "server.jar" in path
-                        or "eula.txt" in path
-                        or "server.properties" in path
-                    ):
+                    if "server.jar" in path or "eula.txt" in path or "server.properties" in path:
                         return True
                     return False
 
@@ -361,9 +347,7 @@ class TestMemoryInServerCreation:
         """Test server creation with invalid memory allocation."""
         with app.app_context():
             # Create admin user
-            admin = User(
-                username="admin_memory", password_hash="test_hash", is_admin=True
-            )
+            admin = User(username="admin_memory", password_hash="test_hash", is_admin=True)
             db.session.add(admin)
             db.session.commit()
 
@@ -392,9 +376,7 @@ class TestMemoryInServerCreation:
         """Test server creation with default memory (no memory_mb specified)."""
         with app.app_context():
             # Create admin user
-            admin = User(
-                username="admin_memory", password_hash="test_hash", is_admin=True
-            )
+            admin = User(username="admin_memory", password_hash="test_hash", is_admin=True)
             db.session.add(admin)
             db.session.commit()
 
@@ -404,13 +386,9 @@ class TestMemoryInServerCreation:
                 sess["_fresh"] = True
 
             # Mock the necessary functions
-            with patch(
-                "app.routes.server_routes.find_next_available_port"
-            ) as mock_port, patch(
+            with patch("app.routes.server_routes.find_next_available_port") as mock_port, patch(
                 "app.routes.server_routes.get_version_info"
-            ) as mock_version, patch(
-                "requests.get"
-            ) as mock_requests, patch(
+            ) as mock_version, patch("requests.get") as mock_requests, patch(
                 "subprocess.Popen"
             ) as mock_popen, patch(
                 "subprocess.check_output"
@@ -447,20 +425,14 @@ class TestMemoryInServerCreation:
                 mock_popen.return_value = mock_process
 
                 mock_file = MagicMock()
-                mock_file.__enter__.return_value.read.return_value = (
-                    "template {server_port}"
-                )
+                mock_file.__enter__.return_value.read.return_value = "template {server_port}"
                 mock_file.__enter__.return_value.write.return_value = None
                 mock_open.return_value = mock_file
 
                 # Mock file existence checks
                 def mock_exists_side_effect(path):
                     # Return True for server JAR file and EULA file
-                    if (
-                        "server.jar" in path
-                        or "eula.txt" in path
-                        or "server.properties" in path
-                    ):
+                    if "server.jar" in path or "eula.txt" in path or "server.properties" in path:
                         return True
                     return False
 
@@ -551,9 +523,7 @@ class TestMemoryEdgeCases:
         """Test memory validation when allocation equals total limit."""
         with app.app_context():
             is_valid, error_msg, available = validate_memory_allocation(8192)
-            assert (
-                is_valid is False
-            )  # Should fail because it exceeds max server memory (4096)
+            assert is_valid is False  # Should fail because it exceeds max server memory (4096)
 
     def test_memory_validation_with_multiple_servers(self, app, admin_user):
         """Test memory validation with multiple servers."""

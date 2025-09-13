@@ -55,9 +55,7 @@ def login():
         password = request.form.get("password", "")
 
         # Check rate limiting for this specific username
-        remaining_attempts = rate_limiter.get_remaining_attempts(
-            f"login_{username}", 5, 300
-        )
+        remaining_attempts = rate_limiter.get_remaining_attempts(f"login_{username}", 5, 300)
 
         if remaining_attempts == 0:
             flash("Too many login attempts. Please try again in 5 minutes.", "danger")
@@ -75,9 +73,7 @@ def login():
                 flash("Logged in successfully.", "success")
                 return redirect("/")
             else:
-                audit_log(
-                    "login_failed", {"username": username, "reason": "invalid_password"}
-                )
+                audit_log("login_failed", {"username": username, "reason": "invalid_password"})
                 flash("Invalid username or password.", "danger")
         else:
             audit_log(
@@ -316,8 +312,7 @@ def delete_user(user_id):
     # Check if user has servers
     if user.servers:
         flash(
-            f"Cannot delete user {user.username} - "
-            f"they have {len(user.servers)} server(s).",
+            f"Cannot delete user {user.username} - " f"they have {len(user.servers)} server(s).",
             "danger",
         )
         return redirect(url_for("auth.manage_users"))

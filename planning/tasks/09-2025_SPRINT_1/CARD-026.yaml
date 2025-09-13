@@ -1,0 +1,40 @@
+id: CARD-026
+title: Update development documentation for new pre-commit standards
+epic: Epic 7 – Development Workflow Optimization
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Update docs/pre-commit-setup.md with new configuration
+  - Update CONTRIBUTING.md with new line length standards
+  - Create bypass procedures for specific development cases
+  - Update README.md if needed to reflect new standards
+  - Document new development workflow for team
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-026]
+artifacts:
+  - docs/pre-commit-setup.md (updated)
+  - CONTRIBUTING.md (updated)
+  - docs/development-workflow.md (new)
+notes: |
+  Phase 3: Documentation Updates (2 hours)
+  
+  This card updates all development documentation to reflect the new
+  pre-commit standards and provides clear guidance for the development team.
+  
+  Documentation updates:
+  - Update pre-commit setup documentation
+  - Update contributing guidelines with new standards
+  - Create development workflow documentation
+  - Document bypass procedures for specific cases
+  - Update any README references to old standards
+  
+  Bypass procedures to document:
+  - Documentation commits: git commit --no-verify
+  - Rapid prototyping: git commit --no-verify
+  - Emergency fixes: git commit --no-verify
+  
+  This ensures the team understands the new standards and has clear
+  procedures for when bypasses are appropriate.

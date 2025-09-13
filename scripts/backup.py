@@ -80,9 +80,7 @@ class DatabaseBackup:
                 raise ValueError("Only SQLite databases are supported for restore")
 
             # Create backup of current database before restore
-            current_backup = (
-                f"{target_db}.pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            )
+            current_backup = f"{target_db}.pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             shutil.copy2(target_db, current_backup)
             print(f"Current database backed up to: {current_backup}")
 
@@ -95,9 +93,7 @@ class DatabaseBackup:
                 if metadata_path.exists():
                     with open(metadata_path, "r") as f:
                         metadata = json.load(f)
-                    print(
-                        f"Restored from backup created: {metadata.get('backup_timestamp')}"
-                    )
+                    print(f"Restored from backup created: {metadata.get('backup_timestamp')}")
             else:
                 raise ValueError("Restored database failed validation")
 
@@ -218,9 +214,7 @@ def main():
 
     # Cleanup command
     cleanup_parser = subparsers.add_parser("cleanup", help="Clean up old backups")
-    cleanup_parser.add_argument(
-        "--keep", type=int, default=10, help="Number of backups to keep"
-    )
+    cleanup_parser.add_argument("--keep", type=int, default=10, help="Number of backups to keep")
 
     args = parser.parse_args()
 

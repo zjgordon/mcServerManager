@@ -42,9 +42,7 @@ class UserFactory:
 
         user_data = {
             "username": username,
-            "password_hash": generate_password_hash(
-                password
-            ),  # pragma: allowlist secret
+            "password_hash": generate_password_hash(password),  # pragma: allowlist secret
             "is_admin": is_admin,
             "is_active": is_active,
             **kwargs,
@@ -57,18 +55,14 @@ class UserFactory:
         username: Optional[str] = None, password: str = "adminpass123", **kwargs
     ) -> User:
         """Create an admin user."""
-        return UserFactory.create(
-            username=username, password=password, is_admin=True, **kwargs
-        )
+        return UserFactory.create(username=username, password=password, is_admin=True, **kwargs)
 
     @staticmethod
     def create_regular(
         username: Optional[str] = None, password: str = "userpass123", **kwargs
     ) -> User:
         """Create a regular user."""
-        return UserFactory.create(
-            username=username, password=password, is_admin=False, **kwargs
-        )
+        return UserFactory.create(username=username, password=password, is_admin=False, **kwargs)
 
     @staticmethod
     def create_inactive(

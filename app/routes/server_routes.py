@@ -95,9 +95,7 @@ def home():
         memory_summary = get_memory_usage_summary()
 
         logger.debug(f"Loaded {len(servers)} servers for user {current_user.username}")
-        return render_template(
-            "home.html", servers=servers, memory_summary=memory_summary
-        )
+        return render_template("home.html", servers=servers, memory_summary=memory_summary)
     except Exception as e:
         logger.error(f"Error loading home page: {str(e)}")
         flash("Error loading server list. Please try again.", "danger")
@@ -149,14 +147,12 @@ def create():
         releases = [
             version["id"]
             for version in manifest.get("versions", [])
-            if version.get("type") == "release"
-            and version.get("id") not in excluded_versions
+            if version.get("type") == "release" and version.get("id") not in excluded_versions
         ]
         snapshots = [
             version["id"]
             for version in manifest.get("versions", [])
-            if version.get("type") == "snapshot"
-            and version.get("id") not in excluded_versions
+            if version.get("type") == "snapshot" and version.get("id") not in excluded_versions
         ]
 
         logger.info(f"Loaded {len(releases)} releases and {len(snapshots)} snapshots")
@@ -207,14 +203,11 @@ def configure_server():
 
         if difficulty not in valid_difficulties:
             raise ValidationError(
-                "Invalid difficulty selected. Please choose peaceful, "
-                "easy, normal, or hard."
+                "Invalid difficulty selected. Please choose peaceful, " "easy, normal, or hard."
             )
 
         if len(level_seed) > 100:
-            raise ValidationError(
-                "Level seed is too long. Maximum length is 100 characters."
-            )
+            raise ValidationError("Level seed is too long. Maximum length is 100 characters.")
 
         if len(motd) > 150:
             raise ValidationError("MOTD is too long. Maximum length is 150 characters.")
@@ -222,24 +215,20 @@ def configure_server():
         # Validate server name
         if not server_name or not is_valid_server_name(server_name):
             raise ValidationError(
-                "Invalid server name. Use only letters, numbers, "
-                "underscores, and hyphens."
+                "Invalid server name. Use only letters, numbers, " "underscores, and hyphens."
             )
 
         # Check for duplicate server name
         existing_server = Server.query.filter_by(server_name=server_name).first()
         if existing_server:
             raise ValidationError(
-                "A server with this name already exists. "
-                "Please choose a different name."
+                "A server with this name already exists. " "Please choose a different name."
             )
 
         # Validate memory allocation
         try:
             memory_config = get_memory_config()
-            memory_mb = int(
-                request.form.get("memory_mb", memory_config["default_server_mb"])
-            )
+            memory_mb = int(request.form.get("memory_mb", memory_config["default_server_mb"]))
         except (ValueError, TypeError, KeyError):
             # Fallback to default if there's any error
             memory_mb = 1024  # Default fallback
@@ -277,9 +266,7 @@ def configure_server():
         if not success:
             raise NetworkError(error or "Failed to fetch version metadata")
 
-        server_download_url = (
-            version_metadata.get("downloads", {}).get("server", {}).get("url")
-        )
+        server_download_url = version_metadata.get("downloads", {}).get("server", {}).get("url")
         if not server_download_url:
             raise ValidationError(f"No server download URL found for version {version}")
 
@@ -299,15 +286,11 @@ def configure_server():
                         f.write(chunk)
 
             # Verify the file was downloaded
-            if (
-                not os.path.exists(server_jar_path)
-                or os.path.getsize(server_jar_path) == 0
-            ):
+            if not os.path.exists(server_jar_path) or os.path.getsize(server_jar_path) == 0:
                 raise FileOperationError("Downloaded server JAR is empty or missing")
 
             logger.info(
-                f"Successfully downloaded server JAR "
-                f"({os.path.getsize(server_jar_path)} bytes)"
+                f"Successfully downloaded server JAR " f"({os.path.getsize(server_jar_path)} bytes)"
             )
 
         except requests.exceptions.RequestException as e:
@@ -339,9 +322,7 @@ def configure_server():
         except FileNotFoundError:
             raise FileOperationError("Server properties template file not found")
         except Exception as e:
-            raise FileOperationError(
-                f"Error processing server properties template: {str(e)}"
-            )
+            raise FileOperationError(f"Error processing server properties template: {str(e)}")
 
         # Write the formatted content to the server.properties file
         properties_file_path = os.path.join(server_dir, "server.properties")
@@ -351,9 +332,7 @@ def configure_server():
                 f.write(properties_content)
             logger.info(f"Created server.properties file: {properties_file_path}")
         except Exception as e:
-            raise FileOperationError(
-                f"Failed to write server.properties file: {str(e)}"
-            )
+            raise FileOperationError(f"Failed to write server.properties file: {str(e)}")
 
         # Add the server to the database with proper error handling
         new_server = Server(
@@ -377,17 +356,14 @@ def configure_server():
             with SafeDatabaseOperation(db.session) as session:
                 session.add(new_server)
                 # Session will be committed automatically by context manager
-            logger.info(
-                f"Server '{server_name}' added to database with ID {new_server.id}"
-            )
+            logger.info(f"Server '{server_name}' added to database with ID {new_server.id}")
         except DatabaseError as e:
             # Clean up created files if database operation fails
             try:
                 if os.path.exists(server_dir):
                     shutil.rmtree(server_dir)
                     logger.info(
-                        f"Cleaned up server directory after database error: "
-                        f"{server_dir}"
+                        f"Cleaned up server directory after database error: " f"{server_dir}"
                     )
             except Exception as cleanup_error:
                 logger.warning(f"Failed to cleanup server directory: {cleanup_error}")
@@ -409,9 +385,7 @@ def configure_server():
 
         # Run server for the first time to produce eula.txt with proper error handling
         try:
-            logger.info(
-                f"Running initial server startup to generate EULA for {server_name}"
-            )
+            logger.info(f"Running initial server startup to generate EULA for {server_name}")
             # Start the server to generate eula.txt
             process = subprocess.Popen(
                 ["java", "-jar", "server.jar", "nogui"],
@@ -428,9 +402,7 @@ def configure_server():
                 # Process has already terminated, get the error
                 stdout, stderr = process.communicate()
                 error_msg = stderr if stderr else stdout
-                logger.error(
-                    f"Server process terminated immediately. Error: {error_msg}"
-                )
+                logger.error(f"Server process terminated immediately. Error: {error_msg}")
                 flash(f"Server failed to start: {error_msg[:200]}", "danger")
                 return redirect(url_for("server.home"))
 
@@ -477,24 +449,17 @@ def configure_server():
                             f"redirecting to EULA page"
                         )
                         flash("You need to accept the EULA to proceed.", "info")
-                        return redirect(
-                            url_for("server.accept_eula", server_id=new_server.id)
-                        )
+                        return redirect(url_for("server.accept_eula", server_id=new_server.id))
                     elif "eula=true" in eula_content:
                         logger.info(f"EULA already accepted for server {server_name}")
             else:
                 logger.warning(
-                    f"EULA file not found for server {server_name}, "
-                    f"redirecting to EULA page"
+                    f"EULA file not found for server {server_name}, " f"redirecting to EULA page"
                 )
-                flash(
-                    "EULA file not found. You will need to accept the EULA.", "warning"
-                )
+                flash("EULA file not found. You will need to accept the EULA.", "warning")
                 return redirect(url_for("server.accept_eula", server_id=new_server.id))
 
-            logger.info(
-                f"Server '{server_name}' created successfully on port {server_port}"
-            )
+            logger.info(f"Server '{server_name}' created successfully on port {server_port}")
             flash(
                 f"Server {server_name} created successfully on port {server_port}!",
                 "success",
@@ -541,9 +506,7 @@ def start_server(server_id):
         )
         return redirect(url_for("server.home"))
 
-    logger.info(
-        f"User {current_user.username} attempting to start server ID {server_id}"
-    )
+    logger.info(f"User {current_user.username} attempting to start server ID {server_id}")
     server = check_server_access(server_id)
     if not server:
         return redirect(url_for("server.home"))
@@ -580,9 +543,7 @@ def start_server(server_id):
 
     # Check if the server is already running
     if server.status == "Running" and server.pid:
-        logger.info(
-            f"Server {server.server_name} is already running (PID: {server.pid})"
-        )
+        logger.info(f"Server {server.server_name} is already running (PID: {server.pid})")
         flash(f"Server {server.server_name} is already running.", "info")
         return redirect(url_for("server.home"))
 
@@ -603,9 +564,7 @@ def start_server(server_id):
         "nogui",
     ]
 
-    logger.info(
-        f"Starting server {server.server_name} with command: {' '.join(command)}"
-    )
+    logger.info(f"Starting server {server.server_name} with command: {' '.join(command)}")
 
     try:
         # Start the server
@@ -625,8 +584,7 @@ def start_server(server_id):
                 # Session will be committed automatically
 
             logger.info(
-                f"Server {server.server_name} started successfully "
-                f"with PID {process.pid}"
+                f"Server {server.server_name} started successfully " f"with PID {process.pid}"
             )
             flash(f"Server {server.server_name} started successfully.", "success")
 
@@ -636,9 +594,7 @@ def start_server(server_id):
                 process.terminate()
                 logger.warning("Terminated server process due to database error")
             except Exception as term_error:
-                logger.error(
-                    f"Failed to terminate process after database error: {term_error}"
-                )
+                logger.error(f"Failed to terminate process after database error: {term_error}")
             raise DatabaseError(f"Failed to update server status in database: {str(e)}")
 
     except subprocess.SubprocessError as e:
@@ -659,14 +615,10 @@ def stop_server(server_id):
     """Stop the server if running."""
     # Handle GET requests by redirecting to home page
     if request.method == "GET":
-        flash(
-            "Please use the Stop button on the server list to stop the server.", "info"
-        )
+        flash("Please use the Stop button on the server list to stop the server.", "info")
         return redirect(url_for("server.home"))
 
-    logger.info(
-        f"User {current_user.username} attempting to stop server ID {server_id}"
-    )
+    logger.info(f"User {current_user.username} attempting to stop server ID {server_id}")
     server = check_server_access(server_id)
     if not server:
         return redirect(url_for("server.home"))
@@ -709,9 +661,7 @@ def stop_server(server_id):
         except DatabaseError as e:
             logger.error(f"Database error updating server status: {str(e)}")
             # The process was stopped, but we couldn't update the database
-            raise DatabaseError(
-                f"Server was stopped but failed to update status: {str(e)}"
-            )
+            raise DatabaseError(f"Server was stopped but failed to update status: {str(e)}")
 
     except psutil.NoSuchProcess:
         logger.info(f"Process {pid} for server {server.server_name} was not running")
@@ -728,9 +678,7 @@ def stop_server(server_id):
 
     except psutil.AccessDenied:
         logger.error(f"Access denied when trying to stop process {pid}")
-        raise ServerError(
-            f"Permission denied when stopping server {server.server_name}"
-        )
+        raise ServerError(f"Permission denied when stopping server {server.server_name}")
 
     except Exception as e:
         logger.error(f"Unexpected error stopping server {server.server_name}: {str(e)}")

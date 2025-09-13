@@ -47,9 +47,7 @@ class TestServerRoutes:
         with patch("app.routes.server_routes.fetch_version_manifest") as mock_fetch:
             import requests
 
-            mock_fetch.side_effect = requests.exceptions.RequestException(
-                "Network error"
-            )
+            mock_fetch.side_effect = requests.exceptions.RequestException("Network error")
 
             response = authenticated_client.get("/create", follow_redirects=True)
             # The error message should be "Unexpected error: Network error" from
@@ -200,9 +198,7 @@ class TestServerRoutes:
         assert b"MOTD is too long" in response.data
 
     @patch("psutil.Process")
-    def test_start_server_success(
-        self, mock_psutil, authenticated_client, app, test_server
-    ):
+    def test_start_server_success(self, mock_psutil, authenticated_client, app, test_server):
         """Test starting a server successfully."""
         # Create EULA file
         server_dir = f"servers/{test_server.server_name}"
@@ -216,9 +212,7 @@ class TestServerRoutes:
             mock_process.pid = 12345
             mock_popen.return_value = mock_process
 
-            response = authenticated_client.post(
-                f"/start/{test_server.id}", follow_redirects=True
-            )
+            response = authenticated_client.post(f"/start/{test_server.id}", follow_redirects=True)
             assert response.status_code == 200
             # Check that we're on the home page after start attempt
             assert b"your minecraft servers" in response.data.lower()
@@ -228,9 +222,7 @@ class TestServerRoutes:
 
     def test_start_server_no_eula(self, authenticated_client, test_server):
         """Test starting server without EULA acceptance."""
-        response = authenticated_client.post(
-            f"/start/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/start/{test_server.id}", follow_redirects=True)
         # Check for flash message about EULA file not found
         assert b"EULA file not found" in response.data
 
@@ -243,9 +235,7 @@ class TestServerRoutes:
         with open(eula_path, "w") as f:
             f.write("eula=false\n")
 
-        response = authenticated_client.post(
-            f"/start/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/start/{test_server.id}", follow_redirects=True)
         assert b"must accept the EULA" in response.data
 
         # Cleanup
@@ -260,17 +250,13 @@ class TestServerRoutes:
             server.pid = 12345
             db.session.commit()
 
-        response = authenticated_client.post(
-            f"/start/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/start/{test_server.id}", follow_redirects=True)
         # Due to server status reconciliation, the server gets marked as not running
         # and the EULA error is shown instead
         assert b"EULA file not found" in response.data
 
     @patch("psutil.Process")
-    def test_stop_server_success(
-        self, mock_psutil, authenticated_client, app, test_server
-    ):
+    def test_stop_server_success(self, mock_psutil, authenticated_client, app, test_server):
         """Test stopping a running server."""
         # Set server as running
         with app.app_context():
@@ -283,9 +269,7 @@ class TestServerRoutes:
         mock_process = MagicMock()
         mock_psutil.return_value = mock_process
 
-        response = authenticated_client.post(
-            f"/stop/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/stop/{test_server.id}", follow_redirects=True)
         assert response.status_code == 200
         assert b"stopped successfully" in response.data
 
@@ -297,9 +281,7 @@ class TestServerRoutes:
 
     def test_stop_already_stopped_server(self, authenticated_client, test_server):
         """Test stopping a server that's already stopped."""
-        response = authenticated_client.post(
-            f"/stop/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/stop/{test_server.id}", follow_redirects=True)
         assert b"already stopped" in response.data
 
     @patch("psutil.Process")
@@ -318,9 +300,7 @@ class TestServerRoutes:
         # Mock psutil to raise NoSuchProcess
         mock_psutil.side_effect = mock_no_process
 
-        response = authenticated_client.post(
-            f"/stop/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/stop/{test_server.id}", follow_redirects=True)
         # Due to server status reconciliation, the server gets marked as not running
         # and the stop operation succeeds instead of failing
         assert b"Server testserver stopped successfully" in response.data
@@ -333,9 +313,7 @@ class TestServerRoutes:
         """Test deleting a server successfully."""
         mock_exists.return_value = True
 
-        response = authenticated_client.post(
-            f"/delete/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/delete/{test_server.id}", follow_redirects=True)
         assert response.status_code == 200
         assert b"deleted successfully" in response.data
 
@@ -362,9 +340,7 @@ class TestServerRoutes:
 
     def test_accept_eula_no_file(self, authenticated_client, test_server):
         """Test EULA acceptance when file doesn't exist."""
-        response = authenticated_client.get(
-            f"/accept_eula/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.get(f"/accept_eula/{test_server.id}", follow_redirects=True)
         assert b"eula.txt not found" in response.data
 
     def test_accept_eula_post(self, authenticated_client, test_server):

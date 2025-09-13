@@ -95,29 +95,21 @@ class AlertManager:
         """Set up default alert rules."""
         # CPU usage alerts
         self.add_rule(ThresholdAlert("high_cpu_usage", 80.0, 60))  # 80% for 1 minute
-        self.add_rule(
-            ThresholdAlert("critical_cpu_usage", 95.0, 30)
-        )  # 95% for 30 seconds
+        self.add_rule(ThresholdAlert("critical_cpu_usage", 95.0, 30))  # 95% for 30 seconds
 
         # Memory usage alerts
         self.add_rule(ThresholdAlert("high_memory_usage", 85.0, 60))  # 85% for 1 minute
-        self.add_rule(
-            ThresholdAlert("critical_memory_usage", 95.0, 30)
-        )  # 95% for 30 seconds
+        self.add_rule(ThresholdAlert("critical_memory_usage", 95.0, 30))  # 95% for 30 seconds
 
         # Disk space alerts
         self.add_rule(ThresholdAlert("low_disk_space", 90.0, 0))  # 90% immediately
         self.add_rule(ThresholdAlert("critical_disk_space", 95.0, 0))  # 95% immediately
 
         # Database connection alerts
-        self.add_rule(
-            ThresholdAlert("high_db_connections", 80, 60)
-        )  # 80 connections for 1 minute
+        self.add_rule(ThresholdAlert("high_db_connections", 80, 60))  # 80 connections for 1 minute
 
         # Error rate alerts
-        self.add_rule(
-            ThresholdAlert("high_error_rate", 10, 300)
-        )  # 10 errors in 5 minutes
+        self.add_rule(ThresholdAlert("high_error_rate", 10, 300))  # 10 errors in 5 minutes
 
     def add_rule(self, rule: AlertRule):
         """Add an alert rule."""
@@ -334,27 +326,19 @@ def check_system_alerts(metrics: Dict[str, Any]):
 
     # Memory usage alerts
     if "memory" in metrics and "usage_percent" in metrics["memory"]:
-        alert_manager.check_alert(
-            "high_memory_usage", metrics["memory"]["usage_percent"]
-        )
-        alert_manager.check_alert(
-            "critical_memory_usage", metrics["memory"]["usage_percent"]
-        )
+        alert_manager.check_alert("high_memory_usage", metrics["memory"]["usage_percent"])
+        alert_manager.check_alert("critical_memory_usage", metrics["memory"]["usage_percent"])
 
     # Disk space alerts
     if "disk" in metrics and "usage_percent" in metrics["disk"]:
         alert_manager.check_alert("low_disk_space", metrics["disk"]["usage_percent"])
-        alert_manager.check_alert(
-            "critical_disk_space", metrics["disk"]["usage_percent"]
-        )
+        alert_manager.check_alert("critical_disk_space", metrics["disk"]["usage_percent"])
 
 
 def check_database_alerts(pool_metrics: Dict[str, Any]):
     """Check database metrics against alert rules."""
     if "checked_out" in pool_metrics:
-        total_connections = pool_metrics.get("pool_size", 0) + pool_metrics.get(
-            "overflow", 0
-        )
+        total_connections = pool_metrics.get("pool_size", 0) + pool_metrics.get("overflow", 0)
         if total_connections > 0:
             usage_percent = (pool_metrics["checked_out"] / total_connections) * 100
             alert_manager.check_alert("high_db_connections", usage_percent)
@@ -362,9 +346,7 @@ def check_database_alerts(pool_metrics: Dict[str, Any]):
 
 def check_error_rate_alerts(error_count: int, time_window: int = 300):
     """Check error rate against alert rules."""
-    alert_manager.check_alert(
-        "high_error_rate", error_count, {"time_window": time_window}
-    )
+    alert_manager.check_alert("high_error_rate", error_count, {"time_window": time_window})
 
 
 def trigger_manual_alert(rule_name: str, message: str, context: Dict[str, Any] = None):

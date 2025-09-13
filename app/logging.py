@@ -30,9 +30,7 @@ class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON."""
         log_entry = {
-            "timestamp": datetime.fromtimestamp(
-                record.created, tz=timezone.utc
-            ).isoformat(),
+            "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -119,9 +117,7 @@ class StructuredLogger:
         security_handler.setFormatter(JSONFormatter())
         self.logger.addHandler(security_handler)
 
-    def _log_with_context(
-        self, level: int, message: str, extra_fields: Dict[str, Any] = None
-    ):
+    def _log_with_context(self, level: int, message: str, extra_fields: Dict[str, Any] = None):
         """Log with additional context information."""
         extra_fields = extra_fields or {}
 
@@ -187,13 +183,9 @@ class StructuredLogger:
             "action": action,
             "details": details or {},
         }
-        self._log_with_context(
-            logging.INFO, f"Security event: {action}", security_fields
-        )
+        self._log_with_context(logging.INFO, f"Security event: {action}", security_fields)
 
-    def performance_metric(
-        self, metric_name: str, value: Union[int, float], unit: str = None
-    ):
+    def performance_metric(self, metric_name: str, value: Union[int, float], unit: str = None):
         """Log performance metric."""
         perf_fields = {
             "event_type": "performance",
@@ -201,9 +193,7 @@ class StructuredLogger:
             "value": value,
             "unit": unit,
         }
-        self._log_with_context(
-            logging.INFO, f"Performance metric: {metric_name}", perf_fields
-        )
+        self._log_with_context(logging.INFO, f"Performance metric: {metric_name}", perf_fields)
 
     def error_tracking(self, error: Exception, context: Dict[str, Any] = None):
         """Track error with full context and stack trace."""
@@ -234,18 +224,12 @@ def log_performance(func):
         try:
             result = func(*args, **kwargs)
             execution_time = time.time() - start_time
-            logger.performance_metric(
-                f"{function_name}_execution_time", execution_time, "seconds"
-            )
+            logger.performance_metric(f"{function_name}_execution_time", execution_time, "seconds")
             return result
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.performance_metric(
-                f"{function_name}_execution_time", execution_time, "seconds"
-            )
-            logger.error_tracking(
-                e, {"function": function_name, "execution_time": execution_time}
-            )
+            logger.performance_metric(f"{function_name}_execution_time", execution_time, "seconds")
+            logger.error_tracking(e, {"function": function_name, "execution_time": execution_time})
             raise
 
     return wrapper

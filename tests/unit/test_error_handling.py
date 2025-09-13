@@ -454,9 +454,7 @@ class TestIntegrationErrorHandling:
             assert response.status_code in [200, 302]
 
     @patch("psutil.Process")
-    def test_server_stop_with_no_process(
-        self, mock_psutil, authenticated_client, app, test_server
-    ):
+    def test_server_stop_with_no_process(self, mock_psutil, authenticated_client, app, test_server):
         """Test stopping server when process doesn't exist."""
         # Set server as running in database
         with app.app_context():
@@ -468,9 +466,7 @@ class TestIntegrationErrorHandling:
         # Mock psutil to raise NoSuchProcess
         mock_psutil.side_effect = psutil.NoSuchProcess(99999)
 
-        response = authenticated_client.post(
-            f"/stop/{test_server.id}", follow_redirects=True
-        )
+        response = authenticated_client.post(f"/stop/{test_server.id}", follow_redirects=True)
 
         # Should handle the error gracefully and update status
         assert response.status_code == 200

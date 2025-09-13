@@ -86,8 +86,7 @@ def handle_network_error(func):
             raise NetworkError(error_msg)
         except requests.exceptions.ConnectionError:
             error_msg = (
-                "Failed to connect to remote server. "
-                "Please check your internet connection."
+                "Failed to connect to remote server. " "Please check your internet connection."
             )
             log_error(NetworkError(error_msg), {"function": func.__name__})
             raise NetworkError(error_msg)
@@ -137,9 +136,7 @@ def handle_database_operations(func):
         try:
             return func(*args, **kwargs)
         except IntegrityError as e:
-            error_msg = (
-                "Data integrity constraint violated. This item may already exist."
-            )
+            error_msg = "Data integrity constraint violated. This item may already exist."
             log_error(
                 DatabaseError(error_msg),
                 {"function": func.__name__, "original_error": str(e)},
@@ -192,15 +189,11 @@ def safe_execute(func, *args, **kwargs):
         result = func(*args, **kwargs)
         return True, result, None
     except AppError as e:
-        log_error(
-            e, {"function": func.__name__ if hasattr(func, "__name__") else "unknown"}
-        )
+        log_error(e, {"function": func.__name__ if hasattr(func, "__name__") else "unknown"})
         return False, None, e.message
     except Exception as e:
         error_msg = f"Unexpected error: {str(e)}"
-        log_error(
-            e, {"function": func.__name__ if hasattr(func, "__name__") else "unknown"}
-        )
+        log_error(e, {"function": func.__name__ if hasattr(func, "__name__") else "unknown"})
         return False, None, error_msg
 
 

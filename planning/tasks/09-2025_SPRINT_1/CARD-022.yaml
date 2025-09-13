@@ -1,33 +1,35 @@
 id: CARD-022
-title: Create comprehensive development documentation
-epic: Epic 6 – Documentation and Knowledge Transfer
+title: Implement immediate pre-commit relief - Phase 1
+epic: Epic 7 – Development Workflow Optimization
 sprint: 09-2025_SPRINT_1
 status: todo
 owner: cursor
 links: []
 acceptance:
-  - Detailed setup instructions created
-  - Environment requirements documented
-  - Troubleshooting guides added
-  - Development workflow guides created
-  - Tool configuration documentation added
+  - Update line length limits to 100 characters for Python
+  - Remove markdownlint hook from pre-commit config
+  - Simplify flake8 ignore patterns to include E501, F401
+  - Remove security hooks (detect-secrets, semgrep)
+  - Pre-commit runs successfully on all files
   - Update planning/meta/PROJECT_HISTORY.md with log entry
   - Update meta/PROJECT_STATUS.md with one-liner
   - Commit follows Conventional Commits with [CARD-022]
 artifacts:
-  - docs/setup.md
-  - docs/development.md
-  - docs/troubleshooting.md
-  - docs/tools.md
-  - README.md (updated)
+  - .pre-commit-config.yaml (updated)
+  - pyproject.toml (updated)
 notes: |
-  Development documentation:
-  - Complete setup instructions for new developers
-  - Environment requirements and dependencies
-  - Troubleshooting guides for common issues
-  - Development workflow and best practices
-  - Tool configuration and usage guides
-  - Code organization and architecture
-  - Testing strategies and guidelines
-  - Deployment and maintenance procedures
-
+  Phase 1: Immediate Relief (1-2 hours)
+  
+  This card implements the most critical changes to provide immediate relief
+  from pre-commit friction:
+  
+  Changes:
+  - Python line length: 88 → 100 characters
+  - Remove markdownlint hook (major source of documentation friction)
+  - Add E501, F401 to flake8 ignore patterns
+  - Remove detect-secrets and semgrep hooks
+  - Update pyproject.toml to match new line length standards
+  
+  This addresses the core issue of agents being stumped by simple line length
+  issues and creates a more development-friendly environment for the Minecraft
+  server management application.

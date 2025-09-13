@@ -64,9 +64,7 @@ class TestPasswordPolicy:
         """Test that password cannot contain username."""
         with app.app_context():
             # Test password containing username
-            with pytest.raises(
-                PasswordPolicyError, match="cannot contain your username"
-            ):
+            with pytest.raises(PasswordPolicyError, match="cannot contain your username"):
                 SecurityUtils.validate_password("admin123", "admin")
 
             # Test valid password
@@ -275,9 +273,7 @@ class TestAuditLogging:
                         call_args = mock_logger.call_args
                         assert call_args[0][0] == "test_action"  # action
                         assert call_args[0][1]["user_id"] == 123  # user_id
-                        assert (
-                            call_args[0][1]["ip_address"] == "192.168.1.100"
-                        )  # ip_address
+                        assert call_args[0][1]["ip_address"] == "192.168.1.100"  # ip_address
 
 
 class TestCSRFProtection:

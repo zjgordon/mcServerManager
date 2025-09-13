@@ -1,33 +1,33 @@
 id: CARD-023
-title: Create developer onboarding materials and training
-epic: Epic 6 – Documentation and Knowledge Transfer
+title: Update line length standards across all configuration files
+epic: Epic 7 – Development Workflow Optimization
 sprint: 09-2025_SPRINT_1
 status: todo
 owner: cursor
 links: []
 acceptance:
-  - Developer onboarding guide created
-  - Project overview documentation added
-  - Development environment setup guide created
-  - Tool usage guides added
-  - Best practices guide created
+  - Black configuration updated to 100 character line length
+  - isort configuration updated to 100 character line length
+  - flake8 configuration updated to 100 character line length
+  - All Python files pass new line length standards
+  - Configuration consistency verified across all tools
   - Update planning/meta/PROJECT_HISTORY.md with log entry
   - Update meta/PROJECT_STATUS.md with one-liner
   - Commit follows Conventional Commits with [CARD-023]
 artifacts:
-  - docs/onboarding.md
-  - docs/project-overview.md
-  - docs/best-practices.md
-  - docs/training-materials.md
-  - docs/faq.md
+  - pyproject.toml (line length updates)
+  - .pre-commit-config.yaml (line length updates)
 notes: |
-  Onboarding materials:
-  - Step-by-step developer onboarding guide
-  - Project overview and architecture
-  - Development environment setup
-  - Tool usage and configuration
-  - Best practices and coding standards
-  - Training materials and tutorials
-  - FAQ and common issues
-  - Knowledge base and resources
-
+  This card ensures consistent line length standards across all Python
+  formatting and linting tools.
+  
+  Specific updates:
+  - [tool.black] line-length = 100
+  - [tool.isort] line_length = 100
+  - flake8 max-line-length = 100
+  - Verify all Python files comply with new standards
+  
+  This eliminates the line length conflicts that have been causing issues
+  for agents and creates a more reasonable standard for Minecraft server
+  management code (which often involves long configuration strings and
+  server names).

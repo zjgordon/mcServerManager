@@ -18,9 +18,7 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash(
-                    "testpass"
-                ),  # pragma: allowlist secret
+                password_hash=generate_password_hash("testpass"),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -41,9 +39,7 @@ class TestUserModel:
             # Create first user
             user1 = User(
                 username="testuser",
-                password_hash=generate_password_hash(
-                    "pass1"
-                ),  # pragma: allowlist secret
+                password_hash=generate_password_hash("pass1"),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user1)
@@ -52,9 +48,7 @@ class TestUserModel:
             # Try to create second user with same username
             user2 = User(
                 username="testuser",
-                password_hash=generate_password_hash(
-                    "pass2"
-                ),  # pragma: allowlist secret
+                password_hash=generate_password_hash("pass2"),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user2)
@@ -68,9 +62,7 @@ class TestUserModel:
             # Create admin user
             admin = User(
                 username="admin_models",
-                password_hash=generate_password_hash(
-                    "adminpass"
-                ),  # pragma: allowlist secret
+                password_hash=generate_password_hash("adminpass"),  # pragma: allowlist secret
                 is_admin=True,
             )
             db.session.add(admin)
@@ -78,9 +70,7 @@ class TestUserModel:
             # Create regular user
             user = User(
                 username="user",
-                password_hash=generate_password_hash(
-                    "userpass"
-                ),  # pragma: allowlist secret
+                password_hash=generate_password_hash("userpass"),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -98,9 +88,7 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash(
-                    "testpass"
-                )  # pragma: allowlist secret
+                password_hash=generate_password_hash("testpass")  # pragma: allowlist secret
                 # is_admin not specified
             )
             db.session.add(user)
@@ -124,9 +112,7 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash(
-                    "testpass"
-                ),  # pragma: allowlist secret
+                password_hash=generate_password_hash("testpass"),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)

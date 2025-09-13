@@ -36,9 +36,7 @@ def get_config() -> Type[BaseConfig]:
     }
 
     if env not in config_map:
-        raise ValueError(
-            f"Unsupported FLASK_ENV: {env}. Must be one of: {list(config_map.keys())}"
-        )
+        raise ValueError(f"Unsupported FLASK_ENV: {env}. Must be one of: {list(config_map.keys())}")
 
     return config_map[env]
 

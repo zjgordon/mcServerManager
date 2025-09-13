@@ -219,9 +219,7 @@ class TestUserManagement:
         """Test successful user addition by admin."""
         with app.app_context():
             # Create admin user
-            admin = User(
-                username="admin_user_mgmt", password_hash="hash", is_admin=True
-            )
+            admin = User(username="admin_user_mgmt", password_hash="hash", is_admin=True)
             db.session.add(admin)
             db.session.commit()
 
@@ -253,9 +251,7 @@ class TestUserManagement:
         """Test manage users page access."""
         with app.app_context():
             # Create admin user
-            admin = User(
-                username="admin_user_mgmt", password_hash="hash", is_admin=True
-            )
+            admin = User(username="admin_user_mgmt", password_hash="hash", is_admin=True)
             db.session.add(admin)
             db.session.commit()
 
@@ -272,9 +268,7 @@ class TestUserManagement:
         """Test user editing functionality."""
         with app.app_context():
             # Create admin and regular user
-            admin = User(
-                username="admin_user_mgmt", password_hash="hash", is_admin=True
-            )
+            admin = User(username="admin_user_mgmt", password_hash="hash", is_admin=True)
             user = User(username="testuser", password_hash="hash", is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()
@@ -307,9 +301,7 @@ class TestUserManagement:
         """Test user deletion functionality."""
         with app.app_context():
             # Create admin and regular user
-            admin = User(
-                username="admin_user_mgmt", password_hash="hash", is_admin=True
-            )
+            admin = User(username="admin_user_mgmt", password_hash="hash", is_admin=True)
             user = User(username="testuser", password_hash="hash", is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()
@@ -330,9 +322,7 @@ class TestUserManagement:
         """Test that users with servers cannot be deleted."""
         with app.app_context():
             # Create admin and user first
-            admin = User(
-                username="admin_user_mgmt", password_hash="hash", is_admin=True
-            )
+            admin = User(username="admin_user_mgmt", password_hash="hash", is_admin=True)
             user = User(username="testuser", password_hash="hash", is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()
@@ -379,13 +369,9 @@ class TestServerOwnership:
                 sess["_fresh"] = True
 
             # Mock server creation process
-            with patch(
-                "app.routes.server_routes.find_next_available_port"
-            ) as mock_port, patch(
+            with patch("app.routes.server_routes.find_next_available_port") as mock_port, patch(
                 "app.routes.server_routes.get_version_info"
-            ) as mock_version, patch(
-                "requests.get"
-            ) as mock_requests, patch(
+            ) as mock_version, patch("requests.get") as mock_requests, patch(
                 "subprocess.Popen"
             ) as mock_popen, patch(
                 "subprocess.check_output"
@@ -422,20 +408,14 @@ class TestServerOwnership:
                 mock_popen.return_value = mock_process
 
                 mock_file = MagicMock()
-                mock_file.__enter__.return_value.read.return_value = (
-                    "template {server_port}"
-                )
+                mock_file.__enter__.return_value.read.return_value = "template {server_port}"
                 mock_file.__enter__.return_value.write.return_value = None
                 mock_open.return_value = mock_file
 
                 # Mock file existence checks
                 def mock_exists_side_effect(path):
                     # Return True for server JAR file and EULA file
-                    if (
-                        "server.jar" in path
-                        or "eula.txt" in path
-                        or "server.properties" in path
-                    ):
+                    if "server.jar" in path or "eula.txt" in path or "server.properties" in path:
                         return True
                     return False
 
@@ -527,9 +507,7 @@ class TestServerOwnership:
         """Test that admins can access all servers."""
         with app.app_context():
             # Create admin and regular user
-            admin = User(
-                username="admin_user_mgmt", password_hash="hash", is_admin=True
-            )
+            admin = User(username="admin_user_mgmt", password_hash="hash", is_admin=True)
             user = User(username="user", password_hash="hash", is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()

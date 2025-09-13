@@ -126,9 +126,7 @@ def cleanup_orphaned_data():
     """Clean up orphaned data (servers without owners, etc.)."""
     # Find servers with non-existent owners
     orphaned_servers = (
-        db.session.query(Server)
-        .filter(~Server.owner_id.in_(db.session.query(User.id)))
-        .all()
+        db.session.query(Server).filter(~Server.owner_id.in_(db.session.query(User.id))).all()
     )
 
     for server in orphaned_servers:
@@ -147,9 +145,7 @@ def validate_test_data_integrity() -> bool:
     try:
         # Check for orphaned servers
         orphaned_count = (
-            db.session.query(Server)
-            .filter(~Server.owner_id.in_(db.session.query(User.id)))
-            .count()
+            db.session.query(Server).filter(~Server.owner_id.in_(db.session.query(User.id))).count()
         )
 
         if orphaned_count > 0:
@@ -163,9 +159,7 @@ def validate_test_data_integrity() -> bool:
 
         # Check for invalid ports
         invalid_ports = (
-            db.session.query(Server)
-            .filter(Server.port < 1 or Server.port > 65535)
-            .count()
+            db.session.query(Server).filter(Server.port < 1 or Server.port > 65535).count()
         )
 
         if invalid_ports > 0:

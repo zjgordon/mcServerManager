@@ -154,9 +154,7 @@ def assert_database_state(
         user_count = User.query.count()
         server_count = Server.query.count()
 
-        assert (
-            user_count == expected_users
-        ), f"Expected {expected_users} users, got {user_count}"
+        assert user_count == expected_users, f"Expected {expected_users} users, got {user_count}"
         assert (
             server_count == expected_servers
         ), f"Expected {expected_servers} servers, got {server_count}"
@@ -190,9 +188,7 @@ def assert_user_exists(
             assert user.is_admin == is_admin, f"User {username} admin status mismatch"
 
         if is_active is not None:
-            assert (
-                user.is_active == is_active
-            ), f"User {username} active status mismatch"
+            assert user.is_active == is_active, f"User {username} active status mismatch"
 
         return True
 
@@ -224,9 +220,7 @@ def assert_server_exists(
         if owner_username is not None:
             owner = User.query.get(server.owner_id)
             assert owner is not None, f"Server {server_name} has no owner"
-            assert (
-                owner.username == owner_username
-            ), f"Server {server_name} owner mismatch"
+            assert owner.username == owner_username, f"Server {server_name} owner mismatch"
 
         if status is not None:
             assert server.status == status, f"Server {server_name} status mismatch"

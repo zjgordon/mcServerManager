@@ -8,12 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.error_handlers import (
-    FileOperationError,
-    NetworkError,
-    ServerError,
-    ValidationError,
-)
+from app.error_handlers import FileOperationError, NetworkError, ServerError, ValidationError
 from app.extensions import db
 from app.models import Server
 from app.utils import (
@@ -240,9 +235,7 @@ class TestUtilityFunctions:
             temp_file = f.name
 
         try:
-            with pytest.raises(
-                FileOperationError, match="Failed to load exclusion list"
-            ):
+            with pytest.raises(FileOperationError, match="Failed to load exclusion list"):
                 load_exclusion_list(temp_file)
         finally:
             os.unlink(temp_file)

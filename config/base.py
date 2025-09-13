@@ -15,9 +15,7 @@ class BaseConfig:
 
     # Security Configuration
     SECRET_KEY = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL") or "sqlite:///minecraft_manager.db"
-    )
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "sqlite:///minecraft_manager.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # CSRF Protection
@@ -25,9 +23,7 @@ class BaseConfig:
     WTF_CSRF_TIME_LIMIT = 3600  # 1 hour
 
     # Session Security
-    SESSION_COOKIE_SECURE = (
-        os.environ.get("SESSION_COOKIE_SECURE", "False").lower() == "true"
-    )
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False").lower() == "true"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
@@ -75,9 +71,7 @@ class BaseConfig:
     SERVER_HOSTNAME = os.environ.get("SERVER_HOSTNAME", "localhost")
 
     # Memory Management Configuration
-    MAX_TOTAL_MEMORY_MB = int(
-        os.environ.get("MAX_TOTAL_MEMORY_MB", "8192")
-    )  # Default 8GB total
+    MAX_TOTAL_MEMORY_MB = int(os.environ.get("MAX_TOTAL_MEMORY_MB", "8192"))  # Default 8GB total
     DEFAULT_SERVER_MEMORY_MB = int(
         os.environ.get("DEFAULT_SERVER_MEMORY_MB", "1024")
     )  # Default 1GB per server
