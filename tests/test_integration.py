@@ -14,19 +14,10 @@ from werkzeug.security import generate_password_hash
 class TestCompleteWorkflows:
     """Test complete user workflows."""
     
-    def test_complete_server_lifecycle(self, client, app):
+    def test_complete_server_lifecycle(self, client, app, admin_user):
         """Test the complete lifecycle of a server from creation to deletion."""
         with app.app_context():
-            # Create admin user
-            admin = User(
-                username='admin_integration',
-                password_hash=generate_password_hash('adminpass'),
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            
-            # Login as admin
+            # Login as admin using the fixture
             response = client.post('/login', data={
                 'username': 'admin',
                 'password': 'adminpass'
@@ -179,19 +170,10 @@ class TestCompleteWorkflows:
             response = client.get('/logout', follow_redirects=True)
             assert b'logged out' in response.data.lower()
     
-    def test_multi_user_workflow(self, client, app):
+    def test_multi_user_workflow(self, client, app, admin_user):
         """Test workflow with multiple users."""
         with app.app_context():
-            # Create admin user
-            admin = User(
-                username='admin_integration',
-                password_hash=generate_password_hash('adminpass'),
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            
-            # Login as admin
+            # Login as admin using the fixture
             client.post('/login', data={
                 'username': 'admin',
                 'password': 'adminpass'
@@ -239,21 +221,12 @@ class TestCompleteWorkflows:
             }, follow_redirects=True)
             assert b'Logged in successfully' in response.data
     
-    def test_error_recovery_workflow(self, client, app):
+    def test_error_recovery_workflow(self, client, app, admin_user):
         """Test workflow with various error conditions."""
         with app.app_context():
-            # Create admin user
-            admin = User(
-                username='admin_integration',
-                password_hash=generate_password_hash('adminpass'),
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            
-            # Login
+            # Login using the fixture
             client.post('/login', data={
-                'username': 'admin_integration',
+                'username': 'admin',
                 'password': 'adminpass'
             })
             
@@ -285,42 +258,33 @@ class TestCompleteWorkflows:
             }, query_string={'version_type': 'release', 'version': '1.20.1'})
             assert b'Invalid gamemode selected' in response.data
     
-    def test_concurrent_server_operations(self, client, app):
+    def test_concurrent_server_operations(self, client, app, admin_user):
         """Test handling of concurrent server operations."""
         with app.app_context():
-            # Create admin first
-            admin = User(
-                username='admin_integration',
-                password_hash=generate_password_hash('adminpass'),
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            
-            # Create servers with admin.id
+            # Create servers with admin_user.id
             server1 = Server(
-                server_name='server1',
+                server_name='concurrentserver1',
                 version='1.20.1',
                 port=25565,
                 status='Stopped',
-                owner_id=admin.id
+                owner_id=admin_user.id
             )
             
             server2 = Server(
-                server_name='server2',
+                server_name='concurrentserver2',
                 version='1.20.1',
                 port=25575,
                 status='Running',
                 pid=12345,
-                owner_id=admin.id
+                owner_id=admin_user.id
             )
             
             db.session.add_all([server1, server2])
             db.session.commit()
             
-            # Login
+            # Login using the fixture
             client.post('/login', data={
-                'username': 'admin_integration',
+                'username': 'admin',
                 'password': 'adminpass'
             })
             
@@ -332,20 +296,10 @@ class TestCompleteWorkflows:
             response = client.post(f'/stop/{server1.id}', follow_redirects=True)
             assert b'already stopped' in response.data
     
-    def test_data_persistence_workflow(self, client, app):
+    def test_data_persistence_workflow(self, client, app, admin_user):
         """Test that data persists correctly across operations."""
         with app.app_context():
-            # Create admin
-            admin = User(
-                username='admin_integration',
-                password_hash=generate_password_hash('adminpass'),
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            admin_id = admin.id
-            
-            # Login
+            # Login using the fixture
             client.post('/login', data={
                 'username': 'admin',
                 'password': 'adminpass'
@@ -404,7 +358,7 @@ class TestCompleteWorkflows:
             })
             
             # Verify data still exists
-            admin = User.query.get(admin_id)
+            admin = User.query.get(admin_user.id)
             assert admin is not None
             assert admin.username == 'admin'
             assert admin.is_admin is True
@@ -420,19 +374,10 @@ class TestCompleteWorkflows:
             assert server.spawn_monsters is True
             assert server.motd == 'Persistence Test Server'
     
-    def test_edge_case_workflows(self, client, app):
+    def test_edge_case_workflows(self, client, app, admin_user):
         """Test edge cases and boundary conditions."""
         with app.app_context():
-            # Create admin
-            admin = User(
-                username='admin_integration',
-                password_hash=generate_password_hash('adminpass'),
-                is_admin=True
-            )
-            db.session.add(admin)
-            db.session.commit()
-            
-            # Login
+            # Login using the fixture
             client.post('/login', data={
                 'username': 'admin',
                 'password': 'adminpass'

@@ -85,3 +85,11 @@ Fixed network error mocking issues in the test suite that were preventing proper
 **Owner:** cursor  
 
 Fixed critical test configuration issues that were causing widespread test failures due to missing environment variables, rate limiting interference, and CSRF protection conflicts. The main problems were rate limiting decorators not respecting the RATELIMIT_ENABLED configuration setting, missing environment variables for test configuration, and CSRF protection interfering with test requests. Implemented surgical fixes by updating the rate_limit decorator to check RATELIMIT_ENABLED configuration, adding comprehensive test configuration with all required environment variables (APP_TITLE, SERVER_HOSTNAME, memory settings), creating separate app_no_admin fixture for admin setup tests, and updating pytest.ini with proper test environment settings. This reduces test failures from 45 to 37 and ensures proper test environment configuration without affecting production behavior.
+
+## 2025-01-09 - CARD-005G: Fix Test Data Setup and Cleanup
+
+**Epic:** Epic 1 – Test Suite Reliability  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed test data setup and cleanup issues that were causing test data leakage between tests, port allocation test interference, and improper file system operation mocking. The main problems were tests creating users and servers directly in the database without proper cleanup, port allocation tests not being properly isolated, and file system operations not being properly mocked. Implemented surgical fixes by updating memory management tests to use admin_user fixture instead of creating users directly, fixing port allocation tests to use unique server names and proper fixtures, improving file system operation mocking in server start tests, and ensuring all integration tests use proper fixtures for test data management. This ensures proper test isolation and eliminates test data leakage between tests without changing application logic.

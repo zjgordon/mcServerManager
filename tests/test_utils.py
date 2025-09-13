@@ -134,6 +134,7 @@ class TestUtilityFunctions:
                 
                 port = find_next_available_port()
                 assert port == 25575  # Should skip 25565 and return 25575
+                # Should check 25575 since 25565 is assigned
                 mock_available.assert_called_once_with(25575)
     
     def test_find_next_available_port_all_unavailable(self, app):
@@ -246,7 +247,7 @@ class TestPortAllocation:
             ports_to_occupy = [25565, 25575, 25585]
             for i, port in enumerate(ports_to_occupy):
                 server = Server(
-                    server_name=f'testserver{i}',
+                    server_name=f'porttestserver{i}',
                     version='1.20.1',
                     port=port,
                     status='Stopped',
@@ -268,7 +269,7 @@ class TestPortAllocation:
             # Fill up many ports
             for i in range(19):  # Fill up to just before the limit
                 server = Server(
-                    server_name=f'testserver{i}',
+                    server_name=f'edgecasetestserver{i}',
                     version='1.20.1',
                     port=25565 + (i * 10),
                     status='Stopped',
@@ -290,7 +291,7 @@ class TestPortAllocation:
             # Fill up all 20 slots in the range
             for i in range(20):
                 server = Server(
-                    server_name=f'testserver{i}',
+                    server_name=f'alltakentestserver{i}',
                     version='1.20.1',
                     port=25565 + (i * 10),
                     status='Stopped',

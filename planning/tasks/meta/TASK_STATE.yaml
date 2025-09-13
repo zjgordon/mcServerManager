@@ -1,10 +1,9 @@
-active_card: CARD-005G
+active_card: CARD-005H
 breadcrumb:
-  step: 'CARD-005F completed - test configuration issues fixed, resolving rate limiting and environment variable problems'
-  last_commit: 'fix: [CARD-005F] Fix test configuration issues'
-  next_action: 'Start at CARD-005G - Next test suite reliability improvement'
+  step: 'CARD-005G completed - test data setup and cleanup issues fixed, ensuring proper test isolation and eliminating data leakage'
+  last_commit: 'fix: [CARD-005G] Fix test data setup and cleanup issues'
+  next_action: 'Start at CARD-005H - Next test suite reliability improvement'
 queue:
-  - CARD-005G
   - CARD-005H
   - CARD-005I
   - CARD-005J
