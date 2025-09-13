@@ -801,42 +801,68 @@ class BackupScheduler:
                 "checksum": None,
             }
 
-    def _cleanup_old_backups(self, server_id: int, backup_dir: str):
-        """Clean up old backups based on retention policy."""
+    def cleanup_old_backups(self, server_id: int) -> Dict[str, Any]:
+        """
+        Clean up old backups based on retention policies with safety checks.
+
+        Args:
+            server_id: ID of the server to clean up backups for
+
+        Returns:
+            Dict containing cleanup results and statistics
+        """
         try:
             backup_schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
             if not backup_schedule:
-                return
+                return {"success": False, "error": "No backup schedule found"}
 
-            retention_days = backup_schedule.retention_days
-            cutoff_time = datetime.utcnow().timestamp() - (retention_days * 24 * 3600)
+            server = Server.query.get(server_id)
+            if not server:
+                return {"success": False, "error": "Server not found"}
 
+            backup_dir = os.path.join("backups", server.server_name)
             if not os.path.exists(backup_dir):
-                return
+                return {"success": True, "message": "No backup directory found", "removed_count": 0}
 
-            removed_count = 0
-            for filename in os.listdir(backup_dir):
-                if filename.endswith(".tar.gz") and filename.startswith(
-                    f"server_{server_id}_backup_"
-                ):
-                    filepath = os.path.join(backup_dir, filename)
-                    try:
-                        file_mtime = os.path.getmtime(filepath)
-                        if file_mtime < cutoff_time:
-                            os.remove(filepath)
-                            removed_count += 1
-                    except OSError:
-                        continue
+            # Get all backup files for this server
+            backup_files = self._get_backup_files(backup_dir, server.server_name)
+            if len(backup_files) <= 1:
+                return {
+                    "success": True,
+                    "message": "Preserving minimum backups",
+                    "removed_count": 0,
+                }
 
-            if removed_count > 0:
-                self.logger.info(
-                    f"Cleaned up {removed_count} old backups for server {server_id}",
-                    {
-                        "event_type": "backup_cleanup",
-                        "server_id": server_id,
-                        "removed_count": removed_count,
-                    },
-                )
+            # Apply retention policies
+            retention_result = self._apply_retention_policies(
+                backup_files, backup_schedule.retention_days
+            )
+
+            # Check disk space and apply emergency cleanup if needed
+            disk_result = self._check_disk_space_and_cleanup(backup_dir, backup_files)
+
+            # Combine results
+            total_removed = retention_result["removed_count"] + disk_result["removed_count"]
+
+            self.logger.info(
+                f"Backup cleanup completed for server {server_id}",
+                {
+                    "event_type": "backup_cleanup_completed",
+                    "server_id": server_id,
+                    "total_removed": total_removed,
+                    "retention_removed": retention_result["removed_count"],
+                    "disk_cleanup_removed": disk_result["removed_count"],
+                    "remaining_backups": len(backup_files) - total_removed,
+                },
+            )
+
+            return {
+                "success": True,
+                "removed_count": total_removed,
+                "retention_removed": retention_result["removed_count"],
+                "disk_cleanup_removed": disk_result["removed_count"],
+                "remaining_backups": len(backup_files) - total_removed,
+            }
 
         except Exception as e:
             self.logger.error_tracking(
@@ -847,6 +873,154 @@ class BackupScheduler:
                     "action": "cleanup_old_backups",
                 },
             )
+            return {"success": False, "error": str(e)}
+
+    def _cleanup_old_backups(self, server_id: int, backup_dir: str):
+        """Legacy method - redirects to new cleanup_old_backups."""
+        result = self.cleanup_old_backups(server_id)
+        if not result["success"]:
+            self.logger.error(
+                f"Backup cleanup failed for server {server_id}: {result.get('error')}",
+                {"event_type": "backup_cleanup_error", "server_id": server_id},
+            )
+
+    def _get_backup_files(self, backup_dir: str, server_name: str) -> List[Dict[str, Any]]:
+        """Get list of backup files with metadata."""
+        backup_files = []
+
+        for filename in os.listdir(backup_dir):
+            if filename.endswith(".tar.gz") and filename.startswith(f"{server_name}_backup_"):
+                filepath = os.path.join(backup_dir, filename)
+                try:
+                    stat = os.stat(filepath)
+                    backup_files.append(
+                        {
+                            "filename": filename,
+                            "filepath": filepath,
+                            "size": stat.st_size,
+                            "mtime": stat.st_mtime,
+                            "created": datetime.fromtimestamp(stat.st_mtime),
+                        }
+                    )
+                except OSError:
+                    continue
+
+        # Sort by modification time (newest first)
+        backup_files.sort(key=lambda x: x["mtime"], reverse=True)
+        return backup_files
+
+    def _apply_retention_policies(
+        self, backup_files: List[Dict[str, Any]], retention_days: int
+    ) -> Dict[str, Any]:
+        """Apply retention policies to backup files."""
+        cutoff_time = datetime.utcnow().timestamp() - (retention_days * 24 * 3600)
+        removed_count = 0
+        removed_files = []
+
+        for backup_file in backup_files:
+            # Safety check: Always keep at least one backup
+            if len(backup_files) - removed_count <= 1:
+                break
+
+            # Apply time-based retention
+            if backup_file["mtime"] < cutoff_time:
+                try:
+                    os.remove(backup_file["filepath"])
+                    removed_count += 1
+                    removed_files.append(backup_file["filename"])
+
+                    self.logger.info(
+                        f"Removed old backup: {backup_file['filename']}",
+                        {
+                            "event_type": "backup_removed",
+                            "filename": backup_file["filename"],
+                            "reason": "retention_policy",
+                            "age_days": (datetime.utcnow().timestamp() - backup_file["mtime"])
+                            / (24 * 3600),
+                        },
+                    )
+                except OSError as e:
+                    self.logger.warning(
+                        f"Failed to remove backup {backup_file['filename']}: {e}",
+                        {
+                            "event_type": "backup_removal_failed",
+                            "filename": backup_file["filename"],
+                        },
+                    )
+
+        return {
+            "removed_count": removed_count,
+            "removed_files": removed_files,
+        }
+
+    def _check_disk_space_and_cleanup(
+        self, backup_dir: str, backup_files: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Check disk space and perform emergency cleanup if needed."""
+        try:
+            # Get disk usage
+            disk_usage = psutil.disk_usage(backup_dir)
+            free_space_gb = disk_usage.free / (1024**3)
+            total_space_gb = disk_usage.total / (1024**3)
+            usage_percent = (disk_usage.used / disk_usage.total) * 100
+
+            # Emergency cleanup threshold: 90% disk usage
+            if usage_percent > 90:
+                self.logger.warning(
+                    f"High disk usage detected: {usage_percent:.1f}%",
+                    {
+                        "event_type": "disk_space_warning",
+                        "usage_percent": usage_percent,
+                        "free_space_gb": free_space_gb,
+                        "total_space_gb": total_space_gb,
+                    },
+                )
+
+                # Keep only the 3 most recent backups in emergency cleanup
+                emergency_kept = 3
+                removed_count = 0
+                removed_files = []
+
+                for i, backup_file in enumerate(backup_files):
+                    if i >= emergency_kept:
+                        try:
+                            os.remove(backup_file["filepath"])
+                            removed_count += 1
+                            removed_files.append(backup_file["filename"])
+
+                            self.logger.warning(
+                                f"Emergency cleanup removed backup: {backup_file['filename']}",
+                                {
+                                    "event_type": "emergency_backup_removal",
+                                    "filename": backup_file["filename"],
+                                    "reason": "disk_space_critical",
+                                    "usage_percent": usage_percent,
+                                },
+                            )
+                        except OSError as e:
+                            self.logger.warning(
+                                f"Failed to remove backup {backup_file['filename']} in emergency cleanup: {e}",
+                                {
+                                    "event_type": "emergency_cleanup_failed",
+                                    "filename": backup_file["filename"],
+                                },
+                            )
+
+                return {
+                    "removed_count": removed_count,
+                    "removed_files": removed_files,
+                    "triggered": True,
+                    "usage_percent": usage_percent,
+                }
+
+            return {"removed_count": 0, "triggered": False, "usage_percent": usage_percent}
+
+        except Exception as e:
+            self.logger.error(
+                f"Disk space check failed: {e}",
+                {"event_type": "disk_space_check_error", "error": str(e)},
+            )
+            return {"removed_count": 0, "triggered": False, "error": str(e)}
 
     def _restart_server_after_backup(self, server: Server, original_pid: Optional[int]):
         """Restart server after backup completion."""

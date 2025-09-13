@@ -1,10 +1,9 @@
-active_card: CARD-031
+active_card: CARD-032
 breadcrumb:
-  step: 'CARD-030 completed - Backup job execution and verification logic implemented with compression, checksums, metadata tracking, retry logic, and comprehensive unit tests'
-  last_commit: 'feat: [CARD-030] Implement backup job execution and verification logic'
-  next_action: 'Start at CARD-031 - Continue Automated Backup Scheduling System implementation'
+  step: 'CARD-031 completed - Backup retention policy and cleanup logic implemented with configurable policies, disk space monitoring, safety checks, audit logging, and comprehensive unit tests'
+  last_commit: 'feat: [CARD-031] Implement backup retention policy and cleanup logic'
+  next_action: 'Start at CARD-032 - Continue Automated Backup Scheduling System implementation'
 queue:
-  - CARD-031
   - CARD-032
   - CARD-033
   - CARD-034

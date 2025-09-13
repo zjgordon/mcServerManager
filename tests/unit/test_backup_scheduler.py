@@ -449,3 +449,211 @@ class TestBackupScheduler:
         # Should not raise exception, just log error
         backup_schedule = BackupSchedule.query.filter_by(server_id=test_server.id).first()
         assert backup_schedule is None
+
+    def test_cleanup_old_backups_success(self, scheduler, test_server):
+        """Test successful backup cleanup."""
+        # Add a schedule
+        schedule_config = {
+            "schedule_type": "daily",
+            "schedule_time": time(2, 30),
+            "retention_days": 7,  # 7 days retention
+            "enabled": True,
+        }
+        scheduler.add_schedule(test_server.id, schedule_config)
+
+        # Mock backup directory and files
+        with patch("os.path.exists") as mock_exists, patch("os.listdir") as mock_listdir, patch(
+            "os.path.join"
+        ) as mock_join, patch("os.stat") as mock_stat:
+            mock_exists.return_value = True
+            mock_listdir.return_value = [
+                "testserver_backup_20240101_120000.tar.gz",  # Old backup
+                "testserver_backup_20240108_120000.tar.gz",  # Recent backup
+            ]
+            mock_join.side_effect = lambda *args: "/".join(args)
+
+            # Mock file stats - old file (8 days ago), recent file (1 day ago)
+            old_time = datetime.now().timestamp() - (8 * 24 * 3600)  # 8 days ago
+            recent_time = datetime.now().timestamp() - (1 * 24 * 3600)  # 1 day ago
+
+            def mock_stat_side_effect(path):
+                mock_stat_obj = Mock()
+                if "20240101" in path:  # Old backup
+                    mock_stat_obj.st_size = 1024
+                    mock_stat_obj.st_mtime = old_time
+                else:  # Recent backup
+                    mock_stat_obj.st_size = 2048
+                    mock_stat_obj.st_mtime = recent_time
+                return mock_stat_obj
+
+            mock_stat.side_effect = mock_stat_side_effect
+
+            result = scheduler.cleanup_old_backups(test_server.id)
+
+            assert result["success"] is True
+            assert result["removed_count"] == 1  # Only old backup should be removed
+            assert result["remaining_backups"] == 1
+
+    def test_cleanup_old_backups_no_schedule(self, scheduler, test_server):
+        """Test backup cleanup when no schedule exists."""
+        result = scheduler.cleanup_old_backups(test_server.id)
+
+        assert result["success"] is False
+        assert "No backup schedule found" in result["error"]
+
+    def test_cleanup_old_backups_no_backup_dir(self, scheduler, test_server):
+        """Test backup cleanup when backup directory doesn't exist."""
+        # Add a schedule
+        schedule_config = {
+            "schedule_type": "daily",
+            "schedule_time": time(2, 30),
+            "retention_days": 7,
+            "enabled": True,
+        }
+        scheduler.add_schedule(test_server.id, schedule_config)
+
+        with patch("os.path.exists") as mock_exists:
+            mock_exists.return_value = False
+
+            result = scheduler.cleanup_old_backups(test_server.id)
+
+            assert result["success"] is True
+            assert result["removed_count"] == 0
+            assert "No backup directory found" in result["message"]
+
+    def test_cleanup_old_backups_preserve_minimum(self, scheduler, test_server):
+        """Test that cleanup preserves at least one backup."""
+        # Add a schedule
+        schedule_config = {
+            "schedule_type": "daily",
+            "schedule_time": time(2, 30),
+            "retention_days": 7,
+            "enabled": True,
+        }
+        scheduler.add_schedule(test_server.id, schedule_config)
+
+        with patch("os.path.exists") as mock_exists, patch("os.listdir") as mock_listdir, patch(
+            "os.path.join"
+        ) as mock_join, patch("os.stat") as mock_stat, patch("os.remove") as mock_remove:
+            mock_exists.return_value = True
+            mock_listdir.return_value = [
+                "testserver_backup_20240101_120000.tar.gz",  # Only one backup
+            ]
+            mock_join.side_effect = lambda *args: "/".join(args)
+
+            # Mock file stats - old file (8 days ago)
+            old_time = datetime.now().timestamp() - (8 * 24 * 3600)
+            mock_stat_obj = Mock()
+            mock_stat_obj.st_size = 1024
+            mock_stat_obj.st_mtime = old_time
+            mock_stat.return_value = mock_stat_obj
+
+            result = scheduler.cleanup_old_backups(test_server.id)
+
+            assert result["success"] is True
+            assert result["removed_count"] == 0  # Should preserve the only backup
+            assert "Preserving minimum backups" in result["message"]
+            mock_remove.assert_not_called()
+
+    def test_apply_retention_policies(self, scheduler):
+        """Test retention policy application."""
+        # Create mock backup files
+        now = datetime.now().timestamp()
+        old_time = now - (10 * 24 * 3600)  # 10 days ago
+        recent_time = now - (3 * 24 * 3600)  # 3 days ago
+
+        backup_files = [
+            {
+                "filename": "testserver_backup_old.tar.gz",
+                "filepath": "/backups/testserver/testserver_backup_old.tar.gz",
+                "size": 1024,
+                "mtime": old_time,
+                "created": datetime.fromtimestamp(old_time),
+            },
+            {
+                "filename": "testserver_backup_recent.tar.gz",
+                "filepath": "/backups/testserver/testserver_backup_recent.tar.gz",
+                "size": 2048,
+                "mtime": recent_time,
+                "created": datetime.fromtimestamp(recent_time),
+            },
+        ]
+
+        with patch("os.remove") as mock_remove:
+            result = scheduler._apply_retention_policies(backup_files, 7)  # 7 days retention
+
+            assert result["removed_count"] == 1
+            assert "testserver_backup_old.tar.gz" in result["removed_files"]
+            mock_remove.assert_called_once()
+
+    def test_check_disk_space_normal_usage(self, scheduler):
+        """Test disk space check with normal usage."""
+        backup_files = [
+            {"filename": "backup1.tar.gz", "filepath": "/backup1.tar.gz"},
+            {"filename": "backup2.tar.gz", "filepath": "/backup2.tar.gz"},
+        ]
+
+        with patch("psutil.disk_usage") as mock_disk_usage:
+            # Mock normal disk usage (50%)
+            mock_usage = Mock()
+            mock_usage.free = 50 * (1024**3)  # 50 GB free
+            mock_usage.total = 100 * (1024**3)  # 100 GB total
+            mock_usage.used = 50 * (1024**3)  # 50 GB used
+            mock_disk_usage.return_value = mock_usage
+
+            result = scheduler._check_disk_space_and_cleanup("/backups", backup_files)
+
+            assert result["removed_count"] == 0
+            assert result["triggered"] is False
+            assert result["usage_percent"] == 50.0
+
+    def test_check_disk_space_emergency_cleanup(self, scheduler):
+        """Test disk space check with emergency cleanup."""
+        backup_files = [
+            {"filename": "backup1.tar.gz", "filepath": "/backup1.tar.gz"},
+            {"filename": "backup2.tar.gz", "filepath": "/backup2.tar.gz"},
+            {"filename": "backup3.tar.gz", "filepath": "/backup3.tar.gz"},
+            {"filename": "backup4.tar.gz", "filepath": "/backup4.tar.gz"},
+        ]
+
+        with patch("psutil.disk_usage") as mock_disk_usage, patch("os.remove") as mock_remove:
+            # Mock high disk usage (95%)
+            mock_usage = Mock()
+            mock_usage.free = 5 * (1024**3)  # 5 GB free
+            mock_usage.total = 100 * (1024**3)  # 100 GB total
+            mock_usage.used = 95 * (1024**3)  # 95 GB used
+            mock_disk_usage.return_value = mock_usage
+
+            result = scheduler._check_disk_space_and_cleanup("/backups", backup_files)
+
+            assert result["removed_count"] == 1  # Should keep only 3 most recent
+            assert result["triggered"] is True
+            assert result["usage_percent"] == 95.0
+            mock_remove.assert_called_once()
+
+    def test_get_backup_files(self, scheduler):
+        """Test getting backup files with metadata."""
+        with patch("os.listdir") as mock_listdir, patch("os.path.join") as mock_join, patch(
+            "os.stat"
+        ) as mock_stat:
+            mock_listdir.return_value = [
+                "testserver_backup_20240101_120000.tar.gz",
+                "testserver_backup_20240102_120000.tar.gz",
+                "other_file.txt",  # Should be ignored
+            ]
+            mock_join.side_effect = lambda *args: "/".join(args)
+
+            # Mock file stats
+            mock_stat_obj = Mock()
+            mock_stat_obj.st_size = 1024
+            expected_timestamp = datetime.now().timestamp()
+            mock_stat_obj.st_mtime = expected_timestamp
+            mock_stat.return_value = mock_stat_obj
+
+            result = scheduler._get_backup_files("/backups/testserver", "testserver")
+
+            assert len(result) == 2  # Only backup files
+            assert all("testserver_backup_" in file["filename"] for file in result)
+            assert all(file["filename"].endswith(".tar.gz") for file in result)
+            assert result[0]["size"] == 1024
+            assert result[0]["mtime"] == expected_timestamp
