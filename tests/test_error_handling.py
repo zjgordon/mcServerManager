@@ -320,8 +320,9 @@ class TestRouteErrorHandler:
     
     def test_validation_error_handling(self, client):
         """Test route decorator handles ValidationError."""
-        from flask import Flask, request
+        from flask import Flask, request, redirect
         app = Flask(__name__)
+        app.config['SECRET_KEY'] = 'test-secret-key'  # Set secret key for session
         
         @app.route('/test')
         @route_error_handler
@@ -330,10 +331,16 @@ class TestRouteErrorHandler:
         
         with app.test_client() as test_client:
             with app.test_request_context('/test'):
-                # This would normally redirect, but we can't test redirects easily here
-                # The decorator should catch the ValidationError
-                with pytest.raises(ValidationError):
-                    test_route()
+                # The decorator should catch the ValidationError and redirect
+                # Since we can't easily test redirects in this context, we'll test that
+                # the ValidationError is properly caught and handled (not re-raised)
+                try:
+                    result = test_route()
+                    # If we get here, the decorator caught the error and returned a redirect
+                    assert result is not None
+                except ValidationError:
+                    # This should not happen - the decorator should catch it
+                    pytest.fail("ValidationError should have been caught by decorator")
 
 
 class TestLogError:

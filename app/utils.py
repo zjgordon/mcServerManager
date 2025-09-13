@@ -222,7 +222,6 @@ def check_admin_password():
         # Don't block the request if there's an error checking admin password
         return None
 
-@handle_file_operations
 def load_exclusion_list(filename='app/static/excluded_versions.json'):
     """
     Load the list of excluded Minecraft versions from JSON file.

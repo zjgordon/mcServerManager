@@ -8,3 +8,4 @@
 - CARD-005A: ✅ Completed - SQLAlchemy session management in test fixtures fixed, eliminating DetachedInstanceError exceptions
 - CARD-005B: ✅ Completed - authentication test infrastructure fixed, resolving redirect issues and session management problems
 - CARD-005C: ✅ Completed - database constraint violations in test data fixed, ensuring proper foreign key relationships
+- CARD-005D: ✅ Completed - custom exception handling in tests fixed, ensuring proper exception behavior and test assertions

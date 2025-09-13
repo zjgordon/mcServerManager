@@ -1,10 +1,9 @@
-active_card: CARD-005D
+active_card: CARD-005E
 breadcrumb:
-  step: 'CARD-005C completed - database constraint violations in test data fixed, ensuring proper foreign key relationships'
-  last_commit: 'fix: [CARD-005C] Fix database constraint violations in test data'
-  next_action: 'Start at CARD-005D - Next test suite reliability improvement'
+  step: 'CARD-005D completed - custom exception handling in tests fixed, ensuring proper exception behavior and test assertions'
+  last_commit: 'fix: [CARD-005D] Fix custom exception handling in tests'
+  next_action: 'Start at CARD-005E - Next test suite reliability improvement'
 queue:
-  - CARD-005D
   - CARD-005E
   - CARD-005F
   - CARD-005G

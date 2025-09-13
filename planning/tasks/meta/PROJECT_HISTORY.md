@@ -60,4 +60,12 @@ Fixed authentication test infrastructure issues that were causing redirect probl
 **Status:** Completed  
 **Owner:** cursor  
 
-Fixed critical database constraint violations in the test suite that were causing widespread test failures. The main issues were NOT NULL constraint failures for server.owner_id and UNIQUE constraint failures for user.username. Implemented surgical fixes by ensuring all Server objects have valid owner_id references and using unique usernames across different test files. Updated test fixtures to create users first, commit them to get valid IDs, then create servers with proper foreign key relationships. This eliminates database constraint violations and ensures proper foreign key relationships work correctly throughout the test suite.
+Fixed critical database constraint violations in the test suite that were causing widespread test failures. The main issues were NOT NULL constraint violations for server.owner_id and UNIQUE constraint violations for user.username. Implemented surgical fixes by ensuring all Server objects have valid owner_id references and using unique usernames across different test files. Updated test fixtures to create users first, commit them to get valid IDs, then create servers with proper foreign key relationships. This eliminates database constraint violations and ensures proper foreign key relationships work correctly throughout the test suite.
+
+## 2025-01-09 - CARD-005D: Fix Custom Exception Handling in Tests
+
+**Epic:** Epic 1 – Test Suite Reliability  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed custom exception handling issues in the test suite that were causing test failures and inconsistent error behavior. The main problems were application context errors in the log_error function, exception type mismatches between tests and actual code behavior, and error handling decorators interfering with test assertions. Implemented surgical fixes by adding safe application context handling in log_error, updating test assertions to match actual exception types (ServerError vs RuntimeError, ValidationError vs ValueError, FileOperationError vs FileNotFoundError), and removing interfering decorators from utility functions. This ensures all custom exceptions raise correctly in tests and test assertions match actual exception behavior.

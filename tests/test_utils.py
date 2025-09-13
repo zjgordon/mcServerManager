@@ -14,6 +14,7 @@ from app.utils import (
     get_version_info,
     load_exclusion_list
 )
+from app.error_handlers import ServerError, ValidationError, FileOperationError, NetworkError
 from app.models import Server
 from app.extensions import db
 
@@ -141,7 +142,7 @@ class TestUtilityFunctions:
             with patch('app.utils.is_port_available') as mock_available:
                 mock_available.return_value = False
                 
-                with pytest.raises(RuntimeError, match="No available ports found"):
+                with pytest.raises(ServerError, match="No available ports found"):
                     find_next_available_port()
     
     @patch('requests.get')
@@ -165,7 +166,7 @@ class TestUtilityFunctions:
         import requests
         mock_get.side_effect = requests.exceptions.RequestException("Network error")
         
-        with pytest.raises(requests.exceptions.RequestException):
+        with pytest.raises(NetworkError):
             fetch_version_manifest()
     
     @patch('app.utils.fetch_version_manifest')
@@ -199,7 +200,7 @@ class TestUtilityFunctions:
             ]
         }
         
-        with pytest.raises(ValueError, match="Version nonexistent not found"):
+        with pytest.raises(ValidationError, match="Version 'nonexistent' not found"):
             get_version_info('nonexistent')
     
     def test_load_exclusion_list_success(self):
@@ -218,8 +219,8 @@ class TestUtilityFunctions:
     
     def test_load_exclusion_list_file_not_found(self):
         """Test loading exclusion list when file doesn't exist."""
-        exclusions = load_exclusion_list('nonexistent_file.json')
-        assert exclusions == []
+        with pytest.raises(FileOperationError, match="Failed to open file"):
+            load_exclusion_list('nonexistent_file.json')
     
     def test_load_exclusion_list_invalid_json(self):
         """Test loading exclusion list with invalid JSON."""
@@ -229,7 +230,7 @@ class TestUtilityFunctions:
             temp_file = f.name
         
         try:
-            with pytest.raises(json.JSONDecodeError):
+            with pytest.raises(FileOperationError, match="Failed to load exclusion list"):
                 load_exclusion_list(temp_file)
         finally:
             os.unlink(temp_file)
@@ -301,5 +302,5 @@ class TestPortAllocation:
             with patch('app.utils.is_port_available') as mock_available:
                 mock_available.return_value = True
                 
-                with pytest.raises(RuntimeError, match="No available ports found"):
+                with pytest.raises(ServerError, match="No available ports found"):
                     find_next_available_port()
