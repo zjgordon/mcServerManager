@@ -1,10 +1,9 @@
-active_card: CARD-006
+active_card: CARD-007
 breadcrumb:
-  step: 'CARD-005N completed - complete test suite verification achieved 100% pass rate (185/185 tests passing)'
-  last_commit: 'fix: [CARD-005N] Fix server creation test mocking and achieve 100% test pass rate'
-  next_action: 'Start at CARD-006 - Next test suite reliability improvement'
+  step: 'CARD-006 completed - configuration management centralized in config/ directory with environment-specific configs and validation'
+  last_commit: 'feat: [CARD-006] Centralize configuration management in config/ directory'
+  next_action: 'Start at CARD-007 - Next configuration improvement'
 queue:
-  - CARD-006
   - CARD-007
   - CARD-008
   - CARD-009

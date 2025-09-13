@@ -169,3 +169,25 @@ Successfully achieved 100% test suite pass rate (185/185 tests passing) by fixin
 - `tests/test_user_management.py` - Fixed file existence and database mocking in server ownership tests
 
 **Impact:** Complete test suite now passes with 100% success rate (185/185 tests), providing reliable test coverage for all application functionality including server creation, memory management, user management, security, and integration workflows.
+
+## 2025-01-09 - CARD-006: Centralize configuration management in config/ directory
+
+**Epic:** Epic 1 – Repository Organization and Environment Setup  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully centralized configuration management by creating a comprehensive configuration system in the `config/` directory with environment-specific configurations (development, testing, production). Implemented a configuration factory pattern that automatically selects the appropriate configuration based on `FLASK_ENV` environment variable. Created base configuration class with common settings and validation, plus environment-specific classes with optimized settings for each environment. Added configuration validation methods and environment variable loading. Updated application imports to use the new centralized configuration system. Created comprehensive configuration documentation explaining the new structure, environment variables, and usage patterns. All 185 tests continue to pass, ensuring the configuration migration maintains full backward compatibility while providing enhanced organization and environment-specific optimizations.
+
+**Key Files Created:**
+- `config/__init__.py` - Configuration factory with automatic environment selection
+- `config/base.py` - Base configuration class with validation and common settings
+- `config/development.py` - Development-specific settings with relaxed security
+- `config/testing.py` - Testing-optimized settings with in-memory database
+- `config/production.py` - Production settings with enhanced security
+- `docs/configuration.md` - Comprehensive configuration documentation
+
+**Key Files Modified:**
+- `app/__init__.py` - Updated to use new configuration factory
+- `tests/test_memory_management.py` - Updated import to use new configuration system
+
+**Impact:** Configuration management is now centralized and environment-aware, providing better organization, validation, and environment-specific optimizations while maintaining full backward compatibility and test coverage.

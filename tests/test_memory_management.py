@@ -9,7 +9,7 @@ from app.utils import (
     get_memory_config, get_total_allocated_memory, get_available_memory,
     validate_memory_allocation, format_memory_display, get_memory_usage_summary
 )
-from app.config import Config
+from config import get_config
 import os
 
 

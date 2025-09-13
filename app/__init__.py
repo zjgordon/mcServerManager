@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, url_for
 from flask_login import current_user
-from .config import Config
+from config import get_config
 from .extensions import db, login_manager, csrf
 from .models import User
 from .routes.auth_routes import auth_bp
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(get_config())
 
     # Initialize extensions
     db.init_app(app)
