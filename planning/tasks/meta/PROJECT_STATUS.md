@@ -72,3 +72,5 @@ RELEASE_NOTES.md)
 - CARD-007M: ✅ Completed - re-enabled bandit security hook with dependency fixes
 - CARD-007N: ✅ Completed - re-enabled pydocstyle documentation hook with ignore flags
 - CARD-007O: ✅ Completed - re-enabled detect-secrets security hook with version update
+- CARD-007P: ✅ Completed - verified complete pre-commit cleanup and banned
+  --no-verify bypasses

@@ -90,13 +90,13 @@ pre-commit autoupdate
 pre-commit autoupdate --repo https://github.com/psf/black
 ```
 
-### Skipping Hooks
+### Pre-commit Enforcement
 
-To skip pre-commit hooks for a specific commit:
-
-```bash
-git commit --no-verify -m "Emergency fix"
-```
+Pre-commit hooks are now fully operational and should not be bypassed. All code
+quality issues have been resolved, and the hooks provide valuable automated
+checks for code formatting, linting, security scanning, and documentation
+standards. The development workflow now relies on these automated checks to
+maintain code quality.
 
 ## Excluded Files
 
