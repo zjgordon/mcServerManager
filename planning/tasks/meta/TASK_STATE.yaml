@@ -1,10 +1,9 @@
-active_card: CARD-003
+active_card: CARD-004
 breadcrumb:
-  step: 'CARD-002 completed - .env.example template created with all environment variables documented'
-  last_commit: 'feat: [CARD-002] Add .env.example template with all required environment variables'
-  next_action: 'Start at CARD-003'
+  step: 'CARD-003 completed - requirements.txt organized with pinned versions and categorized comments'
+  last_commit: 'feat: [CARD-003] Pin all dependencies to specific versions in requirements.txt'
+  next_action: 'Start at CARD-004'
 queue:
-  - CARD-003
   - CARD-004
   - CARD-005
   - CARD-006
