@@ -2,7 +2,7 @@ id: CARD-023
 title: Update line length standards across all configuration files
 epic: Epic 7 – Development Workflow Optimization
 sprint: 09-2025_SPRINT_1
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:
