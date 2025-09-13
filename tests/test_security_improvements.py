@@ -304,7 +304,7 @@ class TestAuthenticationSecurity:
             'username': 'admin',
             'password': 'weak',
             'confirm_password': 'weak'
-        })
+        }, follow_redirects=True)
         
         assert b'Password must be at least 8 characters long' in response.data
     

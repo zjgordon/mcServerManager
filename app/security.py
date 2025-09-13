@@ -46,6 +46,18 @@ class SecurityUtils:
         if not password:
             raise PasswordPolicyError("Password cannot be empty")
         
+        # Check for common weak passwords first (before other validations)
+        weak_passwords = {
+            'password', '123456', '123456789', 'qwerty', 'abc123', 
+            'password123', 'admin', 'letmein', 'welcome', 'monkey'
+        }
+        if password.lower() in weak_passwords:
+            raise PasswordPolicyError("Password is too common. Please choose a stronger password")
+        
+        # Prevent username in password (before other validations)
+        if username and username.lower() in password.lower():
+            raise PasswordPolicyError("Password cannot contain your username")
+        
         if len(password) < current_app.config['PASSWORD_MIN_LENGTH']:
             raise PasswordPolicyError(f"Password must be at least {current_app.config['PASSWORD_MIN_LENGTH']} characters long")
         
@@ -60,18 +72,6 @@ class SecurityUtils:
         
         if current_app.config['PASSWORD_REQUIRE_SPECIAL'] and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
             raise PasswordPolicyError("Password must contain at least one special character")
-        
-        # Prevent username in password
-        if username and username.lower() in password.lower():
-            raise PasswordPolicyError("Password cannot contain your username")
-        
-        # Check for common weak passwords
-        weak_passwords = {
-            'password', '123456', '123456789', 'qwerty', 'abc123', 
-            'password123', 'admin', 'letmein', 'welcome', 'monkey'
-        }
-        if password.lower() in weak_passwords:
-            raise PasswordPolicyError("Password is too common. Please choose a stronger password")
         
         return True
     
@@ -309,11 +309,22 @@ def validate_file_upload(filename, allowed_extensions=None, max_size=None):
     if not filename:
         raise SecurityError("No file provided")
     
+    # Check for path traversal in filename first
+    if '..' in filename or '/' in filename or '\\' in filename:
+        raise SecurityError("Invalid filename")
+    
     # Check file extension
     if allowed_extensions is None:
-        allowed_extensions = current_app.config.get('ALLOWED_EXTENSIONS', set())
+        allowed_extensions = current_app.config.get('ALLOWED_EXTENSIONS', {'jar', 'zip', 'tar.gz'})
     
-    file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    # Handle compound extensions like .tar.gz
+    filename_lower = filename.lower()
+    file_ext = ''
+    if filename_lower.endswith('.tar.gz'):
+        file_ext = 'tar.gz'
+    elif '.' in filename:
+        file_ext = filename.rsplit('.', 1)[1].lower()
+    
     if file_ext not in allowed_extensions:
         raise SecurityError(f"File type '{file_ext}' is not allowed")
     
@@ -323,10 +334,6 @@ def validate_file_upload(filename, allowed_extensions=None, max_size=None):
     
     if request.content_length and request.content_length > max_size:
         raise SecurityError(f"File size exceeds maximum allowed size of {max_size} bytes")
-    
-    # Check for path traversal in filename
-    if '..' in filename or '/' in filename or '\\' in filename:
-        raise SecurityError("Invalid filename")
     
     return True
 

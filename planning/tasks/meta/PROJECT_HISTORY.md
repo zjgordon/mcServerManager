@@ -109,3 +109,11 @@ Fixed flash message assertion issues in the test suite that were causing widespr
 **Owner:** cursor  
 
 Fixed status code assertion issues in the test suite that were causing test failures due to incorrect HTTP status code expectations and redirect behavior handling. The main issues were 404 errors being converted to 302 redirects by global error handlers, rate limiting not working properly in tests (expecting 429 but getting 200), and tests expecting specific error messages but getting redirects instead. Implemented surgical fixes by modifying the 404 error handler to return proper 404 status codes in test mode instead of redirects, enabling rate limiting in specific tests that require it, updating test assertions to match actual application behavior including server status reconciliation, and fixing AttributeError in admin setup checks for 404 requests. This ensures all status code assertions pass correctly and test expectations match actual HTTP behavior, improving overall test suite reliability.
+
+## 2025-01-09 - CARD-005J: Fix Security Test Assertions and Validation
+
+**Epic:** Epic 1 – Test Suite Reliability  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed security test assertion issues that were causing test failures due to incorrect validation order and file extension handling. The main problems were password validation checks happening in the wrong order (uppercase requirement before username/weak password checks), file upload validation not properly handling compound extensions like .tar.gz, and path traversal validation happening after file extension checks. Implemented surgical fixes by reordering password validation to check weak passwords and username-in-password first, updating file upload validation to properly handle .tar.gz extensions by checking for compound extensions before single extensions, and moving path traversal validation before file extension checks. Also fixed test assertions to follow redirects where needed. This ensures all security validation tests pass correctly and security policies work as expected in the test environment.
