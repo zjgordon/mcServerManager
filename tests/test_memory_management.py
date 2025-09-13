@@ -284,7 +284,12 @@ class TestMemoryInServerCreation:
                 mock_open.return_value = mock_file
                 
                 # Mock file existence checks
-                mock_exists.return_value = True
+                def mock_exists_side_effect(path):
+                    # Return True for server JAR file and EULA file
+                    if 'server.jar' in path or 'eula.txt' in path or 'server.properties' in path:
+                        return True
+                    return False
+                mock_exists.side_effect = mock_exists_side_effect
                 
                 # Mock context managers
                 mock_safe_file.return_value.__enter__.return_value = mock_file
@@ -298,20 +303,25 @@ class TestMemoryInServerCreation:
                         def __exit__(self, exc_type, exc_val, exc_tb):
                             if not exc_type:
                                 session.commit()
+                            return False  # Don't suppress exceptions
                     return MockContext()
                 mock_safe_db.side_effect = mock_db_context_manager
                 
                 # Mock time.sleep to prevent actual delays
                 mock_sleep.return_value = None
                 
-                response = client.post('/configure_server', data={
-                    'server_name': 'testserver',
-                    'level_seed': 'test',
-                    'gamemode': 'survival',
-                    'difficulty': 'normal',
-                    'motd': 'Test Server',
-                    'memory_mb': '2048'
-                }, query_string={'version_type': 'release', 'version': '1.20.1'})
+                # Mock os.path.getsize to return non-zero for server JAR
+                with patch('os.path.getsize') as mock_getsize:
+                    mock_getsize.return_value = 1024  # Non-zero size
+                    
+                    response = client.post('/configure_server', data={
+                        'server_name': 'testserver',
+                        'level_seed': 'test',
+                        'gamemode': 'survival',
+                        'difficulty': 'normal',
+                        'motd': 'Test Server',
+                        'memory_mb': '2048'
+                    }, query_string={'version_type': 'release', 'version': '1.20.1'})
                 
                 # Should redirect (either to EULA or home)
                 assert response.status_code == 302
@@ -405,7 +415,12 @@ class TestMemoryInServerCreation:
                 mock_open.return_value = mock_file
                 
                 # Mock file existence checks
-                mock_exists.return_value = True
+                def mock_exists_side_effect(path):
+                    # Return True for server JAR file and EULA file
+                    if 'server.jar' in path or 'eula.txt' in path or 'server.properties' in path:
+                        return True
+                    return False
+                mock_exists.side_effect = mock_exists_side_effect
                 
                 # Mock context managers
                 mock_safe_file.return_value.__enter__.return_value = mock_file
@@ -419,20 +434,25 @@ class TestMemoryInServerCreation:
                         def __exit__(self, exc_type, exc_val, exc_tb):
                             if not exc_type:
                                 session.commit()
+                            return False  # Don't suppress exceptions
                     return MockContext()
                 mock_safe_db.side_effect = mock_db_context_manager
                 
                 # Mock time.sleep to prevent actual delays
                 mock_sleep.return_value = None
                 
-                response = client.post('/configure_server', data={
-                    'server_name': 'testserver',
-                    'level_seed': 'test',
-                    'gamemode': 'survival',
-                    'difficulty': 'normal',
-                    'motd': 'Test Server'
-                    # No memory_mb specified
-                }, query_string={'version_type': 'release', 'version': '1.20.1'})
+                # Mock os.path.getsize to return non-zero for server JAR
+                with patch('os.path.getsize') as mock_getsize:
+                    mock_getsize.return_value = 1024  # Non-zero size
+                    
+                    response = client.post('/configure_server', data={
+                        'server_name': 'testserver',
+                        'level_seed': 'test',
+                        'gamemode': 'survival',
+                        'difficulty': 'normal',
+                        'motd': 'Test Server'
+                        # No memory_mb specified
+                    }, query_string={'version_type': 'release', 'version': '1.20.1'})
                 
                 # Should redirect (either to EULA or home)
                 assert response.status_code == 302

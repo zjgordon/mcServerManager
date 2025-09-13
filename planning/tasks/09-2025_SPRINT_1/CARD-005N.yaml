@@ -2,7 +2,7 @@ id: CARD-005N
 title: Verify Complete Test Suite Passes and Update Documentation
 epic: Epic 1 – Test Suite Reliability
 sprint: 09-2025_SPRINT_1
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:

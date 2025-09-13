@@ -393,7 +393,12 @@ class TestServerOwnership:
                 mock_open.return_value = mock_file
                 
                 # Mock file existence checks
-                mock_exists.return_value = True
+                def mock_exists_side_effect(path):
+                    # Return True for server JAR file and EULA file
+                    if 'server.jar' in path or 'eula.txt' in path or 'server.properties' in path:
+                        return True
+                    return False
+                mock_exists.side_effect = mock_exists_side_effect
                 
                 # Mock context managers
                 mock_safe_file.return_value.__enter__.return_value = mock_file
@@ -407,20 +412,25 @@ class TestServerOwnership:
                         def __exit__(self, exc_type, exc_val, exc_tb):
                             if not exc_type:
                                 session.commit()
+                            return False  # Don't suppress exceptions
                     return MockContext()
                 mock_safe_db.side_effect = mock_db_context_manager
                 
                 # Mock time.sleep to prevent actual delays
                 mock_sleep.return_value = None
                 
-                response = client.post('/configure_server', data={
-                    'server_name': 'testserver',
-                    'level_seed': 'test',
-                    'gamemode': 'survival',
-                    'difficulty': 'normal',
-                    'motd': 'Test Server',
-                    'memory_mb': '1024'
-                }, query_string={'version_type': 'release', 'version': '1.20.1'})
+                # Mock os.path.getsize to return non-zero for server JAR
+                with patch('os.path.getsize') as mock_getsize:
+                    mock_getsize.return_value = 1024  # Non-zero size
+                    
+                    response = client.post('/configure_server', data={
+                        'server_name': 'testserver',
+                        'level_seed': 'test',
+                        'gamemode': 'survival',
+                        'difficulty': 'normal',
+                        'motd': 'Test Server',
+                        'memory_mb': '1024'
+                    }, query_string={'version_type': 'release', 'version': '1.20.1'})
                 
                 # Check server was created with correct ownership
                 server = Server.query.filter_by(server_name='testserver').first()
