@@ -37,3 +37,11 @@ Created comprehensive `requirements-dev.txt` file with all development tools pin
 **Owner:** cursor  
 
 Organized project directory structure by creating dedicated directories for different types of files: `scripts/` for development utilities, `config/` for configuration files, `docs/` for documentation, and `logs/` for application logs. Moved existing configuration files (`config.example.json`, `.env.example`, `pytest.ini`) to the `config/` directory and added `.gitkeep` files to maintain empty directories in version control. Set proper permissions on the `logs/` directory and ensured all existing functionality remains intact. This structure provides better organization for scalable development and clearer separation of concerns.
+
+## 2025-01-09 - CARD-005A: Fix SQLAlchemy Session Management in Test Fixtures
+
+**Epic:** Epic 1 – Test Suite Reliability  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed critical SQLAlchemy session management issue in test fixtures that was causing DetachedInstanceError exceptions in 20+ tests. The problem occurred when Server objects became detached from the database session after fixture creation. Implemented surgical fix by adding `db.session.refresh(server)` call in the `test_server` fixture after commit to ensure proper session binding throughout test lifecycle. This eliminates database session leaks between tests and ensures Server objects remain bound to session. The fix affects only test infrastructure and does not impact application code.

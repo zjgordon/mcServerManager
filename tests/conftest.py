@@ -109,6 +109,8 @@ def test_server(app, admin_user):
         )
         db.session.add(server)
         db.session.commit()
+        # Refresh the server to ensure it's properly attached to the session
+        db.session.refresh(server)
         return server
 
 

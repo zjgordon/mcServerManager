@@ -1,9 +1,22 @@
-active_card: CARD-006
+active_card: CARD-005B
 breadcrumb:
-  step: 'CARD-005 completed - project directory structure organized with scripts/, config/, docs/, logs/ directories'
-  last_commit: 'feat: [CARD-005] Organize project directory structure for scalable development'
-  next_action: 'Start at CARD-006'
+  step: 'CARD-005A completed - SQLAlchemy session management in test fixtures fixed, eliminating DetachedInstanceError exceptions'
+  last_commit: 'fix: [CARD-005A] Fix SQLAlchemy session management in test fixtures'
+  next_action: 'Start at CARD-005B - Next test suite reliability improvement'
 queue:
+  - CARD-005B
+  - CARD-005C
+  - CARD-005D
+  - CARD-005E
+  - CARD-005F
+  - CARD-005G
+  - CARD-005H
+  - CARD-005I
+  - CARD-005J
+  - CARD-005K
+  - CARD-005L
+  - CARD-005M
+  - CARD-005N
   - CARD-006
   - CARD-007
   - CARD-008
