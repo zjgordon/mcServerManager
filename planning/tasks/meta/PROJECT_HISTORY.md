@@ -1039,3 +1039,18 @@ schedule_type, schedule_time, retention_days, enabled, last_backup, created_at) 
 data types and constraints. Added table existence check to handle cases where table already
 exists from db.create_all(). Migration can be applied and rolled back successfully without
 data loss. All 185 tests pass with 54.96% coverage and no linting errors.
+
+## 2025-01-09 - CARD-029: Create app/backup_scheduler.py core module
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive backup scheduler module with APScheduler integration for automated
+server backup management. Implemented BackupScheduler class with core methods for schedule
+management (add, remove, update), scheduler lifecycle (start, stop), and status monitoring.
+Added APScheduler dependency to requirements.txt with proper version pinning. Integrated
+with existing logging system for structured error handling and audit trails. Created
+comprehensive unit test suite with 29 tests covering all core functionality including
+validation, error handling, and scheduler operations. All tests pass with 78% coverage
+for the backup scheduler module.

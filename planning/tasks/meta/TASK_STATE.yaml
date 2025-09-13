@@ -1,10 +1,9 @@
-active_card: CARD-029
+active_card: CARD-030
 breadcrumb:
-  step: 'CARD-028 completed - Database migration for backup_schedules table created with proper foreign key constraints and check constraints'
-  last_commit: 'feat: [CARD-028] Create database migration for backup_schedules table'
-  next_action: 'Start at CARD-029 - Continue Automated Backup Scheduling System implementation'
+  step: 'CARD-029 completed - Backup scheduler core module created with APScheduler integration, comprehensive schedule management methods, error handling, and 29 unit tests'
+  last_commit: 'feat: [CARD-029] Create app/backup_scheduler.py core module'
+  next_action: 'Start at CARD-030 - Continue Automated Backup Scheduling System implementation'
 queue:
-  - CARD-029
   - CARD-030
   - CARD-031
   - CARD-032
