@@ -63,3 +63,5 @@ documentation files (CHANGELOG.md, README.md, CONTRIBUTING.md, SECURITY.md,
 RELEASE_NOTES.md)
 - CARD-007H: ✅ Completed - fixed markdown line length issues (MD013) in
   planning documents
+- CARD-007I: ✅ Completed - fixed markdown line length issues (MD013) in docs and
+  other files

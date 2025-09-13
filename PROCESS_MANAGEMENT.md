@@ -1,6 +1,8 @@
 # Process Management for Minecraft Server Manager
 
-This document describes the comprehensive process management system implemented to address orphaned processes, incorrect status reporting, and process lifecycle management.
+This document describes the comprehensive process management system implemented to
+address orphaned processes, incorrect status reporting, and process lifecycle
+management.
 
 ## Overview
 
@@ -16,9 +18,12 @@ The process management system ensures that:
 
 ### 1. Real-time Process Verification
 
-- **`verify_process_status(pid)`**: Verifies if a process is actually running and validates it's a Java Minecraft server
-- **Process Validation**: Checks process name, command line, and working directory to ensure it's a legitimate Minecraft server
-- **Error Handling**: Gracefully handles access denied, non-existent processes, and other edge cases
+- **`verify_process_status(pid)`**: Verifies if a process is actually running and
+  validates it's a Java Minecraft server
+- **Process Validation**: Checks process name, command line, and working directory
+  ensure it's a legitimate Minecraft server
+- **Error Handling**: Gracefully handles access denied, non-existent processes, and
+  other edge cases
 
 ### 2. Startup Process Reconciliation
 
@@ -29,7 +34,9 @@ The process management system ensures that:
 
 ### 3. Orphaned Process Detection
 
-- **`find_orphaned_minecraft_processes()`**: Identifies Minecraft server processes not managed by the app
+- **`find_orphaned_minecraft_processes()`**: Identifies Minecraft server processes
+  not
+  managed by the app
 - Scans all Java processes for Minecraft server characteristics
 - Cross-references with database to find unmanaged processes
 - Provides detailed information about orphaned processes

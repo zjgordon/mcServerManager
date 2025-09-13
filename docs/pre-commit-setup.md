@@ -2,11 +2,14 @@
 
 ## Overview
 
-This project uses pre-commit hooks to ensure code quality, consistency, and security across all commits. Pre-commit runs automated checks before each commit to catch issues early in the development process.
+This project uses pre-commit hooks to ensure code quality, consistency, and security
+across all commits. Pre-commit runs automated checks before each commit to catch
+issues early in the development process.
 
 ## Installation
 
-Pre-commit is already installed in the development environment. To set up pre-commit hooks for this repository:
+Pre-commit is already installed in the development environment. To set up pre-commit
+hooks for this repository:
 
 ```bash
 # Install pre-commit hooks
@@ -118,13 +121,17 @@ The following files and directories are excluded from pre-commit hooks:
 
 ### Common Issues
 
-1. **Hook fails on first run**: This is normal for new hooks. Run `pre-commit run --all-files` to fix all issues.
+1. **Hook fails on first run**: This is normal for new hooks. Run
+   `pre-commit run --all-files` to fix all issues.
 
-2. **Black and isort conflicts**: The configuration uses black-compatible isort settings. If conflicts occur, run both hooks together.
+2. **Black and isort conflicts**: The configuration uses black-compatible isort
+   settings. If conflicts occur, run both hooks together.
 
-3. **MyPy errors**: The configuration uses relaxed settings. For strict type checking, modify the mypy configuration.
+3. **MyPy errors**: The configuration uses relaxed settings. For strict type
+   checking, modify the mypy configuration.
 
-4. **Bandit false positives**: Review bandit reports and add exceptions to `.bandit` file if needed.
+4. **Bandit false positives**: Review bandit reports and add exceptions to
+   `.bandit` file if needed.
 
 ### Updating Dependencies
 
@@ -153,13 +160,17 @@ Pre-commit hooks can be integrated with CI/CD pipelines:
 
 ## Best Practices
 
-1. **Run hooks before committing**: Always run `pre-commit run --all-files` before pushing changes.
+1. **Run hooks before committing**: Always run `pre-commit run --all-files` before
+   pushing changes.
 
-2. **Fix issues immediately**: Don't accumulate linting issues. Fix them as they appear.
+2. **Fix issues immediately**: Don't accumulate linting issues. Fix them as they
+   appear.
 
-3. **Update hooks regularly**: Keep hooks updated to benefit from latest improvements.
+3. **Update hooks regularly**: Keep hooks updated to benefit from latest
+   improvements.
 
-4. **Customize as needed**: Modify `.pre-commit-config.yaml` to match project requirements.
+4. **Customize as needed**: Modify `.pre-commit-config.yaml` to match project
+   requirements.
 
 5. **Document exceptions**: If you need to skip hooks, document the reason.
 

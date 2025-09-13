@@ -1,20 +1,26 @@
 # Configuration Management
 
-The Minecraft Server Manager uses a centralized configuration management system that supports environment-specific configurations with proper validation and environment variable loading.
+The Minecraft Server Manager uses a centralized configuration management system
+that supports environment-specific configurations with proper validation and
+environment variable loading.
 
 ## Configuration Structure
 
-The configuration system is organized in the `config/` directory with the following structure:
+The configuration system is organized in the `config/` directory with the following
+structure:
 
-- `config/__init__.py` - Configuration factory that selects the appropriate config based on `FLASK_ENV`
-- `config/base.py` - Base configuration class with common settings and validation
+- `config/__init__.py` - Configuration factory that selects the appropriate config
+  based on `FLASK_ENV`
+- `config/base.py` - Base configuration class with common settings and
+  validation
 - `config/development.py` - Development-specific settings
 - `config/testing.py` - Testing-specific settings  
 - `config/production.py` - Production-specific settings
 
 ## Environment Configuration
 
-The application automatically selects the appropriate configuration based on the `FLASK_ENV` environment variable:
+The application automatically selects the appropriate configuration based on the
+`FLASK_ENV` environment variable:
 
 - `development` (default) - Uses `DevelopmentConfig`
 - `testing` or `test` - Uses `TestingConfig`
@@ -76,7 +82,8 @@ Enhanced security and performance for production:
 - `FLASK_ENV` - Environment selection (development, testing, production)
 - `APP_TITLE` - Application title (default: "Minecraft Server Manager")
 - `SERVER_HOSTNAME` - Server hostname (default: "localhost")
-- `SESSION_COOKIE_SECURE` - Enable secure cookies (default: False in dev, True in prod)
+- `SESSION_COOKIE_SECURE` - Enable secure cookies (default: False in dev, True in
+  prod)
 
 ### Memory Management Variables
 
@@ -130,7 +137,9 @@ def create_app():
 
 ## Migration from app/config.py
 
-The old `app/config.py` file has been replaced with the new centralized configuration system. All existing configuration settings have been preserved and enhanced with:
+The old `app/config.py` file has been replaced with the new centralized
+configuration system. All existing configuration settings have been preserved and
+enhanced with:
 
 - Environment-specific configurations
 - Configuration validation
