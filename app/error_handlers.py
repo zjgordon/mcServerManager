@@ -206,6 +206,15 @@ def route_error_handler(func):
             return redirect(request.url)
         except NetworkError as e:
             flash_error(e.message)
+            # For create page, stay on the same page to show error
+            if request.endpoint == 'server.create':
+                # Don't redirect to avoid loops, just render the template with error
+                from flask import render_template
+                return render_template('select_version.html', 
+                                     latest_release='Unknown', 
+                                     latest_snapshot='Unknown', 
+                                     releases=[], 
+                                     snapshots=[])
             return redirect(url_for('server.home'))
         except FileOperationError as e:
             flash_error(e.message)

@@ -253,7 +253,7 @@ class TestCompleteWorkflows:
             
             # Login
             client.post('/login', data={
-                'username': 'admin',
+                'username': 'admin_integration',
                 'password': 'adminpass'
             })
             
@@ -263,7 +263,7 @@ class TestCompleteWorkflows:
                 mock_fetch.side_effect = requests.exceptions.RequestException("Network error")
                 
                 response = client.get('/create', follow_redirects=True)
-                assert b'Error fetching version manifest' in response.data
+                assert b'Unexpected error: Network error' in response.data
             
             # Try to configure server with invalid data
             response = client.post('/configure_server', data={

@@ -1,10 +1,9 @@
-active_card: CARD-005E
+active_card: CARD-005F
 breadcrumb:
-  step: 'CARD-005D completed - custom exception handling in tests fixed, ensuring proper exception behavior and test assertions'
-  last_commit: 'fix: [CARD-005D] Fix custom exception handling in tests'
-  next_action: 'Start at CARD-005E - Next test suite reliability improvement'
+  step: 'CARD-005E completed - network error mocking in tests fixed, ensuring proper error message display and test assertions'
+  last_commit: 'fix: [CARD-005E] Fix network error mocking in tests'
+  next_action: 'Start at CARD-005F - Next test suite reliability improvement'
 queue:
-  - CARD-005E
   - CARD-005F
   - CARD-005G
   - CARD-005H

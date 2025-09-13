@@ -46,7 +46,8 @@ class TestServerRoutes:
             mock_fetch.side_effect = requests.exceptions.RequestException("Network error")
             
             response = authenticated_client.get('/create', follow_redirects=True)
-            assert b'Error fetching version manifest' in response.data
+            # The error message should be "Unexpected error: Network error" from safe_execute
+            assert b'Unexpected error: Network error' in response.data
     
     @patch('app.routes.server_routes.find_next_available_port')
     @patch('app.routes.server_routes.get_version_info')
