@@ -831,3 +831,17 @@ def accept_eula(server_id):
         return redirect(url_for(".home"))
 
     return render_template("accept_eula.html", server=server)
+
+
+@server_bp.route("/backup_management")
+@login_required
+@route_error_handler
+def backup_management():
+    """Backup management interface page."""
+    # Get servers that the current user has access to
+    if current_user.is_admin:
+        servers = Server.query.all()
+    else:
+        servers = Server.query.filter_by(owner_id=current_user.id).all()
+
+    return render_template("backup_management.html", servers=servers)

@@ -1914,3 +1914,238 @@ body {
         font-size: 12px;
     }
 }
+
+/* ===== BACKUP MANAGEMENT STYLES ===== */
+
+.backup-management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--mc-surface);
+    border-radius: 10px;
+    border: 2px solid var(--mc-border);
+}
+
+.page-description {
+    color: var(--mc-text-light);
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+.server-selection-section,
+.schedule-section,
+.manual-backup-section,
+.backup-history-section {
+    margin-bottom: 30px;
+}
+
+.schedule-status {
+    padding: 15px;
+    background: var(--mc-surface);
+    border-radius: 8px;
+    border-left: 4px solid var(--mc-primary);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-icon i {
+    font-size: 1.2rem;
+}
+
+.status-text {
+    font-weight: 500;
+    color: var(--mc-text);
+}
+
+.schedule-form {
+    margin-top: 20px;
+}
+
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.backup-progress {
+    margin-top: 15px;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--mc-surface);
+}
+
+.progress-bar {
+    background: linear-gradient(45deg, var(--mc-primary), var(--mc-secondary));
+    border-radius: 4px;
+}
+
+.backup-history-table {
+    margin-top: 15px;
+}
+
+.mc-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mc-table thead {
+    background: var(--mc-primary);
+    color: white;
+}
+
+.mc-table thead th {
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mc-table tbody td {
+    padding: 15px;
+    border-top: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.mc-table tbody tr:hover {
+    background-color: var(--mc-surface);
+}
+
+.no-backups-message {
+    padding: 40px 20px;
+    color: var(--mc-text-light);
+}
+
+.no-backups-message i {
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.loading-spinner i {
+    color: var(--mc-primary);
+    margin-bottom: 15px;
+}
+
+.status-updates {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.mc-modal .modal-content {
+    border: 2px solid var(--mc-border);
+    border-radius: 10px;
+}
+
+.mc-modal .modal-header {
+    background: var(--mc-surface);
+    border-bottom: 2px solid var(--mc-border);
+}
+
+.mc-modal .modal-title {
+    color: var(--mc-text);
+}
+
+.mc-modal .modal-footer {
+    border-top: 1px solid var(--mc-border);
+}
+
+/* Mobile responsiveness for backup management */
+@media (max-width: 768px) {
+    .backup-management-container {
+        padding: 10px;
+    }
+
+    .page-header {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .page-description {
+        font-size: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .status-updates {
+        position: relative;
+        top: auto;
+        right: auto;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .mc-table {
+        font-size: 0.9rem;
+    }
+
+    .mc-table thead th,
+    .mc-table tbody td {
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .backup-management-container {
+        padding: 5px;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .mc-table {
+        font-size: 0.8rem;
+    }
+
+    .mc-table thead th,
+    .mc-table tbody td {
+        padding: 8px 5px;
+    }
+}
