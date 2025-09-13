@@ -69,3 +69,4 @@ RELEASE_NOTES.md)
 - CARD-007K: ✅ Completed - added language specifiers to fenced code blocks (MD040)
 - CARD-007L: ✅ Completed - verified first-line heading compliance (MD041) -
   already compliant
+- CARD-007M: ✅ Completed - re-enabled bandit security hook with dependency fixes

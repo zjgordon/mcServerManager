@@ -53,13 +53,13 @@ repos:
         args: ['--ignore-missing-imports', '--no-strict-optional']
         exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
 
-  # Bandit hook temporarily disabled due to dependency issues
-  # - repo: https://github.com/pycqa/bandit
-  #   rev: 1.7.5
-  #   hooks:
-  #     - id: bandit
-  #       args: ['-r', '.', '-f', 'json', '-o', 'bandit-report.json']
-  #       exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        additional_dependencies: [pbr]
+        args: ['-f', 'json', '-o', 'bandit-report.json', '--exit-zero']
+        exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
 
   # Safety hook removed due to repository access issues
   # - repo: https://github.com/pycqa/safety

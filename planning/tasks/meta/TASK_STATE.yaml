@@ -1,8 +1,8 @@
-active_card: CARD-007M
+active_card: CARD-007N
 breadcrumb:
-  step: 'CARD-007L completed - verified first-line heading compliance (MD041)'
-  last_commit: 'docs: [CARD-007L] Verify first-line heading compliance in markdown files'
-  next_action: 'Start at CARD-007M - Next code quality improvement'
+  step: 'CARD-007M completed - re-enabled bandit security hook with dependency fixes'
+  last_commit: 'feat: [CARD-007M] Re-enable bandit security hook in pre-commit configuration'
+  next_action: 'Start at CARD-007N - Next code quality improvement'
 queue:
   - CARD-007D
   - CARD-007E
