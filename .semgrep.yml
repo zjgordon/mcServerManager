@@ -1,0 +1,22 @@
+# Semgrep configuration for mcServerManager
+# Advanced security analysis with Python security rules
+
+rules:
+  # Use Python security rules
+  - p/python
+  - p/security-audit
+  - p/owasp-top-ten
+
+# Exclude directories
+exclude:
+  - tests/
+  - venv/
+  - node_modules/
+  - .venv/
+  - __pycache__/
+  - .pytest_cache/
+  - .mypy_cache/
+
+# Include only Python files
+include:
+  - "*.py"

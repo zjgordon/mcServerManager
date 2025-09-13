@@ -58,16 +58,17 @@ repos:
     hooks:
       - id: bandit
         additional_dependencies: [pbr]
-        args: ['-f', 'json', '-o', 'bandit-report.json', '--exit-zero']
+        args: ['-s', 'B101', '-x', 'tests/,venv/,node_modules/,.venv/,__pycache__,.pytest_cache,.mypy_cache', '--exit-zero']
         exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
 
-  # Safety hook removed due to repository access issues
-  # - repo: https://github.com/pycqa/safety
-  #   rev: 2.3.5
-  #   hooks:
-  #     - id: safety
-  #       args: ['--short-report']
-  #       exclude: '^venv/|^node_modules/|^\.venv/'
+  - repo: local
+    hooks:
+      - id: safety
+        name: safety
+        entry: python scripts/safety_check.py
+        language: system
+        files: requirements\.txt$
+        exclude: '^venv/|^node_modules/|^\.venv/'
 
   - repo: https://github.com/pycqa/pydocstyle
     rev: 6.3.0
@@ -124,7 +125,7 @@ repos:
     hooks:
       - id: semgrep
         args: ['--config=auto', '--severity=ERROR']
-        exclude: '^venv/|^node_modules/|^\.venv/'
+        exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
 
   # Documentation hooks
   - repo: https://github.com/igorshubovych/markdownlint-cli

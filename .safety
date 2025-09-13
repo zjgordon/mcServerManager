@@ -1,0 +1,14 @@
+# Safety configuration for mcServerManager
+# Check both requirements.txt and requirements-dev.txt for vulnerabilities
+
+# Files to check
+files = requirements.txt,requirements-dev.txt
+
+# Output format
+format = short
+
+# Exit code on vulnerabilities found
+exit_code = 1
+
+# Ignore specific vulnerabilities (if needed)
+# ignore = 12345,67890
