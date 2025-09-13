@@ -6,12 +6,22 @@ This module provides comprehensive backup scheduling capabilities including:
 - Backup schedule management (add, remove, update)
 - Error handling and logging
 - Schedule status monitoring
+- Backup execution with verification and compression
 """
 
+import gzip
+import hashlib
 import logging
-from datetime import datetime, time
+import os
+import shutil
+import subprocess
+import tarfile
+import time
+from datetime import datetime
+from datetime import time as dt_time
 from typing import Any, Dict, List, Optional
 
+import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -415,7 +425,7 @@ class BackupScheduler:
             return False
 
         # Validate schedule_time
-        if not isinstance(config["schedule_time"], time):
+        if not isinstance(config["schedule_time"], dt_time):
             self.logger.error(
                 "schedule_time must be a time object",
                 {"event_type": "schedule_error", "error": "invalid_schedule_time"},
@@ -493,31 +503,396 @@ class BackupScheduler:
             )
 
     def _execute_backup(self, server_id: int):
-        """Execute backup for a server (placeholder implementation)."""
+        """Execute backup for a server with verification and compression."""
+        backup_start_time = datetime.utcnow()
+        backup_size = 0
+        backup_checksum = None
+
         try:
             self.logger.info(
-                f"Executing backup for server {server_id}",
-                {"event_type": "backup_executed", "server_id": server_id},
+                f"Starting backup execution for server {server_id}",
+                {
+                    "event_type": "backup_started",
+                    "server_id": server_id,
+                    "start_time": backup_start_time.isoformat(),
+                },
             )
 
-            # Update last_backup timestamp
-            backup_schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
-            if backup_schedule:
-                backup_schedule.last_backup = datetime.utcnow()
-                db.session.commit()
+            # Get server and backup schedule
+            server = Server.query.get(server_id)
+            if not server:
+                raise ValueError(f"Server {server_id} not found")
 
-            # TODO: Implement actual backup logic here
-            # This would involve:
-            # 1. Stopping the server
-            # 2. Creating backup archive
-            # 3. Starting the server
-            # 4. Cleaning up old backups based on retention policy
+            backup_schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
+            if not backup_schedule:
+                raise ValueError(f"Backup schedule not found for server {server_id}")
+
+            # Execute the backup
+            backup_result = self.execute_backup_job(server_id)
+
+            if backup_result["success"]:
+                backup_size = backup_result.get("size", 0)
+                backup_checksum = backup_result.get("checksum")
+
+                self.logger.info(
+                    f"Backup completed successfully for server {server_id}",
+                    {
+                        "event_type": "backup_completed",
+                        "server_id": server_id,
+                        "backup_file": backup_result.get("backup_file"),
+                        "backup_size": backup_size,
+                        "checksum": backup_checksum,
+                        "duration_seconds": backup_result.get("duration", 0),
+                    },
+                )
+            else:
+                self.logger.error(
+                    f"Backup failed for server {server_id}: {backup_result.get('error')}",
+                    {
+                        "event_type": "backup_failed",
+                        "server_id": server_id,
+                        "error": backup_result.get("error"),
+                    },
+                )
 
         except Exception as e:
             self.logger.error_tracking(
                 e,
                 {"event_type": "backup_error", "server_id": server_id, "action": "execute_backup"},
             )
+
+        finally:
+            # Update backup schedule with results
+            try:
+                if backup_schedule:
+                    backup_schedule.last_backup = backup_start_time
+                    db.session.commit()
+            except Exception as e:
+                self.logger.error_tracking(
+                    e,
+                    {
+                        "event_type": "backup_error",
+                        "server_id": server_id,
+                        "action": "update_schedule",
+                    },
+                )
+
+    def execute_backup_job(self, server_id: int, max_retries: int = 3) -> Dict[str, Any]:
+        """
+        Execute backup job for a server with comprehensive error handling and verification.
+
+        Args:
+            server_id: ID of the server to backup
+            max_retries: Maximum number of retry attempts
+
+        Returns:
+            Dict containing backup result with success status, file path, size, checksum, etc.
+        """
+        backup_start_time = time.time()
+        server = Server.query.get(server_id)
+
+        if not server:
+            return {"success": False, "error": f"Server {server_id} not found"}
+
+        server_dir = os.path.join("servers", server.server_name)
+        backup_dir = os.path.join("backups", server.server_name)
+
+        # Ensure backup directory exists
+        os.makedirs(backup_dir, exist_ok=True)
+
+        # Generate backup filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_filename = f"{server.server_name}_backup_{timestamp}.tar.gz"
+        backup_filepath = os.path.join(backup_dir, backup_filename)
+
+        was_running = False
+        original_status = server.status
+        original_pid = server.pid
+
+        try:
+            # Step 1: Stop server if running
+            was_running = self._stop_server_for_backup(server)
+
+            # Step 2: Create backup archive with retry logic
+            backup_created = False
+            last_error = None
+
+            for attempt in range(max_retries):
+                try:
+                    if self._create_backup_archive(server_dir, backup_filepath):
+                        backup_created = True
+                        break
+                except Exception as e:
+                    last_error = str(e)
+                    self.logger.warning(
+                        f"Backup attempt {attempt + 1} failed for server {server_id}: {last_error}",
+                        {
+                            "event_type": "backup_retry",
+                            "server_id": server_id,
+                            "attempt": attempt + 1,
+                            "error": last_error,
+                        },
+                    )
+                    if attempt < max_retries - 1:
+                        time.sleep(2**attempt)  # Exponential backoff
+
+            if not backup_created:
+                return {
+                    "success": False,
+                    "error": f"Failed to create backup after {max_retries} attempts: {last_error}",
+                }
+
+            # Step 3: Verify backup integrity
+            verification_result = self._verify_backup_integrity(backup_filepath)
+            if not verification_result["valid"]:
+                # Clean up invalid backup
+                try:
+                    os.remove(backup_filepath)
+                except OSError:
+                    pass
+                return {
+                    "success": False,
+                    "error": f"Backup verification failed: {verification_result['error']}",
+                }
+
+            # Step 4: Get backup metadata
+            backup_size = os.path.getsize(backup_filepath)
+            backup_checksum = verification_result["checksum"]
+
+            # Step 5: Clean up old backups based on retention policy
+            self._cleanup_old_backups(server_id, backup_dir)
+
+            backup_duration = time.time() - backup_start_time
+
+            return {
+                "success": True,
+                "backup_file": backup_filepath,
+                "backup_filename": backup_filename,
+                "size": backup_size,
+                "checksum": backup_checksum,
+                "duration": backup_duration,
+                "was_running": was_running,
+            }
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+        finally:
+            # Step 6: Restart server if it was running
+            if was_running and original_status == "Running":
+                try:
+                    self._restart_server_after_backup(server, original_pid)
+                except Exception as e:
+                    self.logger.error_tracking(
+                        e,
+                        {
+                            "event_type": "backup_error",
+                            "server_id": server_id,
+                            "action": "restart_server",
+                        },
+                    )
+
+    def _stop_server_for_backup(self, server: Server) -> bool:
+        """Stop server for backup if it's running."""
+        if server.status != "Running" or not server.pid:
+            return False
+
+        try:
+            process = psutil.Process(server.pid)
+            process.terminate()
+
+            # Wait for graceful shutdown
+            try:
+                process.wait(timeout=10)
+            except psutil.TimeoutExpired:
+                # Force kill if graceful shutdown fails
+                process.kill()
+                process.wait(timeout=5)
+
+            # Update server status
+            server.status = "Stopped"
+            server.pid = None
+            db.session.commit()
+
+            self.logger.info(
+                f"Server {server.server_name} stopped for backup",
+                {"event_type": "server_stopped", "server_id": server.id},
+            )
+
+            return True
+
+        except psutil.NoSuchProcess:
+            # Process already stopped
+            server.status = "Stopped"
+            server.pid = None
+            db.session.commit()
+            return False
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {"event_type": "backup_error", "server_id": server.id, "action": "stop_server"},
+            )
+            raise
+
+    def _create_backup_archive(self, server_dir: str, backup_filepath: str) -> bool:
+        """Create compressed backup archive."""
+        if not os.path.exists(server_dir):
+            raise FileNotFoundError(f"Server directory not found: {server_dir}")
+
+        try:
+            # Create tar.gz archive
+            with tarfile.open(backup_filepath, "w:gz", compresslevel=6) as tar:
+                tar.add(server_dir, arcname=os.path.basename(server_dir), recursive=True)
+
+            # Verify archive was created and has content
+            if not os.path.exists(backup_filepath) or os.path.getsize(backup_filepath) == 0:
+                raise ValueError("Backup archive is empty or not created")
+
+            return True
+
+        except Exception:
+            # Clean up failed backup file
+            try:
+                if os.path.exists(backup_filepath):
+                    os.remove(backup_filepath)
+            except OSError:
+                pass
+            raise
+
+    def _verify_backup_integrity(self, backup_filepath: str) -> Dict[str, Any]:
+        """Verify backup archive integrity using checksums."""
+        try:
+            # Calculate SHA256 checksum
+            sha256_hash = hashlib.sha256()
+            with open(backup_filepath, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    sha256_hash.update(chunk)
+            checksum = sha256_hash.hexdigest()
+
+            # Verify archive can be opened and has content
+            try:
+                with tarfile.open(backup_filepath, "r:gz") as tar:
+                    members = tar.getmembers()
+                    if not members:
+                        return {"valid": False, "error": "Archive is empty", "checksum": checksum}
+
+                    # Check if we can extract the first member (basic integrity test)
+                    first_member = members[0]
+                    if not first_member.isfile() and not first_member.isdir():
+                        return {
+                            "valid": False,
+                            "error": "Archive contains invalid members",
+                            "checksum": checksum,
+                        }
+
+            except (tarfile.TarError, OSError) as tar_error:
+                return {
+                    "valid": False,
+                    "error": f"Archive corruption detected: {str(tar_error)}",
+                    "checksum": checksum,
+                }
+
+            return {"valid": True, "checksum": checksum}
+
+        except Exception as verify_error:
+            return {
+                "valid": False,
+                "error": f"Integrity verification failed: {str(verify_error)}",
+                "checksum": None,
+            }
+
+    def _cleanup_old_backups(self, server_id: int, backup_dir: str):
+        """Clean up old backups based on retention policy."""
+        try:
+            backup_schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
+            if not backup_schedule:
+                return
+
+            retention_days = backup_schedule.retention_days
+            cutoff_time = datetime.utcnow().timestamp() - (retention_days * 24 * 3600)
+
+            if not os.path.exists(backup_dir):
+                return
+
+            removed_count = 0
+            for filename in os.listdir(backup_dir):
+                if filename.endswith(".tar.gz") and filename.startswith(
+                    f"server_{server_id}_backup_"
+                ):
+                    filepath = os.path.join(backup_dir, filename)
+                    try:
+                        file_mtime = os.path.getmtime(filepath)
+                        if file_mtime < cutoff_time:
+                            os.remove(filepath)
+                            removed_count += 1
+                    except OSError:
+                        continue
+
+            if removed_count > 0:
+                self.logger.info(
+                    f"Cleaned up {removed_count} old backups for server {server_id}",
+                    {
+                        "event_type": "backup_cleanup",
+                        "server_id": server_id,
+                        "removed_count": removed_count,
+                    },
+                )
+
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {
+                    "event_type": "backup_error",
+                    "server_id": server_id,
+                    "action": "cleanup_old_backups",
+                },
+            )
+
+    def _restart_server_after_backup(self, server: Server, original_pid: Optional[int]):
+        """Restart server after backup completion."""
+        try:
+            server_dir = os.path.join("servers", server.server_name)
+            server_jar_path = os.path.join(server_dir, "server.jar")
+
+            if not os.path.exists(server_jar_path):
+                raise FileNotFoundError(f"Server JAR not found: {server_jar_path}")
+
+            # Build command with server's memory allocation
+            memory_mb = server.memory_mb
+            command = [
+                "java",
+                f"-Xms{memory_mb}M",
+                f"-Xmx{memory_mb}M",
+                "-jar",
+                "server.jar",
+                "nogui",
+            ]
+
+            # Start server process
+            process = subprocess.Popen(
+                command,
+                cwd=server_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+            # Update server status
+            server.status = "Running"
+            server.pid = process.pid
+            db.session.commit()
+
+            self.logger.info(
+                f"Server {server.server_name} restarted after backup with PID {process.pid}",
+                {"event_type": "server_restarted", "server_id": server.id, "pid": process.pid},
+            )
+
+        except Exception:
+            # Update status to indicate restart failure
+            server.status = "Stopped"
+            server.pid = None
+            db.session.commit()
+            raise
 
 
 # Global scheduler instance
