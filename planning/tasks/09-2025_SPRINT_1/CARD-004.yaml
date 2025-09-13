@@ -1,0 +1,29 @@
+id: CARD-004
+title: Create requirements-dev.txt for development dependencies
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: completed
+owner: cursor
+links: []
+acceptance:
+  - All development tools included with pinned versions
+  - Testing frameworks (pytest, pytest-cov, pytest-flask)
+  - Linting tools (black, isort, flake8, mypy)
+  - Security tools (bandit, safety, semgrep)
+  - Pre-commit hooks and related tools
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-004]
+artifacts:
+  - requirements-dev.txt
+  - docs/development-setup.md
+notes: |
+  Development dependencies should include:
+  - pytest==7.4.3, pytest-cov==4.1.0, pytest-flask==1.3.0
+  - black==23.9.1, isort==5.12.0, flake8==6.1.0
+  - mypy==1.6.1, types-requests==2.31.0.10
+  - bandit==1.7.5, safety==2.3.5, semgrep==1.45.0
+  - pre-commit==3.5.0, detect-secrets==1.4.0
+  - pydocstyle==6.3.0, markdownlint==0.0.1
+  - mutmut==2.4.0, hypothesis==6.92.1
+  - All versions pinned for reproducibility

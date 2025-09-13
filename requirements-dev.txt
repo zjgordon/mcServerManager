@@ -1,0 +1,33 @@
+# Minecraft Server Manager - Development Dependencies
+# Install with: pip install -r requirements-dev.txt
+# All dependencies pinned to exact versions for reproducible builds
+
+# Testing Frameworks
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-flask==1.3.0
+
+# Code Formatting & Linting
+black==23.9.1
+isort==5.12.0
+flake8==6.1.0
+
+# Type Checking
+mypy==1.6.1
+types-requests==2.31.0.10
+
+# Security Tools
+bandit==1.7.5
+
+# Pre-commit Hooks & Git Tools
+pre-commit==3.5.0
+
+# Documentation & Code Quality
+pydocstyle==6.3.0
+markdown==3.9
+
+# Advanced Testing
+hypothesis==6.92.1
+
+# Development Utilities
+# Additional tools can be added here as needed

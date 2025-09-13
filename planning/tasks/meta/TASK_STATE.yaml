@@ -1,10 +1,9 @@
-active_card: CARD-004
+active_card: CARD-005
 breadcrumb:
-  step: 'CARD-003 completed - requirements.txt organized with pinned versions and categorized comments'
-  last_commit: 'feat: [CARD-003] Pin all dependencies to specific versions in requirements.txt'
-  next_action: 'Start at CARD-004'
+  step: 'CARD-004 completed - requirements-dev.txt created with all development tools and pinned versions'
+  last_commit: 'feat: [CARD-004] Create requirements-dev.txt for development dependencies'
+  next_action: 'Start at CARD-005'
 queue:
-  - CARD-004
   - CARD-005
   - CARD-006
   - CARD-007

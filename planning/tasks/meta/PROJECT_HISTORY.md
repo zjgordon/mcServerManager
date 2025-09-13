@@ -21,3 +21,11 @@ Created comprehensive `.env.example` template file documenting all environment v
 **Owner:** cursor  
 
 Organized and enhanced `requirements.txt` with all dependencies pinned to exact versions for reproducible builds. Added comprehensive comments grouping dependencies by category: Core Flask Framework, Flask Dependencies & Utilities, Database & ORM, HTTP & Network, Security & Authentication, System Utilities, and Type Hints. Created backup file `requirements-pinned.txt` and verified all dependencies install correctly with the development environment script. Ensures consistent dependency versions across development and production environments.
+
+## 2025-01-09 - CARD-004: Create requirements-dev.txt for development dependencies
+
+**Epic:** Epic 1 – Repository Organization and Environment Setup  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive `requirements-dev.txt` file with all development tools pinned to exact versions for reproducible builds. Includes testing frameworks (pytest, pytest-cov, pytest-flask), code formatting tools (black, isort, flake8), type checking (mypy, types-requests), security tools (bandit), pre-commit hooks, documentation tools (pydocstyle, markdown), and advanced testing (hypothesis). Resolved dependency conflicts by selecting compatible versions and verified successful installation. Provides developers with all necessary tools for code quality, testing, and security analysis.
