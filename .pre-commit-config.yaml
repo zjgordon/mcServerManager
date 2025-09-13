@@ -112,13 +112,12 @@ repos:
         args: ['-i', '2', '-ci', '-sr']
 
   # Security hooks
-  # Detect-secrets hook temporarily disabled due to version compatibility issues
-  # - repo: https://github.com/Yelp/detect-secrets
-  #   rev: v1.4.0
-  #   hooks:
-  #     - id: detect-secrets
-  #       args: ['--baseline', '.secrets.baseline']
-  #       exclude: '^venv/|^node_modules/|^\.venv/|^\.secrets\.baseline$'
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '^venv/|^node_modules/|^\.venv/|^\.secrets\.baseline$'
 
   - repo: https://github.com/returntocorp/semgrep
     rev: v1.45.0
