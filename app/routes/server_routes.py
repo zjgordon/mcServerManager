@@ -3,14 +3,12 @@ import shutil
 import signal
 import subprocess
 import tarfile
-import time
 from datetime import datetime
 
 import psutil
 import requests
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from sqlalchemy.exc import IntegrityError
 
 from ..error_handlers import (
     DatabaseError,
@@ -20,21 +18,16 @@ from ..error_handlers import (
     SafeFileOperation,
     ServerError,
     ValidationError,
-    create_error_response,
-    handle_database_operations,
-    handle_file_operations,
-    handle_network_error,
     handle_server_operations,
     logger,
     route_error_handler,
     safe_execute,
 )
 from ..extensions import db
-from ..models import Server, User
+from ..models import Server
 from ..utils import (
     fetch_version_manifest,
     find_next_available_port,
-    format_memory_display,
     get_memory_config,
     get_memory_usage_summary,
     get_version_info,

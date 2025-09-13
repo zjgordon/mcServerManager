@@ -1,9 +1,24 @@
-active_card: CARD-008
+active_card: CARD-007B
 breadcrumb:
-  step: 'CARD-007 completed - pre-commit framework installed and configured with comprehensive hooks for code quality, formatting, and security'
-  last_commit: 'feat: [CARD-007] Install and configure pre-commit framework'
-  next_action: 'Start at CARD-008 - Next code quality improvement'
+  step: 'CARD-007A completed - removed unused imports from app module files flagged by flake8 F401 errors'
+  last_commit: 'refactor: [CARD-007A] Remove unused imports from app module files'
+  next_action: 'Start at CARD-007B - Next code quality improvement'
 queue:
+  - CARD-007C
+  - CARD-007C
+  - CARD-007D
+  - CARD-007E
+  - CARD-007F
+  - CARD-007G
+  - CARD-007H
+  - CARD-007I
+  - CARD-007J
+  - CARD-007K
+  - CARD-007L
+  - CARD-007M
+  - CARD-007N
+  - CARD-007O
+  - CARD-007P
   - CARD-008
   - CARD-009
   - CARD-010

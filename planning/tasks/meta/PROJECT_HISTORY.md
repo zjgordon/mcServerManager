@@ -206,13 +206,23 @@ Successfully centralized configuration management by creating a comprehensive co
 Successfully installed and configured comprehensive pre-commit framework with hooks for Python, JavaScript/TypeScript, Shell scripts, and general code quality. Created `.pre-commit-config.yaml` with black, isort, flake8, mypy for Python code formatting and linting, prettier and eslint for frontend code, shellcheck and shfmt for shell script validation, and general hooks for trailing whitespace, end-of-file fixing, and merge conflict detection. Added security hooks including semgrep for advanced security scanning. Created comprehensive documentation in `docs/pre-commit-setup.md` explaining installation, configuration, usage, and troubleshooting. Pre-commit hooks are now active and automatically format code, fix common issues, and enforce code quality standards on every commit.
 
 **Key Files Created:**
+
 - `.pre-commit-config.yaml` - Main pre-commit configuration with comprehensive hooks
 - `.pre-commit-hooks.yaml` - Additional hook configuration details
 - `docs/pre-commit-setup.md` - Comprehensive pre-commit documentation
 - `.secrets.baseline` - Secrets detection baseline file
 
 **Key Files Modified:**
+
 - `app/config.py` - Fixed long line formatting for CSP header
 - Multiple files - Automatically formatted by pre-commit hooks
 
 **Impact:** Pre-commit framework is now fully operational, providing automated code quality checks, formatting, and security scanning on every commit. This ensures consistent code style, catches issues early, and maintains high code quality standards across the entire project.
+
+## 2025-01-09 - CARD-007A: Remove unused imports from app module files
+
+**Epic:** Epic 2 – Pre-commit Hooks and Code Quality  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully removed all unused imports flagged by flake8 F401 errors from core app module files. Used flake8 to identify exact unused imports and surgically removed them without affecting functionality. Removed unused imports from app/__init__.py (check_admin_password), app/routes/auth_routes.py (re, psutil, flask.abort), app/routes/server_routes.py (time, sqlalchemy.exc.IntegrityError, error_handlers imports, User model, format_memory_display), and app/utils.py (flask.current_app, flask_login.current_user, error_handlers imports). All F401 errors resolved while maintaining code functionality and imports that are actually used by the application.

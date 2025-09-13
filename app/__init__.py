@@ -12,7 +12,6 @@ from .models import User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .security import add_security_headers, audit_log
-from .utils import check_admin_password
 
 logger = logging.getLogger(__name__)
 
