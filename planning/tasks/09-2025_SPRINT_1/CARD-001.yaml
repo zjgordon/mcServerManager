@@ -1,0 +1,28 @@
+id: CARD-001
+title: Create dev.sh development environment management script
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: completed
+owner: cursor
+links: []
+acceptance:
+  - Script detects and resolves port conflicts automatically
+  - Virtual environment activation and dependency installation included
+  - Environment variable management implemented
+  - Script handles multiple development instances gracefully
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-001]
+artifacts:
+  - dev.sh
+  - scripts/dev-utils.sh
+notes: |
+  The dev.sh script should:
+  - Check for existing virtual environment and activate it
+  - Install/update dependencies from requirements.txt
+  - Detect port conflicts (5000, 5001, etc.) and suggest alternatives
+  - Set up environment variables from .env if present
+  - Provide options for different development modes (debug, test, production)
+  - Include error handling and helpful error messages
+  - Support both Python Flask app and any frontend development
+  - Be executable and include proper shebang
