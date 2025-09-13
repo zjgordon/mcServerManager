@@ -59,10 +59,12 @@ provides guidelines and information for contributors.
 
 ### Code Style
 
-- Follow PEP 8 Python style guidelines
+- Follow PEP 8 Python style guidelines with 100-character line length limit
 - Use meaningful variable and function names
 - Write comprehensive docstrings for functions and classes
 - Keep functions small and focused on single responsibilities
+- Code is automatically formatted with Black and isort via pre-commit hooks
+- Linting is handled by flake8 with development-friendly ignore patterns
 
 ### Commit Messages
 
