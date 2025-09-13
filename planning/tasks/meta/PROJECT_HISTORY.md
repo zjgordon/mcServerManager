@@ -45,3 +45,11 @@ Organized project directory structure by creating dedicated directories for diff
 **Owner:** cursor  
 
 Fixed critical SQLAlchemy session management issue in test fixtures that was causing DetachedInstanceError exceptions in 20+ tests. The problem occurred when Server objects became detached from the database session after fixture creation. Implemented surgical fix by adding `db.session.refresh(server)` call in the `test_server` fixture after commit to ensure proper session binding throughout test lifecycle. This eliminates database session leaks between tests and ensures Server objects remain bound to session. The fix affects only test infrastructure and does not impact application code.
+
+## 2025-01-09 - CARD-005B: Fix Authentication Test Infrastructure and Session Management
+
+**Epic:** Epic 1 – Test Suite Reliability  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed authentication test infrastructure issues that were causing redirect problems and session management failures. The core issue was that the `check_admin_setup()` before_request handler was redirecting to admin setup when no admin user with password existed, preventing login page from loading in tests. Implemented surgical fix by modifying the `app` fixture to automatically create a default admin user during test setup, ensuring admin setup redirects don't interfere with test flow. Also updated the `admin_user` fixture to reuse existing admin user to prevent UNIQUE constraint violations. This ensures session management works correctly across test boundaries and flash messages are properly captured and asserted.

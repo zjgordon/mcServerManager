@@ -1,10 +1,9 @@
-active_card: CARD-005B
+active_card: CARD-005C
 breadcrumb:
-  step: 'CARD-005A completed - SQLAlchemy session management in test fixtures fixed, eliminating DetachedInstanceError exceptions'
-  last_commit: 'fix: [CARD-005A] Fix SQLAlchemy session management in test fixtures'
-  next_action: 'Start at CARD-005B - Next test suite reliability improvement'
+  step: 'CARD-005B completed - authentication test infrastructure fixed, resolving redirect issues and session management problems'
+  last_commit: 'fix: [CARD-005B] Fix authentication test infrastructure and session management'
+  next_action: 'Start at CARD-005C - Next test suite reliability improvement'
 queue:
-  - CARD-005B
   - CARD-005C
   - CARD-005D
   - CARD-005E
