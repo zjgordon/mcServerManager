@@ -8,6 +8,7 @@ from config import get_config
 
 from .error_handlers import init_error_handlers
 from .extensions import csrf, db, login_manager
+from .health import health_bp
 from .models import User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
@@ -31,6 +32,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(server_bp)
+    app.register_blueprint(health_bp)
 
     # Template context processor for global variables
     @app.context_processor
