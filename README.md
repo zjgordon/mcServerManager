@@ -62,6 +62,7 @@ features.
 - **Python 3.8+** with pip
 - **Java 8+** (for Minecraft servers)
 - **Linux/Unix** system (tested on Ubuntu, CentOS, Debian)
+- **Node.js 16+** (for frontend development)
 
 ### Quick Start
 
@@ -70,15 +71,48 @@ features.
 git clone <repository-url>
 cd mcServerManager
 
+# Use the development script (recommended)
+chmod +x dev.sh
+./dev.sh
+
+# Or manual setup:
 # Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
-# Set up the application
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Initialize database
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
+
+# Start the application
 python run.py
+```
+
+### Development Setup
+
+For detailed setup instructions, see [Setup Guide](docs/setup.md).
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Set up pre-commit hooks
+pre-commit install
+
+# Run tests
+pytest
+
+# Run code quality checks
+pre-commit run --all-files
 ```
 
 ### Environment Configuration
@@ -272,12 +306,53 @@ for details.
 4. Add tests for new functionality
 5. Submit a pull request
 
+## 📚 Documentation
+
+### Comprehensive Guides
+
+- **[Setup Guide](docs/setup.md)** - Detailed installation and environment setup
+- **[Development Guide](docs/development.md)** - Development workflows and best practices
+- **[Troubleshooting Guide](docs/troubleshooting.md)** - Common issues and solutions
+- **[Tools Documentation](docs/tools.md)** - Development tools and configuration
+
+### Configuration & Management
+
+- **[Configuration Guide](docs/configuration.md)** - Application configuration
+  management
+- **[Database Management](docs/database-management.md)** - Database operations
+  and migrations
+- **[Health Monitoring](docs/health-monitoring.md)** - Application monitoring
+  and health checks
+- **[Logging & Monitoring](docs/logging-monitoring.md)** - Logging configuration
+  and monitoring
+
+### Development & Quality
+
+- **[Pre-commit Setup](docs/pre-commit-setup.md)** - Code quality and
+  formatting tools
+- **[Security Scanning](docs/security-scanning.md)** - Security tools and
+  vulnerability scanning
+- **[Testing Configuration](docs/testing-configuration.md)** - Test setup and
+  execution
+- **[Test Data Management](docs/test-data-management.md)** - Test fixtures and
+  data handling
+- **[Test Organization](docs/test-organization.md)** - Test structure and
+  categorization
+
+### Process Management & Workflow
+
+- **[Process Management](PROCESS_MANAGEMENT.md)** - Detailed process management
+  information
+- **[CI/CD Setup](docs/ci-cd-setup.md)** - Continuous integration and deployment
+- **[Git Workflow](docs/git-workflow.md)** - Git workflow and branching strategy
+
 ## 📞 Support
 
-- **Documentation**: See [PROCESS_MANAGEMENT.md](PROCESS_MANAGEMENT.md) for detailed
-  process management information
+- **Documentation**: Comprehensive guides available in the `docs/` directory
 - **Issues**: Report bugs and feature requests via GitHub issues
 - **Security**: Report security vulnerabilities privately
+- **Troubleshooting**: Check the [Troubleshooting Guide](docs/troubleshooting.md)
+  first
 
 ## 🔄 Version History
 
