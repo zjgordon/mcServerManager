@@ -18,7 +18,9 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass"),
+                password_hash=generate_password_hash(
+                    "testpass"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -29,7 +31,9 @@ class TestUserModel:
             assert created_user is not None
             assert created_user.username == "testuser"
             assert created_user.is_admin is False
-            assert check_password_hash(  # pragma: allowlist secretcreated_user.password_hash, "testpass")
+            assert check_password_hash(
+                created_user.password_hash, "testpass"
+            )  # pragma: allowlist secret
 
     def test_user_unique_username(self, app):
         """Test that usernames must be unique."""
@@ -37,7 +41,9 @@ class TestUserModel:
             # Create first user
             user1 = User(
                 username="testuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"pass1"),
+                password_hash=generate_password_hash(
+                    "pass1"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user1)
@@ -46,7 +52,9 @@ class TestUserModel:
             # Try to create second user with same username
             user2 = User(
                 username="testuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"pass2"),
+                password_hash=generate_password_hash(
+                    "pass2"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user2)
@@ -60,7 +68,9 @@ class TestUserModel:
             # Create admin user
             admin = User(
                 username="admin_models",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"adminpass"),
+                password_hash=generate_password_hash(
+                    "adminpass"
+                ),  # pragma: allowlist secret
                 is_admin=True,
             )
             db.session.add(admin)
@@ -68,7 +78,9 @@ class TestUserModel:
             # Create regular user
             user = User(
                 username="user",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"userpass"),
+                password_hash=generate_password_hash(
+                    "userpass"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -86,7 +98,9 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass")
+                password_hash=generate_password_hash(
+                    "testpass"
+                )  # pragma: allowlist secret
                 # is_admin not specified
             )
             db.session.add(user)
@@ -110,7 +124,9 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass"),
+                password_hash=generate_password_hash(
+                    "testpass"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -134,7 +150,7 @@ class TestServerModel:
             # Create admin user in the same session context
             admin_user = User(
                 username="admin_models",
-                password_hash="test_hash",
+                password_hash="test_hash",  # pragma: allowlist secret
                 is_admin=True,
                 is_active=True,
             )
@@ -182,7 +198,7 @@ class TestServerModel:
             # Create admin user in the same session context
             admin_user = User(
                 username="admin_models",
-                password_hash="test_hash",
+                password_hash="test_hash",  # pragma: allowlist secret
                 is_admin=True,
                 is_active=True,
             )

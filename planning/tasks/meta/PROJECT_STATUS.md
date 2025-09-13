@@ -90,3 +90,5 @@ RELEASE_NOTES.md)
   management system with factory pattern and organized structure
 - CARD-015: ✅ Completed - organized tests by feature/component with
   comprehensive tagging system and directory structure
+- CARD-017: ✅ Completed - configured git hooks for commit message validation
+  with conventional commit format enforcement and pre-push quality checks

@@ -25,7 +25,9 @@ class TestAuthentication:
             # Create a test user with unique username
             user = User(
                 username="logintestuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass")  # pragma: allowlist secret,
+                password_hash=generate_password_hash(
+                    "testpass"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -34,7 +36,10 @@ class TestAuthentication:
             # Attempt login
             response = client.post(
                 "/login",
-                data={"username": "logintestuser", "password": "testpass"},
+                data={
+                    "username": "logintestuser",
+                    "password": "testpass",  # pragma: allowlist secret
+                },
                 follow_redirects=True,
             )
 
@@ -47,7 +52,9 @@ class TestAuthentication:
             # Create a test user with unique username
             user = User(
                 username="invalidlogintestuser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass")  # pragma: allowlist secret,
+                password_hash=generate_password_hash(
+                    "testpass"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(user)
@@ -56,7 +63,10 @@ class TestAuthentication:
             # Attempt login with wrong password
             response = client.post(
                 "/login",
-                data={"username": "invalidlogintestuser", "password": "wrongpass"},
+                data={
+                    "username": "invalidlogintestuser",
+                    "password": "wrongpass",  # pragma: allowlist secret
+                },
             )
 
             assert b"Invalid username or password" in response.data
@@ -64,7 +74,11 @@ class TestAuthentication:
     def test_login_nonexistent_user(self, client):
         """Test login with non-existent user."""
         response = client.post(
-            "/login", data={"username": "nonexistent", "password": "password"}
+            "/login",
+            data={
+                "username": "nonexistent",
+                "password": "password",  # pragma: allowlist secret
+            },
         )
 
         assert b"Invalid username or password" in response.data
@@ -92,8 +106,8 @@ class TestAuthentication:
                 "/set_admin_password",
                 data={
                     "username": "adminsetup",
-                    "password": "newpassword",
-                    "confirm_password": "newpassword",
+                    "password": "newpassword",  # pragma: allowlist secret
+                    "confirm_password": "newpassword",  # pragma: allowlist secret
                 },
                 follow_redirects=True,
             )
@@ -119,8 +133,8 @@ class TestAuthentication:
                 "/set_admin_password",
                 data={
                     "username": "adminmismatch",
-                    "password": "newpassword",
-                    "confirm_password": "differentpassword",
+                    "password": "newpassword",  # pragma: allowlist secret
+                    "confirm_password": "differentpassword",  # pragma: allowlist secret
                 },
                 follow_redirects=True,
             )
@@ -138,8 +152,8 @@ class TestAuthentication:
             "/add_user",
             data={
                 "username": "newuser",
-                "password": "newpass",
-                "confirm_password": "newpass",
+                "password": "newpass",  # pragma: allowlist secret
+                "confirm_password": "newpass",  # pragma: allowlist secret
             },
             follow_redirects=True,
         )
@@ -158,8 +172,8 @@ class TestAuthentication:
             "/add_user",
             data={
                 "username": "newuser",
-                "password": "newpass",
-                "confirm_password": "newpass",
+                "password": "newpass",  # pragma: allowlist secret
+                "confirm_password": "newpass",  # pragma: allowlist secret
             },
             follow_redirects=True,
         )
@@ -172,7 +186,9 @@ class TestAuthentication:
             # Create existing user
             existing_user = User(
                 username="existinguser",
-                password_hash=generate_password_hash(  # pragma: allowlist secret"pass")  # pragma: allowlist secret,
+                password_hash=generate_password_hash(
+                    "pass"
+                ),  # pragma: allowlist secret
                 is_admin=False,
             )
             db.session.add(existing_user)
@@ -186,8 +202,8 @@ class TestAuthentication:
             "/add_user",
             data={
                 "username": "existinguser",
-                "password": "newpass",
-                "confirm_password": "newpass",
+                "password": "newpass",  # pragma: allowlist secret
+                "confirm_password": "newpass",  # pragma: allowlist secret
             },
             follow_redirects=True,
         )
@@ -204,15 +220,17 @@ class TestAuthentication:
         # Set a known password for the user
         with app.app_context():
             user = User.query.get(regular_user.id)
-            user.password_hash = generate_password_hash(  # pragma: allowlist secret"oldpass")
+            user.password_hash = generate_password_hash(
+                "oldpass"
+            )  # pragma: allowlist secret
             db.session.commit()
 
         response = client.post(
             "/change_password",
             data={
-                "current_password": "oldpass",
-                "new_password": "newpass",
-                "confirm_password": "newpass",
+                "current_password": "oldpass",  # pragma: allowlist secret
+                "new_password": "newpass",  # pragma: allowlist secret
+                "confirm_password": "newpass",  # pragma: allowlist secret
             },
             follow_redirects=True,
         )
@@ -223,7 +241,9 @@ class TestAuthentication:
         # Verify password was changed
         with app.app_context():
             user = User.query.get(regular_user.id)
-            assert check_password_hash(  # pragma: allowlist secretuser.password_hash, "newpass")
+            assert check_password_hash(
+                user.password_hash, "newpass"
+            )  # pragma: allowlist secret
 
     def test_change_password_wrong_current(self, client, regular_user):
         """Test changing password with wrong current password."""
@@ -234,9 +254,9 @@ class TestAuthentication:
         response = client.post(
             "/change_password",
             data={
-                "current_password": "wrongpass",
-                "new_password": "newpass",
-                "confirm_password": "newpass",
+                "current_password": "wrongpass",  # pragma: allowlist secret
+                "new_password": "newpass",  # pragma: allowlist secret
+                "confirm_password": "newpass",  # pragma: allowlist secret
             },
         )
 
@@ -251,15 +271,17 @@ class TestAuthentication:
         # Set a known password for the user
         with app.app_context():
             user = User.query.get(regular_user.id)
-            user.password_hash = generate_password_hash(  # pragma: allowlist secret"oldpass")
+            user.password_hash = generate_password_hash(
+                "oldpass"
+            )  # pragma: allowlist secret
             db.session.commit()
 
         response = client.post(
             "/change_password",
             data={
-                "current_password": "oldpass",
-                "new_password": "newpass",
-                "confirm_password": "differentpass",
+                "current_password": "oldpass",  # pragma: allowlist secret
+                "new_password": "newpass",  # pragma: allowlist secret
+                "confirm_password": "differentpass",  # pragma: allowlist secret
             },
         )
 

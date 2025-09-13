@@ -42,7 +42,9 @@ class UserFactory:
 
         user_data = {
             "username": username,
-            "password_hash": generate_password_hash(  # pragma: allowlist secretpassword),
+            "password_hash": generate_password_hash(
+                password
+            ),  # pragma: allowlist secret
             "is_admin": is_admin,
             "is_active": is_active,
             **kwargs,

@@ -58,7 +58,10 @@ class TestSecurityVulnerabilities:
         for malicious_username in sql_injection_attempts:
             response = client.post(
                 "/login",
-                data={"username": malicious_username, "password": "anypassword"},
+                data={
+                    "username": malicious_username,
+                    "password": "anypassword",  # pragma: allowlist secret
+                },
             )
 
             # Should not crash and should return invalid login
@@ -203,7 +206,9 @@ class TestSecurityVulnerabilities:
         with app.app_context():
             # Create regular user
             user = User(
-                username="regularuser", password_hash="test_hash", is_admin=False
+                username="regularuser",
+                password_hash="test_hash",  # pragma: allowlist secret
+                is_admin=False,
             )
             db.session.add(user)
             db.session.commit()
@@ -227,19 +232,21 @@ class TestSecurityVulnerabilities:
         with app.app_context():
             from werkzeug.security import check_password_hash, generate_password_hash
 
-            password = "testpassword123"
-            hash1 = generate_password_hash(  # pragma: allowlist secretpassword)
-            hash2 = generate_password_hash(  # pragma: allowlist secretpassword)
+            password = "testpassword123"  # pragma: allowlist secret
+            hash1 = generate_password_hash(password)  # pragma: allowlist secret
+            hash2 = generate_password_hash(password)  # pragma: allowlist secret
 
             # Hashes should be different (salted)
             assert hash1 != hash2
 
             # But both should verify the password
-            assert check_password_hash(  # pragma: allowlist secrethash1, password)
-            assert check_password_hash(  # pragma: allowlist secrethash2, password)
+            assert check_password_hash(hash1, password)  # pragma: allowlist secret
+            assert check_password_hash(hash2, password)  # pragma: allowlist secret
 
             # Wrong password should not verify
-            assert not check_password_hash(  # pragma: allowlist secrethash1, "wrongpassword")
+            assert not check_password_hash(
+                hash1, "wrongpassword"
+            )  # pragma: allowlist secret
 
     def test_process_security(self, authenticated_client, app, test_server):
         """Test that server processes are started securely."""
@@ -287,7 +294,11 @@ class TestSecurityVulnerabilities:
 
         # Invalid login should not reveal if username exists
         response = client.post(
-            "/login", data={"username": "nonexistent", "password": "wrongpass"}
+            "/login",
+            data={
+                "username": "nonexistent",
+                "password": "wrongpass",  # pragma: allowlist secret
+            },
         )
         assert b"Invalid username or password" in response.data
         # Should not say "user not found" vs "wrong password"
