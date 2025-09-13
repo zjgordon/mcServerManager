@@ -1,0 +1,34 @@
+id: CARD-006
+title: Centralize configuration management in config/ directory
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Configuration files moved to config/ directory
+  - Environment-specific configs created (dev, test, prod)
+  - Configuration validation implemented
+  - Configuration documentation added
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-006]
+artifacts:
+  - config/base.py
+  - config/development.py
+  - config/testing.py
+  - config/production.py
+  - config/__init__.py
+  - docs/configuration.md
+notes: |
+  Configuration structure:
+  - config/base.py - base configuration class
+  - config/development.py - development-specific settings
+  - config/testing.py - testing-specific settings
+  - config/production.py - production-specific settings
+  - config/__init__.py - configuration factory
+  - Move existing app/config.py logic to new structure
+  - Implement configuration validation
+  - Add environment variable loading
+  - Document all configuration options
+

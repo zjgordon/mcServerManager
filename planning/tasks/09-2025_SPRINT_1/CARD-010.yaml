@@ -1,0 +1,32 @@
+id: CARD-010
+title: Configure flake8 for Python linting with project-specific rules
+epic: Epic 2 – Pre-commit Hooks and Code Quality
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - flake8 configured with project-specific rules
+  - .flake8 or setup.cfg created with flake8 settings
+  - All Python files pass flake8 linting
+  - flake8 integrated with pre-commit hooks
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-010]
+artifacts:
+  - .flake8
+  - setup.cfg (if needed)
+  - docs/linting-standards.md
+notes: |
+  flake8 configuration:
+  - max-line-length = 88
+  - max-complexity = 10
+  - ignore = E203, W503, E501
+  - exclude = .git,__pycache__,venv,node_modules,.venv
+  - per-file-ignores = 
+    __init__.py:F401
+    tests/*:S101
+  - select = E,W,F,C
+  - All existing Python files must pass flake8 checks
+  - Fix any flake8 violations found
+

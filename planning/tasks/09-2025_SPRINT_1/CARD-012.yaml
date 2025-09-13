@@ -1,0 +1,30 @@
+id: CARD-012
+title: Configure security scanning tools (bandit, safety, semgrep)
+epic: Epic 2 – Pre-commit Hooks and Code Quality
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - bandit configured for Python security scanning
+  - safety configured for dependency vulnerability checking
+  - semgrep configured for advanced security analysis
+  - All security tools integrated with pre-commit hooks
+  - Security scan results documented
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-012]
+artifacts:
+  - .bandit
+  - .safety
+  - .semgrep.yml
+  - docs/security-scanning.md
+notes: |
+  Security tools configuration:
+  - bandit: exclude tests/, skip B101 (assert_used)
+  - safety: check requirements.txt and requirements-dev.txt
+  - semgrep: use python security rules, exclude tests/
+  - All tools configured to run on pre-commit
+  - Security issues must be addressed or documented
+  - Create security scanning documentation
+

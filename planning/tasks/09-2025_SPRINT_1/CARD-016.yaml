@@ -1,0 +1,32 @@
+id: CARD-016
+title: Configure test coverage reporting with 80% threshold
+epic: Epic 3 – Testing Infrastructure Enhancement
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - pytest-cov configured for coverage reporting
+  - Coverage threshold set to 80%
+  - Branch coverage analysis enabled
+  - Coverage reporting in CI configured
+  - Coverage trend tracking implemented
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-016]
+artifacts:
+  - .coveragerc
+  - coverage.xml
+  - htmlcov/
+  - docs/coverage-reporting.md
+notes: |
+  Coverage configuration:
+  - minimum coverage = 80%
+  - branch coverage enabled
+  - exclude patterns for tests, migrations, __init__.py
+  - HTML and XML coverage reports
+  - Coverage trend tracking
+  - CI integration for coverage reporting
+  - Coverage badges and reporting
+  - All existing code must meet coverage threshold
+

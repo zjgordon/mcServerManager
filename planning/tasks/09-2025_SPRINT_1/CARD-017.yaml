@@ -1,0 +1,31 @@
+id: CARD-017
+title: Configure git hooks for commit message validation
+epic: Epic 4 – Development Workflow Integration
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Commit message validation hooks configured
+  - Conventional commit format enforced
+  - Commit message templates created
+  - Branch protection rules implemented
+  - Merge conflict prevention added
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-017]
+artifacts:
+  - .gitmessage
+  - .git/hooks/commit-msg
+  - .git/hooks/pre-push
+  - docs/git-workflow.md
+notes: |
+  Git hooks configuration:
+  - commit-msg hook for conventional commit validation
+  - pre-push hook for running tests before push
+  - commit message template for consistent format
+  - branch protection rules for main branch
+  - merge conflict prevention strategies
+  - automated changelog generation
+  - commit signing configuration
+

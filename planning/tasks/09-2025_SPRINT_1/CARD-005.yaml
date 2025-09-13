@@ -1,0 +1,33 @@
+id: CARD-005
+title: Organize project directory structure for scalable development
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - scripts/ directory created for development utilities
+  - config/ directory created for configuration files
+  - docs/ directory created for documentation
+  - logs/ directory created with proper permissions
+  - Existing files moved to appropriate locations
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-005]
+artifacts:
+  - scripts/ directory
+  - config/ directory
+  - docs/ directory
+  - logs/ directory
+  - updated project structure documentation
+notes: |
+  Directory structure should be:
+  - scripts/ - development utilities, setup scripts
+  - config/ - configuration files, environment configs
+  - docs/ - documentation, guides, architecture docs
+  - logs/ - application logs, test logs, status check logs
+  - Move existing scripts from scripts/ to appropriate locations
+  - Update import paths in code if necessary
+  - Ensure all existing functionality still works
+  - Add .gitkeep files to empty directories
+

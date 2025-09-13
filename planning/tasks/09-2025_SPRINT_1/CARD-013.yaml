@@ -1,0 +1,32 @@
+id: CARD-013
+title: Enhance pytest configuration with comprehensive settings
+epic: Epic 3 – Testing Infrastructure Enhancement
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - pytest.ini updated with comprehensive configuration
+  - pytest plugins added for better testing
+  - Test coverage reporting configured
+  - Test parallelization enabled
+  - Test result caching implemented
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-013]
+artifacts:
+  - pytest.ini (updated)
+  - pyproject.toml (updated)
+  - docs/testing-configuration.md
+notes: |
+  pytest configuration enhancements:
+  - Add pytest-cov for coverage reporting
+  - Add pytest-xdist for parallel testing
+  - Add pytest-cache for result caching
+  - Add pytest-html for HTML reports
+  - Add pytest-mock for mocking
+  - Configure test discovery patterns
+  - Set up coverage thresholds
+  - Configure test markers and categories
+  - Add test result reporting
+

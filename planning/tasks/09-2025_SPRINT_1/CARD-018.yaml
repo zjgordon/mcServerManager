@@ -1,0 +1,32 @@
+id: CARD-018
+title: Create GitHub Actions workflows for CI/CD
+epic: Epic 4 – Development Workflow Integration
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - .github/workflows/ directory created
+  - Test workflow implemented
+  - Code quality checks workflow added
+  - Security scanning workflow created
+  - Deployment workflow (staging) added
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-018]
+artifacts:
+  - .github/workflows/test.yml
+  - .github/workflows/quality.yml
+  - .github/workflows/security.yml
+  - .github/workflows/deploy.yml
+  - docs/ci-cd-setup.md
+notes: |
+  GitHub Actions workflows:
+  - test.yml: run tests on all PRs and pushes
+  - quality.yml: run linting and formatting checks
+  - security.yml: run security scans and vulnerability checks
+  - deploy.yml: deploy to staging environment
+  - All workflows configured with proper triggers
+  - Quality gates implemented for PRs
+  - Automated reporting and notifications
+

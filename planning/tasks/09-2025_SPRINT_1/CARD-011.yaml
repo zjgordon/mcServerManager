@@ -1,0 +1,36 @@
+id: CARD-011
+title: Configure mypy for static type checking
+epic: Epic 2 – Pre-commit Hooks and Code Quality
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - mypy configured with strict type checking
+  - mypy.ini or pyproject.toml updated with mypy settings
+  - All Python files have proper type annotations
+  - mypy integrated with pre-commit hooks
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-011]
+artifacts:
+  - mypy.ini
+  - pyproject.toml (updated)
+  - docs/type-checking.md
+notes: |
+  mypy configuration:
+  - python_version = 3.8
+  - strict = true
+  - warn_return_any = true
+  - warn_unused_configs = true
+  - disallow_untyped_defs = true
+  - disallow_incomplete_defs = true
+  - check_untyped_defs = true
+  - disallow_untyped_decorators = true
+  - no_implicit_optional = true
+  - warn_redundant_casts = true
+  - warn_unused_ignores = true
+  - warn_no_return = true
+  - warn_unreachable = true
+  - All existing Python files must have type annotations added
+

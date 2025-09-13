@@ -1,10 +1,9 @@
-active_card: CARD-005
+active_card: CARD-006
 breadcrumb:
-  step: 'CARD-004 completed - requirements-dev.txt created with all development tools and pinned versions'
-  last_commit: 'feat: [CARD-004] Create requirements-dev.txt for development dependencies'
-  next_action: 'Start at CARD-005'
+  step: 'CARD-005 completed - project directory structure organized with scripts/, config/, docs/, logs/ directories'
+  last_commit: 'feat: [CARD-005] Organize project directory structure for scalable development'
+  next_action: 'Start at CARD-006'
 queue:
-  - CARD-005
   - CARD-006
   - CARD-007
   - CARD-008

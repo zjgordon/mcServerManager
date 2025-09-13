@@ -1,0 +1,39 @@
+id: CARD-008
+title: Configure Black code formatter with project-specific settings
+epic: Epic 2 – Pre-commit Hooks and Code Quality
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Black configured with 88 character line length
+  - pyproject.toml created with Black configuration
+  - All Python files formatted according to Black standards
+  - Black integrated with pre-commit hooks
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-008]
+artifacts:
+  - pyproject.toml
+  - .black.toml (if needed)
+  - docs/code-formatting.md
+notes: |
+  Black configuration:
+  - line-length = 88
+  - target-version = ['py38', 'py39', 'py310', 'py311']
+  - include = '\.pyi?$'
+  - exclude = '''
+  /(
+      \.git
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  '''
+  - skip-string-normalization = false
+  - All existing Python files must be reformatted
+

@@ -1,0 +1,31 @@
+id: CARD-007
+title: Install and configure pre-commit framework
+epic: Epic 2 – Pre-commit Hooks and Code Quality
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - pre-commit installed in development environment
+  - .pre-commit-config.yaml created with comprehensive hooks
+  - Python-specific hooks configured (black, isort, flake8, mypy)
+  - JavaScript/TypeScript hooks configured (prettier, eslint)
+  - Shell script validation hooks added
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-007]
+artifacts:
+  - .pre-commit-config.yaml
+  - .pre-commit-hooks.yaml
+  - docs/pre-commit-setup.md
+notes: |
+  Pre-commit configuration should include:
+  - Python hooks: black, isort, flake8, mypy, bandit, safety
+  - Frontend hooks: prettier, eslint, stylelint
+  - General hooks: trailing-whitespace, end-of-file-fixer
+  - Security hooks: detect-secrets, semgrep
+  - Documentation hooks: markdownlint, pydocstyle
+  - Shell hooks: shellcheck, shfmt
+  - All hooks configured with appropriate arguments
+  - Exclude patterns for generated files and dependencies
+

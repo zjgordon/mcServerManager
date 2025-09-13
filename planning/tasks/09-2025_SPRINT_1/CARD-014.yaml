@@ -1,0 +1,33 @@
+id: CARD-014
+title: Create comprehensive test fixtures and data management
+epic: Epic 3 – Testing Infrastructure Enhancement
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Comprehensive test fixtures created
+  - Test data factories implemented
+  - Database seeding for tests added
+  - Test data cleanup utilities created
+  - Test isolation strategies implemented
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-014]
+artifacts:
+  - tests/fixtures/
+  - tests/factories.py
+  - tests/data/
+  - tests/utils/
+  - docs/test-data-management.md
+notes: |
+  Test fixtures and data management:
+  - Create fixtures for users, servers, and database state
+  - Implement factory pattern for test data generation
+  - Add database seeding utilities
+  - Create test data cleanup functions
+  - Implement test isolation strategies
+  - Add test data validation
+  - Create test data documentation
+  - Ensure tests are deterministic and repeatable
+

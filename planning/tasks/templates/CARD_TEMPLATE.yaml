@@ -1,0 +1,16 @@
+id: CARD-XXX
+title: Short action-verb description
+epic: Epic X – (Epic Title)
+sprint: <Sprint Name/Number>
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Context, edge cases, or clarifications

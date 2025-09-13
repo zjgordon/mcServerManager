@@ -1,0 +1,33 @@
+id: CARD-015
+title: Organize tests by feature/component with tagging system
+epic: Epic 3 – Testing Infrastructure Enhancement
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Tests organized by feature/component
+  - Test tagging system implemented
+  - Performance testing framework added
+  - Integration test suite created
+  - End-to-end testing capabilities added
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-015]
+artifacts:
+  - tests/unit/
+  - tests/integration/
+  - tests/e2e/
+  - tests/performance/
+  - docs/test-organization.md
+notes: |
+  Test organization structure:
+  - tests/unit/ - unit tests for individual components
+  - tests/integration/ - integration tests for component interactions
+  - tests/e2e/ - end-to-end tests for full workflows
+  - tests/performance/ - performance and load tests
+  - Implement test markers: @pytest.mark.unit, @pytest.mark.integration, etc.
+  - Add test categorization and filtering
+  - Create test execution strategies
+  - Document test organization guidelines
+

@@ -1,0 +1,30 @@
+# Commit Message Template
+
+format: '<type>(<scope>): <description> [<card-id>]'
+
+types:
+  feat: 'A new feature'
+  fix: 'A bug fix'
+  docs: 'Documentation only changes'
+  style: 'Changes that do not affect the meaning of the code'
+  refactor: 'A code change that neither fixes a bug nor adds a feature'
+  perf: 'A code change that improves performance'
+  test: 'Adding missing tests or correcting existing tests'
+  build: 'Changes that affect the build system or external dependencies'
+  ci: 'Changes to our CI configuration files and scripts'
+  chore: "Other changes that don't modify src or test files"
+  revert: 'Reverts a previous commit'
+
+examples:
+  - 'feat(api): add /health endpoint [CARD-001]'
+  - 'fix(web): correct dice roller bug [CARD-010]'
+  - 'docs(status): update CURRENT_SPRINT and PROJECT_STATUS [CARD-004]'
+  - 'chore(deps): update dependencies to latest versions'
+  - 'ci(workflow): add automated testing to GitHub Actions'
+
+rules:
+  - 'Use lowercase for type and description'
+  - 'Do not end description with a period'
+  - 'Maximum 100 characters for the entire header'
+  - 'Include card ID in square brackets when applicable'
+  - 'Scope should be the area of codebase affected (api, web, docs, ci, etc.)'

@@ -1,0 +1,31 @@
+id: CARD-019
+title: Implement comprehensive health check endpoints
+epic: Epic 5 – Application Stability and Monitoring
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Health check endpoints created
+  - Database connectivity checks implemented
+  - External service dependency checks added
+  - System resource monitoring implemented
+  - Application performance metrics added
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-019]
+artifacts:
+  - app/health.py
+  - app/monitoring.py
+  - docs/health-monitoring.md
+notes: |
+  Health check implementation:
+  - /health endpoint for basic health status
+  - /health/detailed endpoint for comprehensive status
+  - Database connectivity validation
+  - External service dependency checks
+  - System resource monitoring (CPU, memory, disk)
+  - Application performance metrics
+  - Health check response format standardization
+  - Error handling and graceful degradation
+

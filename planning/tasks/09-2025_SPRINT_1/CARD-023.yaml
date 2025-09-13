@@ -1,0 +1,33 @@
+id: CARD-023
+title: Create developer onboarding materials and training
+epic: Epic 6 – Documentation and Knowledge Transfer
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Developer onboarding guide created
+  - Project overview documentation added
+  - Development environment setup guide created
+  - Tool usage guides added
+  - Best practices guide created
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-023]
+artifacts:
+  - docs/onboarding.md
+  - docs/project-overview.md
+  - docs/best-practices.md
+  - docs/training-materials.md
+  - docs/faq.md
+notes: |
+  Onboarding materials:
+  - Step-by-step developer onboarding guide
+  - Project overview and architecture
+  - Development environment setup
+  - Tool usage and configuration
+  - Best practices and coding standards
+  - Training materials and tutorials
+  - FAQ and common issues
+  - Knowledge base and resources
+

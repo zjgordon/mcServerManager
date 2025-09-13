@@ -1,0 +1,33 @@
+id: CARD-009
+title: Configure isort for import sorting and organization
+epic: Epic 2 – Pre-commit Hooks and Code Quality
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - isort configured with project-specific import grouping
+  - pyproject.toml updated with isort settings
+  - All Python files have imports sorted according to isort rules
+  - isort integrated with pre-commit hooks
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-009]
+artifacts:
+  - pyproject.toml (updated)
+  - .isort.cfg (if needed)
+  - docs/import-organization.md
+notes: |
+  isort configuration:
+  - profile = "black"
+  - line_length = 88
+  - multi_line_output = 3
+  - include_trailing_comma = true
+  - force_grid_wrap = 0
+  - use_parentheses = true
+  - ensure_newline_before_comments = true
+  - known_first_party = ["app"]
+  - known_third_party = ["flask", "sqlalchemy", "pytest"]
+  - sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+  - All existing Python files must have imports reorganized
+
