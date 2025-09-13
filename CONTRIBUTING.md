@@ -1,6 +1,7 @@
 # Contributing to Minecraft Server Manager
 
-Thank you for your interest in contributing to Minecraft Server Manager! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Minecraft Server Manager! This document
+provides guidelines and information for contributors.
 
 ## 🚀 Getting Started
 
@@ -327,4 +328,5 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ---
 
-Thank you for contributing to Minecraft Server Manager! Your contributions help make this project better for everyone.
+Thank you for contributing to Minecraft Server Manager! Your contributions help make
+this project better for everyone.

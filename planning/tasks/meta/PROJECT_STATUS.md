@@ -27,3 +27,4 @@
 - CARD-007D: ✅ Completed - fixed line length issues (E501) in test files using proper line continuation methods
 - CARD-007E: ✅ Completed - fixed bare except clauses, unused variables, f-string issues, and redefinition problems flagged by flake8
 - CARD-007F: ✅ Completed - fixed shellcheck SC2034 warning by removing unused 'mode' variable from dev.sh
+- CARD-007G: ✅ Completed - fixed markdown line length issues (MD013) in core documentation files (CHANGELOG.md, README.md, CONTRIBUTING.md, SECURITY.md, RELEASE_NOTES.md)

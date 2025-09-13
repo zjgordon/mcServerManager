@@ -130,7 +130,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Alpha Release (v0.1.0-alpha)
 
-This alpha release represents a significant milestone in the development of Minecraft Server Manager. The application has evolved from a HarvardX school project into a production-ready server management system with enterprise-grade features.
+This alpha release represents a significant milestone in the development of Minecraft
+Server Manager. The application has evolved from a HarvardX school project into a
+production-ready server management system with enterprise-grade features.
 
 **Key Highlights:**
 

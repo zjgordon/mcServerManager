@@ -6,17 +6,24 @@
 
 ## 🎉 Welcome to Minecraft Server Manager v0.1.0-alpha
 
-This is the first official alpha release of Minecraft Server Manager, a professional web application for creating, managing, and monitoring Minecraft game servers. This release represents a significant milestone in the project's development, evolving from a HarvardX school project into a production-ready server management system.
+This is the first official alpha release of Minecraft Server Manager, a professional
+web application for creating, managing, and monitoring Minecraft game servers. This
+release represents a significant milestone in the project's development, evolving
+from a HarvardX school project into a production-ready server management system.
 
 ## 🚀 What's New
 
 ### Core Features
 
-- **Complete Server Lifecycle Management**: Create, start, stop, delete, and backup Minecraft servers
-- **Dynamic Version Selection**: Choose from available Minecraft versions with automatic exclusion filtering
+- **Complete Server Lifecycle Management**: Create, start, stop, delete, and backup
+  Minecraft servers
+- **Dynamic Version Selection**: Choose from available Minecraft versions with automatic
+  exclusion filtering
 - **Smart Port Allocation**: Automatic port assignment with conflict detection
-- **Comprehensive Configuration**: Customize game mode, difficulty, PvP, spawn settings, MOTD, and more
-- **Memory Management**: Configurable memory allocation with system-wide limits and per-server defaults
+- **Comprehensive Configuration**: Customize game mode, difficulty, PvP, spawn settings,
+  MOTD, and more
+- **Memory Management**: Configurable memory allocation with system-wide limits and
+  per-server defaults
 
 ### User Management & Security
 
@@ -28,8 +35,10 @@ This is the first official alpha release of Minecraft Server Manager, a professi
 
 ### Process Management & Monitoring
 
-- **Real-time Status Verification**: Accurate server status reporting with process validation
-- **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft processes
+- **Real-time Status Verification**: Accurate server status reporting with process
+  validation
+- **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft
+  processes
 - **Startup Reconciliation**: Ensures database consistency with actual running processes
 - **Periodic Health Checks**: Automated status monitoring with configurable intervals
 - **Process Oversight**: Admin interface for process monitoring and management
@@ -176,14 +185,17 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ---
 
 **Thank you for using Minecraft Server Manager!**
 
-This alpha release represents months of development and refinement. We're excited to share it with the community and look forward to your feedback and contributions.
+This alpha release represents months of development and refinement. We're excited
+to share it with the community and look forward to your feedback and contributions.
 
-For the latest updates and announcements, follow the project on GitHub and join our community discussions.
+For the latest updates and announcements, follow the project on GitHub and join our
+community discussions.
 
 **Happy Server Managing!** 🎮

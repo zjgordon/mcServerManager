@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Minecraft Server Manager implements comprehensive security measures appropriate for hobbyist use on local networks and the internet. This document outlines the security features, best practices, and recommendations for secure deployment.
+The Minecraft Server Manager implements comprehensive security measures appropriate
+for hobbyist use on local networks and the internet. This document outlines the security
+features, best practices, and recommendations for secure deployment.
 
 ## 🔒 Security Features
 
@@ -10,7 +12,8 @@ The Minecraft Server Manager implements comprehensive security measures appropri
 
 #### Password Security
 
-- **Strong Password Policy**: Minimum 8 characters with uppercase, lowercase, and digits required
+- **Strong Password Policy**: Minimum 8 characters with uppercase, lowercase, and
+  digits required
 - **Password Hashing**: Uses Werkzeug's secure password hashing (scrypt)
 - **Password Validation**: Prevents common weak passwords and username-in-password
 - **Password Expiry**: Configurable password expiration (default: 1 year)
@@ -80,7 +83,8 @@ The Minecraft Server Manager implements comprehensive security measures appropri
 
 ```javascript
 default-src 'self';
-script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
+script-src 'self' 'unsafe-inline' https://code.jquery.com 
+https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com;
 style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com;
 img-src 'self' data:;
 font-src 'self' https://maxcdn.bootstrapcdn.com;
@@ -329,4 +333,5 @@ grep "rate_limit" app.log
 
 ---
 
-**Note**: This security documentation is designed for hobbyist use. For enterprise deployments, consider additional security measures and professional security assessment.
+**Note**: This security documentation is designed for hobbyist use. For enterprise
+deployments, consider additional security measures and professional security assessment.

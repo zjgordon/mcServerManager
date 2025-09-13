@@ -7,21 +7,27 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/yourusername/mcServerManager)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A professional web application for creating, managing, and monitoring Minecraft game servers with enterprise-grade process management and user administration.
+A professional web application for creating, managing, and monitoring Minecraft game
+servers with enterprise-grade process management and user administration.
 
 ## 🏷️ Current Release: v0.1.0-alpha
 
-This is the alpha release of Minecraft Server Manager, featuring a complete server management system with advanced process monitoring, user administration, and security features.
+This is the alpha release of Minecraft Server Manager, featuring a complete server
+management system with advanced process monitoring, user administration, and security
+features.
 
 ## 🚀 Features
 
 ### Core Server Management
 
 - **Server Lifecycle**: Create, start, stop, delete, and backup Minecraft servers
-- **Version Selection**: Choose from available Minecraft versions with automatic exclusion filtering
+- **Version Selection**: Choose from available Minecraft versions with automatic
+  exclusion filtering
 - **Dynamic Port Allocation**: Automatic port assignment with conflict detection
-- **Server Configuration**: Customize game mode, difficulty, PvP, spawn settings, MOTD, and more
-- **Memory Management**: Configurable memory allocation with system-wide limits and per-server defaults
+- **Server Configuration**: Customize game mode, difficulty, PvP, spawn settings,
+  MOTD, and more
+- **Memory Management**: Configurable memory allocation with system-wide limits and
+  per-server defaults
 
 ### User Management & Security
 
@@ -33,8 +39,10 @@ This is the alpha release of Minecraft Server Manager, featuring a complete serv
 
 ### Process Management & Monitoring
 
-- **Real-time Status Verification**: Accurate server status reporting with process validation
-- **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft processes
+- **Real-time Status Verification**: Accurate server status reporting with process
+  validation
+- **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft
+  processes
 - **Startup Reconciliation**: Ensures database consistency with actual running processes
 - **Periodic Health Checks**: Automated status monitoring with configurable intervals
 - **Process Oversight**: Admin interface for process monitoring and management
@@ -251,7 +259,8 @@ pytest tests/test_auth.py
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ## 🤝 Contributing
 
@@ -263,13 +272,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: See [PROCESS_MANAGEMENT.md](PROCESS_MANAGEMENT.md) for detailed process management information
+- **Documentation**: See [PROCESS_MANAGEMENT.md](PROCESS_MANAGEMENT.md) for detailed
+  process management information
 - **Issues**: Report bugs and feature requests via GitHub issues
 - **Security**: Report security vulnerabilities privately
 
 ## 🔄 Version History
 
-- **v0.1.0-alpha** (Current): Alpha release with comprehensive server management, process monitoring, and security features
+- **v0.1.0-alpha** (Current): Alpha release with comprehensive server management,
+  process monitoring, and security features
 - **v0.0.2**: Code review, cleanup, and AI-enhanced improvements (Sprint 2)
 - **v0.0.1**: Initial HarvardX school project implementation (Sprint 1)
 

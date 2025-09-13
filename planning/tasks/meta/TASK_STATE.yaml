@@ -1,8 +1,8 @@
-active_card: CARD-007G
+active_card: CARD-007H
 breadcrumb:
-  step: 'CARD-007F completed - fixed shellcheck SC2034 warning by removing unused mode variable from dev.sh'
-  last_commit: 'fix: [CARD-007F] Remove unused mode variable from dev.sh'
-  next_action: 'Start at CARD-007G - Next code quality improvement'
+  step: 'CARD-007G completed - fixed markdown line length issues (MD013) in core documentation files'
+  last_commit: 'fix: [CARD-007G] Fix markdown line length issues in core documentation'
+  next_action: 'Start at CARD-007H - Next code quality improvement'
 queue:
   - CARD-007D
   - CARD-007E
