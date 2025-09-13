@@ -2,7 +2,11 @@
 
 ## Executive Summary
 
-This plan outlines a comprehensive frontend enhancement strategy for the Minecraft Server Manager application. The current system uses Flask with Jinja2 templates, Bootstrap 4, and custom CSS with a Minecraft-inspired theme. The enhancement plan focuses on modernizing the UI/UX while maintaining all existing functionality and preserving the Minecraft aesthetic.
+This plan outlines a comprehensive frontend enhancement strategy for the
+Minecraft Server Manager application. The current system uses Flask with Jinja2
+templates, Bootstrap 4, and custom CSS with a Minecraft-inspired theme. The
+enhancement plan focuses on modernizing the UI/UX while maintaining all existing
+functionality and preserving the Minecraft aesthetic.
 
 ## Current State Analysis
 
@@ -332,7 +336,7 @@ This plan outlines a comprehensive frontend enhancement strategy for the Minecra
 
 #### Component Structure
 
-```
+```text
 frontend/
 ├── src/
 │   ├── components/
@@ -560,6 +564,14 @@ self.addEventListener('install', (event) => {
 
 ## Conclusion
 
-This UI enhancement plan provides a comprehensive roadmap for modernizing the Minecraft Server Manager frontend while maintaining its core functionality and Minecraft aesthetic. The phased approach ensures manageable implementation while delivering immediate value to users. The plan emphasizes performance, accessibility, and user experience while building a solid foundation for future enhancements.
+This UI enhancement plan provides a comprehensive roadmap for modernizing the
+Minecraft Server Manager frontend while maintaining its core functionality and
+Minecraft aesthetic. The phased approach ensures manageable implementation while
+delivering immediate value to users. The plan emphasizes performance,
+accessibility, and user experience while building a solid foundation for future
+enhancements.
 
-The implementation should be done incrementally, with each phase building upon the previous one, ensuring that the application remains functional throughout the enhancement process. Regular testing and user feedback should be incorporated to ensure the enhancements meet user needs and expectations.
+The implementation should be done incrementally, with each phase building upon
+the previous one, ensuring that the application remains functional throughout
+the enhancement process. Regular testing and user feedback should be
+incorporated to ensure the enhancements meet user needs and expectations.

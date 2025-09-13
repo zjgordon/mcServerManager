@@ -2,7 +2,7 @@ id: CARD-021
 title: Implement database migration system
 epic: Epic 5 – Application Stability and Monitoring
 sprint: 09-2025_SPRINT_1
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:

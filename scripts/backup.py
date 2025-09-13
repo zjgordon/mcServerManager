@@ -1,289 +1,261 @@
 #!/usr/bin/env python3
-"""Database backup and recovery script for mcServerManager."""
+"""
+Database backup and recovery script for mcServerManager.
+
+This script provides functionality to backup and restore the database,
+including data validation and integrity checks.
+"""
 
 import argparse
+import json
 import os
+import shutil
+import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
 
 # Add the project root to the Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import create_app
-from app.database import DatabaseBackup, DatabaseMonitor, DatabaseValidator
+from app import create_app  # noqa: E402
 
 
-def create_backup(backup_dir: str = None, verbose: bool = False):
-    """Create a database backup."""
-    app = create_app()
+class DatabaseBackup:
+    """Database backup and recovery manager."""
 
-    with app.app_context():
-        backup_file = DatabaseBackup.create_backup(backup_dir)
+    def __init__(self, app=None):
+        """Initialize the backup manager."""
+        self.app = app or create_app()
+        self.backup_dir = Path("backups")
+        self.backup_dir.mkdir(exist_ok=True)
 
-        if backup_file:
-            print(f"✅ Database backup created successfully: {backup_file}")
+    def create_backup(self, backup_name=None):
+        """Create a database backup with metadata."""
+        if not backup_name:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_name = f"backup_{timestamp}"
 
-            if verbose:
-                # Get file size
-                file_size = os.path.getsize(backup_file)
-                print(
-                    f"   File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)"
-                )
+        backup_path = self.backup_dir / f"{backup_name}.db"
+        metadata_path = self.backup_dir / f"{backup_name}_metadata.json"
 
-                # Validate backup
-                print("   Validating backup...")
-                health = DatabaseMonitor.check_database_health()
-                if health["status"] == "healthy":
-                    print("   ✅ Backup validation successful")
-                else:
-                    print(
-                        f"   ⚠️  Backup validation warnings: {', '.join(health['issues'])}"
-                    )
-        else:
-            print("❌ Failed to create database backup")
-            return 1
+        with self.app.app_context():
+            # Get database path from SQLAlchemy URI
+            db_uri = self.app.config["SQLALCHEMY_DATABASE_URI"]
+            if db_uri.startswith("sqlite:///"):
+                source_db = db_uri.replace("sqlite:///", "")
+            else:
+                raise ValueError("Only SQLite databases are supported for backup")
 
-    return 0
+            # Copy database file
+            shutil.copy2(source_db, backup_path)
 
+            # Create metadata
+            metadata = self._get_database_metadata(source_db)
+            metadata["backup_name"] = backup_name
+            metadata["backup_timestamp"] = datetime.now().isoformat()
+            metadata["source_database"] = source_db
 
-def restore_backup(backup_file: str, verbose: bool = False):
-    """Restore database from backup."""
-    if not os.path.exists(backup_file):
-        print(f"❌ Backup file not found: {backup_file}")
-        return 1
+            with open(metadata_path, "w") as f:
+                json.dump(metadata, f, indent=2)
 
-    app = create_app()
+            print(f"Backup created: {backup_path}")
+            print(f"Metadata saved: {metadata_path}")
+            return str(backup_path)
 
-    with app.app_context():
-        if verbose:
-            print(f"Restoring database from: {backup_file}")
-            file_size = os.path.getsize(backup_file)
-            print(
-                f"Backup file size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)"
+    def restore_backup(self, backup_name):
+        """Restore database from backup."""
+        backup_path = self.backup_dir / f"{backup_name}.db"
+        metadata_path = self.backup_dir / f"{backup_name}_metadata.json"
+
+        if not backup_path.exists():
+            raise FileNotFoundError(f"Backup file not found: {backup_path}")
+
+        with self.app.app_context():
+            # Get current database path
+            db_uri = self.app.config["SQLALCHEMY_DATABASE_URI"]
+            if db_uri.startswith("sqlite:///"):
+                target_db = db_uri.replace("sqlite:///", "")
+            else:
+                raise ValueError("Only SQLite databases are supported for restore")
+
+            # Create backup of current database before restore
+            current_backup = (
+                f"{target_db}.pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             )
+            shutil.copy2(target_db, current_backup)
+            print(f"Current database backed up to: {current_backup}")
 
-        success = DatabaseBackup.restore_backup(backup_file)
+            # Restore from backup
+            shutil.copy2(backup_path, target_db)
 
-        if success:
-            print("✅ Database restored successfully")
-
-            if verbose:
-                # Validate restored database
-                print("Validating restored database...")
-                health = DatabaseMonitor.check_database_health()
-                if health["status"] == "healthy":
-                    print("✅ Database validation successful")
-                else:
+            # Validate restored database
+            if self._validate_database(target_db):
+                print(f"Database restored successfully from: {backup_name}")
+                if metadata_path.exists():
+                    with open(metadata_path, "r") as f:
+                        metadata = json.load(f)
                     print(
-                        f"⚠️  Database validation warnings: {', '.join(health['issues'])}"
+                        f"Restored from backup created: {metadata.get('backup_timestamp')}"
                     )
-        else:
-            print("❌ Failed to restore database")
-            return 1
+            else:
+                raise ValueError("Restored database failed validation")
 
-    return 0
+    def list_backups(self):
+        """List available backups."""
+        backups = []
+        for file in self.backup_dir.glob("backup_*.db"):
+            metadata_file = file.with_suffix("_metadata.json")
+            metadata = {}
+            if metadata_file.exists():
+                with open(metadata_file, "r") as f:
+                    metadata = json.load(f)
 
-
-def list_backups(backup_dir: str = None):
-    """List available database backups."""
-    if not backup_dir:
-        backup_dir = os.path.join(os.getcwd(), "instance", "backups")
-
-    if not os.path.exists(backup_dir):
-        print(f"❌ Backup directory not found: {backup_dir}")
-        return 1
-
-    backup_files = []
-    for file in os.listdir(backup_dir):
-        if file.startswith("db_backup_") and file.endswith(".db"):
-            file_path = os.path.join(backup_dir, file)
-            stat = os.stat(file_path)
-            backup_files.append(
+            backups.append(
                 {
-                    "filename": file,
-                    "path": file_path,
-                    "size": stat.st_size,
-                    "modified": datetime.fromtimestamp(stat.st_mtime),
+                    "name": file.stem,
+                    "file": str(file),
+                    "size": file.stat().st_size,
+                    "created": metadata.get("backup_timestamp", "Unknown"),
+                    "tables": metadata.get("tables", {}),
                 }
             )
 
-    if not backup_files:
-        print("No database backups found")
-        return 0
+        return sorted(backups, key=lambda x: x["created"], reverse=True)
 
-    # Sort by modification time (newest first)
-    backup_files.sort(key=lambda x: x["modified"], reverse=True)
+    def _get_database_metadata(self, db_path):
+        """Get metadata about the database."""
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-    print(f"Available database backups in {backup_dir}:")
-    print("-" * 80)
-    print(f"{'Filename':<30} {'Size':<15} {'Modified':<20}")
-    print("-" * 80)
+        # Get table information
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = {}
+        for (table_name,) in cursor.fetchall():
+            cursor.execute(f"PRAGMA table_info({table_name})")
+            columns = cursor.fetchall()
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            row_count = cursor.fetchone()[0]
+            tables[table_name] = {
+                "columns": len(columns),
+                "rows": row_count,
+            }
 
-    for backup in backup_files:
-        size_mb = backup["size"] / 1024 / 1024
-        modified_str = backup["modified"].strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{backup['filename']:<30} {size_mb:>8.2f} MB {modified_str:<20}")
+        # Get database file size
+        file_size = os.path.getsize(db_path)
 
-    return 0
+        conn.close()
 
+        return {
+            "tables": tables,
+            "file_size": file_size,
+            "database_version": sqlite3.sqlite_version,
+        }
 
-def validate_database():
-    """Validate database integrity."""
-    app = create_app()
+    def _validate_database(self, db_path):
+        """Validate database integrity."""
+        try:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
 
-    with app.app_context():
-        print("Validating database integrity...")
+            # Check database integrity
+            cursor.execute("PRAGMA integrity_check")
+            result = cursor.fetchone()[0]
+            if result != "ok":
+                print(f"Database integrity check failed: {result}")
+                return False
 
-        # Check data integrity
-        data_issues = DatabaseValidator.validate_data_integrity()
-        total_data_issues = sum(len(issues) for issues in data_issues.values())
+            # Check if required tables exist
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = [row[0] for row in cursor.fetchall()]
+            required_tables = ["user", "server", "configuration"]
+            missing_tables = set(required_tables) - set(tables)
+            if missing_tables:
+                print(f"Missing required tables: {missing_tables}")
+                return False
 
-        if total_data_issues == 0:
-            print("✅ Data integrity check passed")
-        else:
-            print(f"❌ Data integrity issues found: {total_data_issues}")
-            for category, issues in data_issues.items():
-                if issues:
-                    print(f"   {category}: {len(issues)} issues")
-                    for issue in issues[:5]:  # Show first 5 issues
-                        print(f"     - {issue}")
-                    if len(issues) > 5:
-                        print(f"     ... and {len(issues) - 5} more")
+            conn.close()
+            return True
 
-        # Check schema integrity
-        schema_issues = DatabaseValidator.validate_schema()
-        total_schema_issues = sum(len(issues) for issues in schema_issues.values())
+        except Exception as e:
+            print(f"Database validation error: {e}")
+            return False
 
-        if total_schema_issues == 0:
-            print("✅ Schema integrity check passed")
-        else:
-            print(f"❌ Schema integrity issues found: {total_schema_issues}")
-            for category, issues in schema_issues.items():
-                if issues:
-                    print(f"   {category}: {len(issues)} issues")
-                    for issue in issues:
-                        print(f"     - {issue}")
+    def cleanup_old_backups(self, keep_count=10):
+        """Clean up old backups, keeping only the most recent ones."""
+        backups = self.list_backups()
+        if len(backups) <= keep_count:
+            print(f"Only {len(backups)} backups found, no cleanup needed")
+            return
 
-        # Check overall health
-        health = DatabaseMonitor.check_database_health()
-        print(f"\nDatabase health status: {health['status'].upper()}")
+        # Remove old backups
+        for backup in backups[keep_count:]:
+            backup_file = Path(backup["file"])
+            metadata_file = backup_file.with_suffix("_metadata.json")
 
-        if health["issues"]:
-            print("Issues found:")
-            for issue in health["issues"]:
-                print(f"  - {issue}")
+            backup_file.unlink(missing_ok=True)
+            metadata_file.unlink(missing_ok=True)
+            print(f"Removed old backup: {backup['name']}")
 
-        if health["recommendations"]:
-            print("Recommendations:")
-            for rec in health["recommendations"]:
-                print(f"  - {rec}")
-
-        return 0 if total_data_issues == 0 and total_schema_issues == 0 else 1
-
-
-def show_stats():
-    """Show database statistics."""
-    app = create_app()
-
-    with app.app_context():
-        print("Database Statistics:")
-        print("-" * 40)
-
-        stats = DatabaseMonitor.get_database_stats()
-
-        print("Table counts:")
-        for table, count in stats.get("table_counts", {}).items():
-            print(f"  {table}: {count:,} records")
-
-        db_size = stats.get("database_size", 0)
-        if db_size > 0:
-            print(
-                f"\nDatabase size: {db_size:,} bytes ({db_size / 1024 / 1024:.2f} MB)"
-            )
-
-        conn_info = stats.get("connection_info", {})
-        if conn_info:
-            print("\nConnection pool:")
-            for key, value in conn_info.items():
-                print(f"  {key}: {value}")
-
-        return 0
+        print(f"Cleanup complete. Kept {keep_count} most recent backups.")
 
 
 def main():
     """Main CLI interface."""
-    parser = argparse.ArgumentParser(
-        description="Database backup and recovery tool for mcServerManager",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s backup                    # Create backup in default location
-  %(prog)s backup -d /path/to/backups -v  # Create backup with verbose output
-  %(prog)s restore backup.db         # Restore from specific backup file
-  %(prog)s list                      # List available backups
-  %(prog)s validate                  # Validate database integrity
-  %(prog)s stats                     # Show database statistics
-        """,
-    )
-
+    parser = argparse.ArgumentParser(description="Database backup and recovery tool")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Backup command
-    backup_parser = subparsers.add_parser("backup", help="Create database backup")
-    backup_parser.add_argument("-d", "--backup-dir", help="Backup directory")
-    backup_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose output"
+    # Create backup command
+    create_parser = subparsers.add_parser("create", help="Create a database backup")
+    create_parser.add_argument("--name", help="Custom backup name")
+
+    # Restore backup command
+    restore_parser = subparsers.add_parser("restore", help="Restore from backup")
+    restore_parser.add_argument("name", help="Backup name to restore")
+
+    # List backups command
+    subparsers.add_parser("list", help="List available backups")
+
+    # Cleanup command
+    cleanup_parser = subparsers.add_parser("cleanup", help="Clean up old backups")
+    cleanup_parser.add_argument(
+        "--keep", type=int, default=10, help="Number of backups to keep"
     )
-
-    # Restore command
-    restore_parser = subparsers.add_parser(
-        "restore", help="Restore database from backup"
-    )
-    restore_parser.add_argument("backup_file", help="Backup file to restore")
-    restore_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose output"
-    )
-
-    # List command
-    list_parser = subparsers.add_parser("list", help="List available backups")
-    list_parser.add_argument("-d", "--backup-dir", help="Backup directory to list")
-
-    # Validate command
-    subparsers.add_parser("validate", help="Validate database integrity")
-
-    # Stats command
-    subparsers.add_parser("stats", help="Show database statistics")
 
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
-        return 1
+        return
+
+    backup_manager = DatabaseBackup()
 
     try:
-        if args.command == "backup":
-            return create_backup(backup_dir=args.backup_dir, verbose=args.verbose)
+        if args.command == "create":
+            backup_manager.create_backup(args.name)
         elif args.command == "restore":
-            return restore_backup(backup_file=args.backup_file, verbose=args.verbose)
+            backup_manager.restore_backup(args.name)
         elif args.command == "list":
-            return list_backups(backup_dir=args.backup_dir)
-        elif args.command == "validate":
-            return validate_database()
-        elif args.command == "stats":
-            return show_stats()
-        else:
-            parser.print_help()
-            return 1
+            backups = backup_manager.list_backups()
+            if not backups:
+                print("No backups found")
+            else:
+                print(f"{'Name':<30} {'Size':<10} {'Created':<20} {'Tables'}")
+                print("-" * 80)
+                for backup in backups:
+                    table_info = ", ".join(
+                        [f"{k}({v['rows']})" for k, v in backup["tables"].items()]
+                    )
+                    print(
+                        f"{backup['name']:<30} {backup['size']:<10} {backup['created']:<20} {table_info}"
+                    )
+        elif args.command == "cleanup":
+            backup_manager.cleanup_old_backups(args.keep)
 
-    except KeyboardInterrupt:
-        print("\n❌ Operation cancelled by user")
-        return 1
     except Exception as e:
-        print(f"❌ Error: {e}")
-        return 1
+        print(f"Error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
