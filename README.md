@@ -193,6 +193,7 @@ pip install -r requirements.txt --upgrade
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-4-7952B3?style=flat&logo=bootstrap&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)
 
+```text
 - **Backend**: Flask (Python web framework)
 - **Database**: SQLAlchemy ORM with SQLite/PostgreSQL support
 - **Frontend**: Bootstrap 4, jQuery, custom CSS
@@ -200,10 +201,11 @@ pip install -r requirements.txt --upgrade
 - **Authentication**: Flask-Login with CSRF protection
 - **Security**: Flask-Limiter, PyJWT, CSRF protection
 - **Testing**: pytest, pytest-flask
+```
 
 ### Directory Structure
 
-```
+```text
 mcServerManager/
 ├── app/                    # Main application package
 │   ├── routes/            # Flask route handlers

@@ -594,3 +594,16 @@ document readability and navigation while ensuring each heading is unique.
 Verified all fixes using markdownlint to ensure compliance with MD024 rule.
 All 185 tests continue to pass, ensuring documentation improvements without
 affecting application functionality.
+
+## 2025-01-09 - CARD-007K: Add language specifiers to fenced code blocks
+
+**Epic:** Epic 2 – Pre-commit Hooks and Code Quality  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully added language specifiers to all fenced code blocks to comply with
+MD040 rule. Fixed code blocks in CONTRIBUTING.md (4 blocks) and README.md (2
+blocks) by adding appropriate language tags: "text" for commit message examples,
+directory structures, and technology lists. Used markdownlint to verify all
+fixes and ensure compliance with MD040 rule. All 185 tests continue to pass,
+ensuring documentation improvements without affecting application functionality.

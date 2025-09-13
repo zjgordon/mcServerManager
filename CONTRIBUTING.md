@@ -68,7 +68,7 @@ provides guidelines and information for contributors.
 
 Use clear, descriptive commit messages following this format:
 
-```
+```text
 type(scope): brief description
 
 Detailed explanation of changes if needed.
@@ -88,7 +88,7 @@ Fixes #issue_number
 
 **Examples:**
 
-```
+```text
 feat(auth): add two-factor authentication support
 
 Implements 2FA using TOTP for enhanced security.
@@ -97,7 +97,7 @@ Users can enable 2FA in their profile settings.
 Fixes #123
 ```
 
-```
+```text
 fix(server): resolve memory leak in process monitoring
 
 Fixed memory leak that occurred when monitoring
@@ -178,7 +178,7 @@ pytest -v
 
 ### Project Structure
 
-```
+```text
 app/
 ├── __init__.py          # Flask app initialization
 ├── config.py            # Configuration management

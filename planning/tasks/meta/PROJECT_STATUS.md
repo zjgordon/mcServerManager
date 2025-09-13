@@ -66,3 +66,4 @@ RELEASE_NOTES.md)
 - CARD-007I: ✅ Completed - fixed markdown line length issues (MD013) in docs and
   other files
 - CARD-007J: ✅ Completed - fixed duplicate headings (MD024) in markdown files
+- CARD-007K: ✅ Completed - added language specifiers to fenced code blocks (MD040)
