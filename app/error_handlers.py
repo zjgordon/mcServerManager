@@ -102,7 +102,10 @@ def handle_network_error(func):
             log_error(NetworkError(error_msg), {"function": func.__name__})
             raise NetworkError(error_msg)
         except requests.exceptions.ConnectionError:
-            error_msg = "Failed to connect to remote server. Please check your internet connection."
+            error_msg = (
+                "Failed to connect to remote server. "
+                "Please check your internet connection."
+            )
             log_error(NetworkError(error_msg), {"function": func.__name__})
             raise NetworkError(error_msg)
         except requests.exceptions.HTTPError as e:

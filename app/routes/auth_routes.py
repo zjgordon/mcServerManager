@@ -109,7 +109,8 @@ def set_admin_password():
         # Admin password already set - require authentication to change it
         if not current_user.is_authenticated or not current_user.is_admin:
             flash(
-                "Admin account is already set up. Please log in as admin to change the password.",
+                "Admin account is already set up. "
+                "Please log in as admin to change the password.",
                 "danger",
             )
             return redirect(url_for("auth.login"))
@@ -315,7 +316,8 @@ def delete_user(user_id):
     # Check if user has servers
     if user.servers:
         flash(
-            f"Cannot delete user {user.username} - they have {len(user.servers)} server(s).",
+            f"Cannot delete user {user.username} - "
+            f"they have {len(user.servers)} server(s).",
             "danger",
         )
         return redirect(url_for("auth.manage_users"))
@@ -447,7 +449,9 @@ def process_management():
             # Reconcile server statuses
             summary = reconcile_server_statuses()
             flash(
-                f'Process reconciliation complete: {summary["statuses_updated"]} statuses updated, {summary["orphaned_processes_found"]} orphaned processes found',
+                f"Process reconciliation complete: "
+                f'{summary["statuses_updated"]} statuses updated, '
+                f'{summary["orphaned_processes_found"]} orphaned processes found',
                 "info",
             )
 
@@ -455,7 +459,8 @@ def process_management():
             # Run periodic status check
             summary = periodic_status_check()
             flash(
-                f'Periodic status check complete: {summary["statuses_updated"]} statuses updated',
+                f"Periodic status check complete: "
+                f'{summary["statuses_updated"]} statuses updated',
                 "info",
             )
 

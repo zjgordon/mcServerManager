@@ -9,16 +9,19 @@ This document outlines a comprehensive plan to fix all current pre-commit errors
 ### 1. Python Code Quality Issues (flake8) - 67 errors
 
 #### Import Issues (F401) - 25 errors
+
 - **Unused imports**: Multiple files contain imports that are never used
 - **Files affected**: `app/__init__.py`, `app/routes/auth_routes.py`, `app/routes/server_routes.py`, `app/utils.py`, `tests/*.py`
 - **Severity**: Low - Cleanup task, no functional impact
 
 #### Line Length Issues (E501) - 32 errors
+
 - **Lines exceeding 88 characters**: Various files have lines that exceed the configured limit
 - **Files affected**: `app/error_handlers.py`, `app/routes/auth_routes.py`, `app/routes/server_routes.py`, `app/utils.py`, `config/base.py`, `tests/*.py`
 - **Severity**: Low - Formatting issue, easily fixable
 
 #### Code Quality Issues (E722, F811, F841, F541) - 10 errors
+
 - **Bare except clauses**: 3 instances in `app/__init__.py`, `app/routes/server_routes.py`, `app/utils.py`
 - **Redefined variables**: 2 instances in `app/routes/server_routes.py`, `app/utils.py`
 - **Unused variables**: 4 instances across multiple files
@@ -28,6 +31,7 @@ This document outlines a comprehensive plan to fix all current pre-commit errors
 ### 2. Shell Script Issues (shellcheck) - 1 error
 
 #### Unused Variable (SC2034) - 1 error
+
 - **File**: `dev.sh` line 197
 - **Issue**: Variable `mode` is assigned but never used
 - **Severity**: Low - Cleanup task
@@ -35,16 +39,19 @@ This document outlines a comprehensive plan to fix all current pre-commit errors
 ### 3. Markdown Formatting Issues (markdownlint) - 89 errors
 
 #### Line Length Issues (MD013) - 70 errors
+
 - **Lines exceeding 80 characters**: Multiple markdown files have lines that exceed the configured limit
 - **Files affected**: All major documentation files including `CHANGELOG.md`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, planning documents
 - **Severity**: Low - Formatting issue, easily fixable
 
 #### Duplicate Headings (MD024) - 15 errors
+
 - **Multiple headings with same content**: Several files have duplicate heading text
 - **Files affected**: `CHANGELOG.md`, `planning/SPRINT1-SAFE_COMMITS.md`
 - **Severity**: Low - Documentation structure issue
 
 #### Missing Language Specifiers (MD040) - 4 errors
+
 - **Fenced code blocks without language**: Several code blocks lack language specification
 - **Files affected**: `CONTRIBUTING.md`, `README.md`
 - **Severity**: Low - Documentation clarity issue
@@ -72,16 +79,19 @@ The pre-commit configuration is **appropriately rigorous** for a production-read
 ### Phase 1: Python Code Quality (Priority: High)
 
 #### 1.1 Remove Unused Imports
+
 - **Files**: `app/__init__.py`, `app/routes/auth_routes.py`, `app/routes/server_routes.py`, `app/utils.py`, `tests/*.py`
 - **Action**: Remove all F401 flagged imports
 - **Estimated effort**: 2 hours
 
 #### 1.2 Fix Line Length Issues
+
 - **Files**: All Python files with E501 errors
 - **Action**: Break long lines using appropriate Python line continuation methods
 - **Estimated effort**: 3 hours
 
 #### 1.3 Address Code Quality Issues
+
 - **Bare except clauses**: Replace with specific exception handling
 - **Unused variables**: Remove or use appropriately
 - **Redefined variables**: Rename to avoid conflicts
@@ -91,6 +101,7 @@ The pre-commit configuration is **appropriately rigorous** for a production-read
 ### Phase 2: Shell Script Cleanup (Priority: Medium)
 
 #### 2.1 Fix dev.sh Issues
+
 - **File**: `dev.sh`
 - **Action**: Remove unused `mode` variable or implement its intended functionality
 - **Estimated effort**: 30 minutes
@@ -98,16 +109,19 @@ The pre-commit configuration is **appropriately rigorous** for a production-read
 ### Phase 3: Markdown Formatting (Priority: Low)
 
 #### 3.1 Fix Line Length Issues
+
 - **Files**: All markdown files with MD013 errors
 - **Action**: Break long lines at appropriate points
 - **Estimated effort**: 4 hours
 
 #### 3.2 Fix Duplicate Headings
+
 - **Files**: `CHANGELOG.md`, `planning/SPRINT1-SAFE_COMMITS.md`
 - **Action**: Rename duplicate headings to be unique
 - **Estimated effort**: 1 hour
 
 #### 3.3 Add Language Specifiers
+
 - **Files**: `CONTRIBUTING.md`, `README.md`
 - **Action**: Add appropriate language tags to code blocks
 - **Estimated effort**: 30 minutes
@@ -115,23 +129,27 @@ The pre-commit configuration is **appropriately rigorous** for a production-read
 ### Phase 4: Re-enable Disabled Hooks (Priority: Medium)
 
 #### 4.1 Resolve Dependency Issues
+
 - **Hooks**: bandit, safety, pydocstyle, detect-secrets
 - **Action**: Update dependencies and resolve compatibility issues
 - **Estimated effort**: 2 hours
 
 #### 4.2 Test Re-enabled Hooks
+
 - **Action**: Run pre-commit with all hooks enabled
 - **Estimated effort**: 1 hour
 
 ## Implementation Strategy
 
 ### Approach
+
 1. **Surgical fixes**: Address each error individually without changing functionality
 2. **Incremental commits**: Fix one category at a time with descriptive commit messages
 3. **Validation**: Run pre-commit after each phase to ensure fixes are working
 4. **Documentation**: Update any affected documentation
 
 ### Risk Mitigation
+
 1. **Backup current state**: Ensure all changes are committed before starting
 2. **Test after each phase**: Verify functionality remains intact
 3. **Gradual rollout**: Fix non-critical issues first, then address code quality issues
@@ -139,12 +157,14 @@ The pre-commit configuration is **appropriately rigorous** for a production-read
 ## Success Criteria
 
 ### Immediate Goals
+
 - [ ] All flake8 errors resolved (67 errors)
 - [ ] All shellcheck errors resolved (1 error)
 - [ ] All markdownlint errors resolved (89 errors)
 - [ ] Pre-commit passes with `--all-files` flag
 
 ### Long-term Goals
+
 - [ ] Re-enable all disabled security hooks
 - [ ] Establish CI/CD integration with pre-commit
 - [ ] Remove all `--no-verify` bypasses from project

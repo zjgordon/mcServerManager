@@ -78,12 +78,14 @@ def home():
                 if not process_status["is_running"]:
                     # Process is not running, update the status
                     logger.info(
-                        f"Server {server.server_name} marked as running but process {server.pid} is not active"
+                        f"Server {server.server_name} marked as running "
+                        f"but process {server.pid} is not active"
                     )
                     server.status = "Stopped"
                     server.pid = None
                     # Don't commit here - just update the object for display
-                    # The actual database update will happen during the next reconciliation
+                    # The actual database update will happen during
+                    # the next reconciliation
 
             # Set the is_running attribute based on verified status
             server.is_running = server.status == "Running" and server.pid is not None
@@ -177,7 +179,8 @@ def configure_server():
     version = request.args.get("version")
 
     logger.info(
-        f"User {current_user.username} configuring server for version {version} ({version_type})"
+        f"User {current_user.username} configuring server "
+        f"for version {version} ({version_type})"
     )
 
     if request.method == "POST":
@@ -197,12 +200,14 @@ def configure_server():
 
         if gamemode not in valid_gamemodes:
             raise ValidationError(
-                "Invalid gamemode selected. Please choose survival, creative, adventure, or spectator."
+                "Invalid gamemode selected. Please choose survival, "
+                "creative, adventure, or spectator."
             )
 
         if difficulty not in valid_difficulties:
             raise ValidationError(
-                "Invalid difficulty selected. Please choose peaceful, easy, normal, or hard."
+                "Invalid difficulty selected. Please choose peaceful, "
+                "easy, normal, or hard."
             )
 
         if len(level_seed) > 100:
@@ -216,14 +221,16 @@ def configure_server():
         # Validate server name
         if not server_name or not is_valid_server_name(server_name):
             raise ValidationError(
-                "Invalid server name. Use only letters, numbers, underscores, and hyphens."
+                "Invalid server name. Use only letters, numbers, "
+                "underscores, and hyphens."
             )
 
         # Check for duplicate server name
         existing_server = Server.query.filter_by(server_name=server_name).first()
         if existing_server:
             raise ValidationError(
-                "A server with this name already exists. Please choose a different name."
+                "A server with this name already exists. "
+                "Please choose a different name."
             )
 
         # Validate memory allocation
@@ -241,7 +248,8 @@ def configure_server():
             raise ValidationError(error_msg)
 
         logger.info(
-            f"Creating server '{server_name}' with gamemode '{gamemode}', difficulty '{difficulty}', and memory '{memory_mb}MB'"
+            f"Creating server '{server_name}' with gamemode '{gamemode}', "
+            f"difficulty '{difficulty}', and memory '{memory_mb}MB'"
         )
 
         # Create the server directory inside 'servers/' with proper error handling
@@ -297,7 +305,8 @@ def configure_server():
                 raise FileOperationError("Downloaded server JAR is empty or missing")
 
             logger.info(
-                f"Successfully downloaded server JAR ({os.path.getsize(server_jar_path)} bytes)"
+                f"Successfully downloaded server JAR "
+                f"({os.path.getsize(server_jar_path)} bytes)"
             )
 
         except requests.exceptions.RequestException as e:
@@ -376,7 +385,8 @@ def configure_server():
                 if os.path.exists(server_dir):
                     shutil.rmtree(server_dir)
                     logger.info(
-                        f"Cleaned up server directory after database error: {server_dir}"
+                        f"Cleaned up server directory after database error: "
+                        f"{server_dir}"
                     )
             except Exception as cleanup_error:
                 logger.warning(f"Failed to cleanup server directory: {cleanup_error}")
@@ -390,7 +400,8 @@ def configure_server():
         except Exception as e:
             logger.error(f"Java is not installed or not in PATH: {str(e)}")
             flash(
-                "Java is not installed or not accessible. Please install Java to run Minecraft servers.",
+                "Java is not installed or not accessible. "
+                "Please install Java to run Minecraft servers.",
                 "danger",
             )
             return redirect(url_for("server.home"))
@@ -462,7 +473,8 @@ def configure_server():
                     eula_content = eula_file.read()
                     if "eula=false" in eula_content:
                         logger.info(
-                            f"EULA not accepted for server {server_name}, redirecting to EULA page"
+                            f"EULA not accepted for server {server_name}, "
+                            f"redirecting to EULA page"
                         )
                         flash("You need to accept the EULA to proceed.", "info")
                         return redirect(
@@ -472,7 +484,8 @@ def configure_server():
                         logger.info(f"EULA already accepted for server {server_name}")
             else:
                 logger.warning(
-                    f"EULA file not found for server {server_name}, redirecting to EULA page"
+                    f"EULA file not found for server {server_name}, "
+                    f"redirecting to EULA page"
                 )
                 flash(
                     "EULA file not found. You will need to accept the EULA.", "warning"
@@ -491,7 +504,8 @@ def configure_server():
         except Exception as e:
             logger.error(f"Error checking EULA file: {str(e)}")
             flash(
-                "Server created but there was an issue checking the EULA. Please try starting the server.",
+                "Server created but there was an issue checking the EULA. "
+                "Please try starting the server.",
                 "warning",
             )
             return redirect(url_for("server.home"))
@@ -611,7 +625,8 @@ def start_server(server_id):
                 # Session will be committed automatically
 
             logger.info(
-                f"Server {server.server_name} started successfully with PID {process.pid}"
+                f"Server {server.server_name} started successfully "
+                f"with PID {process.pid}"
             )
             flash(f"Server {server.server_name} started successfully.", "success")
 

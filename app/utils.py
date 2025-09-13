@@ -135,7 +135,10 @@ def find_next_available_port():
                 continue
 
         # If we get here, no ports were available
-        error_msg = f"No available ports found after checking {max_checks} ports starting from {base_port}"
+        error_msg = (
+            f"No available ports found after checking {max_checks} ports "
+            f"starting from {base_port}"
+        )
         logger.error(error_msg)
         raise ServerError(error_msg)
 
@@ -162,7 +165,8 @@ def fetch_version_manifest():
 
         manifest_data = response.json()
         logger.info(
-            f"Successfully fetched manifest with {len(manifest_data.get('versions', []))} versions"
+            f"Successfully fetched manifest with "
+            f"{len(manifest_data.get('versions', []))} versions"
         )
 
         return manifest_data
@@ -203,7 +207,10 @@ def get_version_info(version_id):
             available_versions = [
                 v["id"] for v in manifest["versions"][:10]
             ]  # Show first 10 for reference
-            error_msg = f"Version '{version_id}' not found in manifest. Available versions include: {', '.join(available_versions)}"
+            error_msg = (
+                f"Version '{version_id}' not found in manifest. "
+                f"Available versions include: {', '.join(available_versions)}"
+            )
             logger.warning(error_msg)
             raise ValidationError(error_msg)
 
@@ -521,7 +528,9 @@ def update_app_config(
         db.session.commit()
 
         logger.info(
-            f"App configuration updated in database: Title={app_title}, Hostname={server_hostname}, Total={max_total_mb}MB, Per Server={max_per_server_mb}MB"
+            f"App configuration updated in database: Title={app_title}, "
+            f"Hostname={server_hostname}, Total={max_total_mb}MB, "
+            f"Per Server={max_per_server_mb}MB"
         )
         return True
     except Exception as e:
@@ -531,7 +540,8 @@ def update_app_config(
 
 
 def update_memory_config(max_total_mb, max_per_server_mb):
-    """Update memory configuration by setting environment variables (backward compatibility)."""
+    """Update memory configuration by setting environment variables
+    (backward compatibility)."""
     return update_app_config(
         max_total_mb=max_total_mb, max_per_server_mb=max_per_server_mb
     )
@@ -557,7 +567,8 @@ def get_memory_usage_summary(user_id=None):
         available = get_available_memory()  # No user_id - show total system
 
         logger.debug(
-            f"Memory summary - Total: {config['max_total_mb']}MB, Allocated: {allocated}MB, Available: {available}MB"
+            f"Memory summary - Total: {config['max_total_mb']}MB, "
+            f"Allocated: {allocated}MB, Available: {available}MB"
         )
 
         return {
@@ -691,7 +702,8 @@ def verify_process_status(pid):
 
 def find_orphaned_minecraft_processes():
     """
-    Find orphaned Minecraft server processes that are running but not managed by the app.
+    Find orphaned Minecraft server processes that are running but not
+    managed by the app.
 
     Returns:
         list: List of orphaned process information
@@ -731,14 +743,16 @@ def find_orphaned_minecraft_processes():
                             }
                             orphaned_processes.append(orphaned_info)
                             logger.warning(
-                                f"Found orphaned Minecraft process: PID {process.info['pid']}, CWD: {process.info['cwd']}"
+                                f"Found orphaned Minecraft process: "
+                                f"PID {process.info['pid']}, CWD: {process.info['cwd']}"
                             )
 
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
             except Exception as e:
                 logger.debug(
-                    f"Error checking process {process.info.get('pid', 'unknown')}: {str(e)}"
+                    f"Error checking process "
+                    f"{process.info.get('pid', 'unknown')}: {str(e)}"
                 )
                 continue
 
@@ -778,7 +792,8 @@ def reconcile_server_statuses():
                 if not process_status["is_running"]:
                     # Process is not running, update status
                     logger.info(
-                        f"Server {server.server_name} (PID {server.pid}) is not running, updating status"
+                        f"Server {server.server_name} (PID {server.pid}) "
+                        f"is not running, updating status"
                     )
 
                     try:
@@ -788,14 +803,18 @@ def reconcile_server_statuses():
                         summary["statuses_updated"] += 1
                         logger.info(f"Updated status for server {server.server_name}")
                     except Exception as e:
-                        error_msg = f"Failed to update status for server {server.server_name}: {str(e)}"
+                        error_msg = (
+                            f"Failed to update status for server "
+                            f"{server.server_name}: {str(e)}"
+                        )
                         logger.error(error_msg)
                         summary["errors"].append(error_msg)
 
                 else:
                     # Process is running, verify it's still valid
                     logger.debug(
-                        f"Server {server.server_name} (PID {server.pid}) is running and verified"
+                        f"Server {server.server_name} (PID {server.pid}) "
+                        f"is running and verified"
                     )
 
             except Exception as e:
@@ -815,7 +834,9 @@ def reconcile_server_statuses():
                 )
 
         logger.info(
-            f"Server status reconciliation complete: {summary['statuses_updated']} statuses updated, {summary['orphaned_processes_found']} orphaned processes found"
+            f"Server status reconciliation complete: "
+            f"{summary['statuses_updated']} statuses updated, "
+            f"{summary['orphaned_processes_found']} orphaned processes found"
         )
 
     except Exception as e:
@@ -829,7 +850,8 @@ def reconcile_server_statuses():
 def periodic_status_check():
     """
     Periodic function to check server statuses and update the database.
-    This should be called periodically (e.g., every few minutes) to keep statuses current.
+    This should be called periodically (e.g., every few minutes) to keep
+    statuses current.
 
     Returns:
         dict: Summary of status updates
@@ -854,7 +876,8 @@ def periodic_status_check():
                 if not process_status["is_running"]:
                     # Process is not running, update status
                     logger.info(
-                        f"Periodic check: Server {server.server_name} (PID {server.pid}) is not running, updating status"
+                        f"Periodic check: Server {server.server_name} "
+                        f"(PID {server.pid}) is not running, updating status"
                     )
 
                     try:
@@ -863,10 +886,14 @@ def periodic_status_check():
                         db.session.commit()
                         summary["statuses_updated"] += 1
                         logger.info(
-                            f"Updated status for server {server.server_name} during periodic check"
+                            f"Updated status for server {server.server_name} "
+                            f"during periodic check"
                         )
                     except Exception as e:
-                        error_msg = f"Failed to update status for server {server.server_name}: {str(e)}"
+                        error_msg = (
+                            f"Failed to update status for server "
+                            f"{server.server_name}: {str(e)}"
+                        )
                         logger.error(error_msg)
                         summary["errors"].append(error_msg)
 
@@ -877,7 +904,8 @@ def periodic_status_check():
 
         if summary["statuses_updated"] > 0:
             logger.info(
-                f"Periodic status check complete: {summary['statuses_updated']} statuses updated"
+                f"Periodic status check complete: "
+                f"{summary['statuses_updated']} statuses updated"
             )
 
     except Exception as e:

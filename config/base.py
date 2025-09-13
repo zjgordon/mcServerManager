@@ -45,7 +45,13 @@ class BaseConfig:
         "X-Frame-Options": "SAMEORIGIN",
         "X-XSS-Protection": "1; mode=block",
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com; style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; img-src 'self' data:; font-src 'self' https://maxcdn.bootstrapcdn.com;",
+        "Content-Security-Policy": (
+            "default-src 'self'; script-src 'self' 'unsafe-inline' "
+            "https://code.jquery.com https://cdnjs.cloudflare.com "
+            "https://maxcdn.bootstrapcdn.com; style-src 'self' 'unsafe-inline' "
+            "https://maxcdn.bootstrapcdn.com; img-src 'self' data:; "
+            "font-src 'self' https://maxcdn.bootstrapcdn.com;"
+        ),
     }
 
     # Password Policy
@@ -88,8 +94,8 @@ class BaseConfig:
         Validate the current configuration and return any issues found.
 
         Returns:
-            Dict[str, Any]: Dictionary containing validation results with 'valid' boolean
-                           and 'issues' list of problems found
+            Dict[str, Any]: Dictionary containing validation results with
+                           'valid' boolean and 'issues' list of problems found
         """
         issues = []
 
