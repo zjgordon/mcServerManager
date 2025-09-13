@@ -1,0 +1,22 @@
+id: CARD-007L
+title: Fix first-line heading issues in markdown files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix first-line heading issues (MD041) in markdown files:
+  - planning/tasks/meta/PROJECT_HISTORY.md: Add top-level heading as first line
+  - planning/tasks/meta/PROJECT_STATUS.md: Add top-level heading as first line
+  
+  Add appropriate H1 headings (# Title) as the first line of each file.
+  Ensure the headings are descriptive and follow markdown best practices.
+  Run markdownlint to verify fixes before committing.

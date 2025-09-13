@@ -1,0 +1,25 @@
+id: CARD-007O
+title: Re-enable detect-secrets security hook
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Re-enable the detect-secrets security hook that was temporarily disabled due to version compatibility issues:
+  - Uncomment the detect-secrets hook section in .pre-commit-config.yaml
+  - Update detect-secrets to latest compatible version
+  - Resolve any dependency conflicts
+  - Create or update .secrets.baseline file if needed
+  - Test the hook with pre-commit run detect-secrets --all-files
+  - Address any secret detection findings if they appear
+  
+  Ensure the hook runs successfully without breaking the pre-commit pipeline.
+  Run pre-commit to verify the hook works before committing.

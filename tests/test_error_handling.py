@@ -349,7 +349,7 @@ class TestRouteErrorHandler:
 
     def test_validation_error_handling(self, client):
         """Test route decorator handles ValidationError."""
-        from flask import Flask, redirect, request
+        from flask import Flask
 
         app = Flask(__name__)
         app.config["SECRET_KEY"] = "test-secret-key"  # Set secret key for session

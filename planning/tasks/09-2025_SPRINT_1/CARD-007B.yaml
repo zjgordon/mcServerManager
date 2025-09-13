@@ -1,0 +1,26 @@
+id: CARD-007B
+title: Remove unused imports from test files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Remove unused imports flagged by flake8 F401 errors from test files:
+  - tests/test_auth.py: Remove unused imports 'pytest', 'flask.url_for'
+  - tests/test_error_handling.py: Remove unused imports 'flask.redirect', 'flask.request'
+  - tests/test_integration.py: Remove unused imports 'os', 'shutil', 'tempfile', 'unittest.mock.MagicMock', 'pytest', 'werkzeug.security.generate_password_hash', 'app.extensions.db', 'app.models.Server'
+  - tests/test_memory_management.py: Remove unused imports 'os', 'pytest', 'config.get_config'
+  - tests/test_security.py: Remove unused imports 'tempfile', 'pytest', 'app.models.Server'
+  - tests/test_server_routes.py: Remove unused imports 'tempfile', 'pytest', 'app.models.User'
+  - tests/test_user_management.py: Remove unused imports 'datetime.datetime', 'pytest', 'app.utils.get_available_memory'
+  
+  Use flake8 to identify exact lines and remove only the unused imports without affecting test functionality.
+  Run pre-commit to verify fixes before committing.

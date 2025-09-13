@@ -1,10 +1,7 @@
 """
 Tests for user management functionality.
 """
-from datetime import datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from app.extensions import db
 from app.models import Server, User
@@ -560,11 +557,7 @@ class TestMemoryManagementWithUsers:
     def test_user_specific_memory_calculation(self, app):
         """Test memory calculation for specific users."""
         with app.app_context():
-            from app.utils import (
-                get_available_memory,
-                get_memory_usage_summary,
-                get_total_allocated_memory,
-            )
+            from app.utils import get_memory_usage_summary, get_total_allocated_memory
 
             # Create two users
             user1 = User(username="user1", password_hash="hash")

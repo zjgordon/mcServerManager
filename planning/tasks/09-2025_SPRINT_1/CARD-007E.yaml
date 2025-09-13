@@ -1,0 +1,34 @@
+id: CARD-007E
+title: Fix bare except clauses and code quality issues
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix code quality issues flagged by flake8:
+  - app/__init__.py: Line 55 - Replace bare 'except' with specific exception handling
+  - app/routes/server_routes.py: Line 420 - Fix redefinition of unused 'time' from line 6
+  - app/routes/server_routes.py: Line 454 - Replace bare 'except' with specific exception handling
+  - app/routes/server_routes.py: Line 615 - Remove unused variable 'session'
+  - app/routes/server_routes.py: Line 629 - Fix f-string missing placeholders
+  - app/routes/server_routes.py: Line 712 - Remove unused variable 'session'
+  - app/routes/server_routes.py: Line 747 - Remove unused variable 'pid_file'
+  - app/utils.py: Line 469 - Fix redefinition of unused 'current_user' from line 9
+  - app/utils.py: Line 472 - Replace bare 'except' with specific exception handling
+  - tests/test_error_handling.py: Line 279 - Remove unused variable 'file'
+  - tests/test_error_handling.py: Line 362 - Remove unused variable 'test_client'
+  - tests/test_security.py: Line 134 - Remove unused variable 'response'
+  - tests/test_security.py: Line 256 - Remove unused variable 'response'
+  - tests/test_user_management.py: Line 467 - Remove unused variable 'response'
+  
+  Replace bare except clauses with specific exception types where appropriate.
+  Remove or properly use unused variables.
+  Run pre-commit to verify fixes before committing.

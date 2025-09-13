@@ -2,13 +2,10 @@
 Security-focused tests for the Minecraft Server Manager.
 """
 import os
-import tempfile
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from app.extensions import db
-from app.models import Server, User
+from app.models import User
 from app.utils import is_valid_server_name
 
 

@@ -1,0 +1,23 @@
+id: CARD-007A
+title: Remove unused imports from app module files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Remove unused imports flagged by flake8 F401 errors from core app module files:
+  - app/__init__.py: Remove unused import '.utils.check_admin_password'
+  - app/routes/auth_routes.py: Remove unused imports 're', 'psutil', 'flask.abort'
+  - app/routes/server_routes.py: Remove unused imports 'time', 'sqlalchemy.exc.IntegrityError', error_handlers imports, '..models.User', '..utils.format_memory_display'
+  - app/utils.py: Remove unused imports 'flask.current_app', 'flask_login.current_user', error_handlers imports
+  
+  Use flake8 to identify exact lines and remove only the unused imports without affecting functionality.
+  Run pre-commit to verify fixes before committing.

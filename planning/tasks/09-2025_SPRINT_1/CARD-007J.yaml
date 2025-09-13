@@ -1,0 +1,22 @@
+id: CARD-007J
+title: Fix duplicate headings in markdown files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix duplicate headings (MD024) in markdown files:
+  - CHANGELOG.md: Multiple headings with same content "### Added", "### Changed", "### Fixed"
+  - planning/SPRINT1-SAFE_COMMITS.md: Multiple headings with same content "#### Tasks", "#### Deliverables"
+  
+  Rename duplicate headings to be unique while maintaining logical structure.
+  Consider using version numbers, dates, or descriptive suffixes to differentiate.
+  Run markdownlint to verify fixes before committing.

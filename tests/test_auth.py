@@ -1,8 +1,6 @@
 """
 Tests for authentication routes and functionality.
 """
-import pytest
-from flask import url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db

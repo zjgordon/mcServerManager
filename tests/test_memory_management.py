@@ -1,10 +1,7 @@
 """
 Tests for memory management functionality.
 """
-import os
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from app.extensions import db
 from app.models import Server, User
@@ -16,7 +13,6 @@ from app.utils import (
     get_total_allocated_memory,
     validate_memory_allocation,
 )
-from config import get_config
 
 
 class TestMemoryConfiguration:

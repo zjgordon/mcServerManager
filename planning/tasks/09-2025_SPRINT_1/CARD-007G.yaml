@@ -1,0 +1,25 @@
+id: CARD-007G
+title: Fix markdown line length issues in core documentation
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix markdown line length issues (MD013) exceeding 80 characters in core documentation files:
+  - CHANGELOG.md: Line 133 (241 > 80 characters)
+  - README.md: Lines 10, 14, 21, 23, 24, 36, 37, 254, 266, 272 (various lengths > 80 characters)
+  - CONTRIBUTING.md: Line 330 (118 > 80 characters)
+  - SECURITY.md: Lines 5, 13, 83, 332 (241, 97, 119, 171 > 80 characters)
+  - RELEASE_NOTES.md: Lines 9, 15, 16, 18, 19, 31, 32, 179, 185, 187 (various lengths > 80 characters)
+  
+  Break long lines at appropriate points while maintaining readability.
+  Use markdown line breaks or restructure content as needed.
+  Run markdownlint to verify fixes before committing.

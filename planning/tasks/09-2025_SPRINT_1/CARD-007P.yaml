@@ -1,0 +1,25 @@
+id: CARD-007P
+title: Verify complete pre-commit cleanup and ban --no-verify
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Final verification and enforcement of pre-commit standards:
+  - Run pre-commit run --all-files to verify all issues are resolved
+  - Ensure all hooks pass without errors
+  - Update project documentation to reflect --no-verify is no longer needed
+  - Add pre-commit enforcement to development workflow documentation
+  - Consider adding pre-commit CI integration if not already present
+  
+  This card represents the completion of the pre-commit cleanup initiative.
+  All previous cards must be completed before this one.
+  Run pre-commit to verify everything works before committing.

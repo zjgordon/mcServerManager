@@ -3,13 +3,10 @@ Tests for server management routes and functionality.
 """
 import os
 import shutil
-import tempfile
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from app.extensions import db
-from app.models import Server, User
+from app.models import Server
 
 
 class TestServerRoutes:

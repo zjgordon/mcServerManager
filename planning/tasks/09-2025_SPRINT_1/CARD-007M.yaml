@@ -1,0 +1,24 @@
+id: CARD-007M
+title: Re-enable bandit security hook
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Re-enable the bandit security hook that was temporarily disabled due to dependency issues:
+  - Uncomment the bandit hook section in .pre-commit-config.yaml
+  - Update bandit to latest compatible version
+  - Resolve any dependency conflicts
+  - Test the hook with pre-commit run bandit --all-files
+  - Address any new security findings if they appear
+  
+  Ensure the hook runs successfully without breaking the pre-commit pipeline.
+  Run pre-commit to verify the hook works before committing.

@@ -1,0 +1,26 @@
+id: CARD-007D
+title: Fix line length issues in test files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix line length issues (E501) exceeding 88 characters in test files:
+  - tests/test_error_handling.py: Line 369 (92 > 88 characters)
+  - tests/test_integration.py: Line 55 (91 > 88 characters)
+  - tests/test_security.py: Lines 51, 161, 162 (109, 90, 92 > 88 characters)
+  - tests/test_server_routes.py: Line 54 (93 > 88 characters)
+  - tests/test_user_management.py: Line 604 (106 > 88 characters)
+  - tests/test_utils.py: Line 298 (95 > 88 characters)
+  
+  Use appropriate Python line continuation methods (parentheses, backslash, or logical breaks).
+  Maintain test readability and functionality.
+  Run pre-commit to verify fixes before committing.

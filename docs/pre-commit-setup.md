@@ -21,6 +21,7 @@ pre-commit install --install-hooks --overwrite
 The pre-commit configuration is defined in `.pre-commit-config.yaml` and includes:
 
 ### Python Hooks
+
 - **black**: Code formatting with 88-character line length
 - **isort**: Import sorting with black compatibility
 - **flake8**: Linting with extended ignore patterns
@@ -30,21 +31,26 @@ The pre-commit configuration is defined in `.pre-commit-config.yaml` and include
 - **pydocstyle**: Documentation style checking
 
 ### JavaScript/TypeScript Hooks
+
 - **prettier**: Code formatting for JS/TS/CSS/HTML/Markdown
 - **eslint**: Linting with TypeScript and React support
 
 ### Shell Script Hooks
+
 - **shellcheck**: Shell script linting and validation
 - **shfmt**: Shell script formatting
 
 ### Security Hooks
+
 - **detect-secrets**: Secret detection and prevention
 - **semgrep**: Advanced security scanning
 
 ### Documentation Hooks
+
 - **markdownlint**: Markdown linting and formatting
 
 ### General Hooks
+
 - **trailing-whitespace**: Remove trailing whitespace
 - **end-of-file-fixer**: Ensure files end with newline
 - **check-yaml**: YAML syntax validation

@@ -1,0 +1,25 @@
+id: CARD-007C
+title: Fix line length issues in app module files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix line length issues (E501) exceeding 88 characters in core app module files:
+  - app/error_handlers.py: Line 105 (100 > 88 characters)
+  - app/routes/auth_routes.py: Lines 123, 329, 461, 469 (98, 93, 163, 98 > 88 characters)
+  - app/routes/server_routes.py: Lines 88, 93, 187, 207, 212, 226, 233, 251, 307, 386, 400, 472, 482, 501, 621 (various lengths > 88 characters)
+  - app/utils.py: Lines 142, 169, 210, 528, 538, 564, 698, 738, 745, 785, 795, 802, 822, 836, 861, 870, 873, 884 (various lengths > 88 characters)
+  - config/base.py: Lines 48, 91 (314, 89 > 88 characters)
+  
+  Use appropriate Python line continuation methods (parentheses, backslash, or logical breaks).
+  Maintain code readability and functionality.
+  Run pre-commit to verify fixes before committing.

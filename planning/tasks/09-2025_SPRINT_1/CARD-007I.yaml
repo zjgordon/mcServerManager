@@ -1,0 +1,23 @@
+id: CARD-007I
+title: Fix markdown line length issues in docs and other files
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix markdown line length issues (MD013) exceeding 80 characters in remaining files:
+  - PROCESS_MANAGEMENT.md: Lines 3, 19, 20, 21, 32 (172, 120, 127, 100, 105 > 80 characters)
+  - docs/configuration.md: Lines 3, 7, 9, 17, 79, 133 (186, 94, 103, 114, 87, 168 > 80 characters)
+  - docs/pre-commit-setup.md: Lines 5, 9, 121, 123, 125, 127, 156, 158 (206, 111, 113, 134, 117, 100, 99, 88 > 80 characters)
+  
+  Break long lines at appropriate points while maintaining readability.
+  Use markdown line breaks or restructure content as needed.
+  Run markdownlint to verify fixes before committing.
