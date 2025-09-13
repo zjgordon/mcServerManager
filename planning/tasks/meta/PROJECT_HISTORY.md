@@ -1013,3 +1013,16 @@ documenting the complete development workflow, best practices, troubleshooting g
 and performance benefits of the simplified configuration. All documentation now
 accurately reflects the optimized development environment focused on rapid development
 while maintaining essential code quality standards.
+
+## 2025-01-09 - CARD-027: Create BackupSchedule database model
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created BackupSchedule SQLAlchemy model with comprehensive schema including server_id foreign key,
+schedule_type validation (daily/weekly/monthly), schedule_time, retention_days with range validation,
+enabled flag, last_backup tracking, and created_at timestamp. Implemented proper validation methods
+for schedule_type and retention_days with database constraints. Added relationship to Server model
+with backref for backup_schedules. Model includes proper string representation for debugging.
+All tests pass (185/185) with no linting errors.

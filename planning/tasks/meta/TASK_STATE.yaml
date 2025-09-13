@@ -1,10 +1,9 @@
-active_card: CARD-027
+active_card: CARD-028
 breadcrumb:
-  step: 'CARD-026 completed - updated development documentation for new pre-commit standards, including pre-commit setup guide, contributing guidelines, and comprehensive workflow documentation'
-  last_commit: 'docs: [CARD-026] Update development documentation for new pre-commit standards'
-  next_action: 'Start at CARD-027 - Begin Automated Backup Scheduling System implementation'
+  step: 'CARD-027 completed - BackupSchedule database model created with comprehensive schema, validation methods, and foreign key relationship to Server model'
+  last_commit: 'feat: [CARD-027] Create BackupSchedule database model'
+  next_action: 'Start at CARD-028 - Continue Automated Backup Scheduling System implementation'
 queue:
-  - CARD-027
   - CARD-028
   - CARD-029
   - CARD-030

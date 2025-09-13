@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 
 from flask_login import UserMixin
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, Time
 
 from .extensions import db
 
@@ -213,5 +213,55 @@ class Configuration(db.Model):
 
         if not self.validate_value():
             errors.append("Configuration value cannot be empty")
+
+        return errors
+
+
+class BackupSchedule(db.Model):
+    """Backup schedule configuration for servers."""
+
+    __tablename__ = "backup_schedule"
+
+    id = db.Column(db.Integer, primary_key=True)
+    server_id = db.Column(db.Integer, db.ForeignKey("server.id"), nullable=False)
+    schedule_type = db.Column(db.String(20), nullable=False)
+    schedule_time = db.Column(db.Time, nullable=False)
+    retention_days = db.Column(db.Integer, nullable=False, default=30)
+    enabled = db.Column(db.Boolean, nullable=False, default=True)
+    last_backup = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    # Relationship to Server model
+    server = db.relationship("Server", backref=db.backref("backup_schedules", lazy=True))
+
+    # Add constraints
+    __table_args__ = (
+        CheckConstraint(
+            "schedule_type IN ('daily', 'weekly', 'monthly')", name="check_schedule_type_values"
+        ),
+        CheckConstraint("retention_days >= 1", name="check_retention_days_minimum"),
+        CheckConstraint("retention_days <= 365", name="check_retention_days_maximum"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<BackupSchedule server_id={self.server_id} type={self.schedule_type} time={self.schedule_time}>"
+
+    def validate_schedule_type(self) -> bool:
+        """Validate schedule_type value."""
+        return self.schedule_type in ["daily", "weekly", "monthly"]
+
+    def validate_retention_days(self) -> bool:
+        """Validate retention_days range."""
+        return self.retention_days is not None and 1 <= self.retention_days <= 365
+
+    def validate(self) -> list:
+        """Validate backup schedule data and return list of errors."""
+        errors = []
+
+        if not self.validate_schedule_type():
+            errors.append("Schedule type must be one of: daily, weekly, monthly")
+
+        if not self.validate_retention_days():
+            errors.append("Retention days must be between 1 and 365")
 
         return errors
