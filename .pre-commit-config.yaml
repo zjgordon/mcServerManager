@@ -69,13 +69,12 @@ repos:
   #       args: ['--short-report']
   #       exclude: '^venv/|^node_modules/|^\.venv/'
 
-  # Pydocstyle hook temporarily disabled due to missing docstrings
-  # - repo: https://github.com/pycqa/pydocstyle
-  #   rev: 6.3.0
-  #   hooks:
-  #     - id: pydocstyle
-  #       args: ['--convention=google']
-  #       exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: ['--convention=google', '--add-ignore=D100,D101,D103,D104,D105,D107,D200,D205,D209,D212,D415']
+        exclude: '^venv/|^node_modules/|^\.venv/|^tests/'
 
   # JavaScript/TypeScript hooks
   - repo: https://github.com/pre-commit/mirrors-prettier

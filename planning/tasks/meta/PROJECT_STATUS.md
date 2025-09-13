@@ -70,3 +70,4 @@ RELEASE_NOTES.md)
 - CARD-007L: ✅ Completed - verified first-line heading compliance (MD041) -
   already compliant
 - CARD-007M: ✅ Completed - re-enabled bandit security hook with dependency fixes
+- CARD-007N: ✅ Completed - re-enabled pydocstyle documentation hook with ignore flags
