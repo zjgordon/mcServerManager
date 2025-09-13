@@ -51,7 +51,7 @@ def create_app():
             from datetime import datetime
 
             return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
-        except:
+        except (ValueError, OSError, OverflowError):
             return str(timestamp)
 
     # Security middleware

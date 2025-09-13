@@ -129,7 +129,7 @@ class TestSecurityVulnerabilities:
             mock_popen.return_value = mock_process
 
             # Try with a "normal" looking name that contains path traversal
-            response = authenticated_client.post(
+            authenticated_client.post(
                 "/configure_server",
                 data={
                     "server_name": "normal-name",  # This should work
@@ -253,7 +253,7 @@ class TestSecurityVulnerabilities:
                 mock_process.pid = 12345
                 mock_popen.return_value = mock_process
 
-                response = authenticated_client.post(f"/start/{test_server.id}")
+                authenticated_client.post(f"/start/{test_server.id}")
 
                 if mock_popen.called:
                     # Verify the command doesn't contain shell injection

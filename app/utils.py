@@ -6,6 +6,7 @@ import socket
 import psutil
 import requests
 from flask import redirect, request, url_for
+from flask_login import current_user
 
 from .error_handlers import (
     FileOperationError,
@@ -469,10 +470,8 @@ def update_app_config(
 
         # Try to get current user, but don't fail if not available
         try:
-            from flask_login import current_user
-
             user_id = current_user.id if current_user.is_authenticated else None
-        except:
+        except (AttributeError, RuntimeError):
             user_id = None
 
         # Update each configuration value

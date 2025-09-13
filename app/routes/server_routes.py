@@ -3,6 +3,7 @@ import shutil
 import signal
 import subprocess
 import tarfile
+import time
 from datetime import datetime
 
 import psutil
@@ -421,7 +422,6 @@ def configure_server():
             )
 
             # Give the process a moment to start and check for immediate errors
-            import time
 
             time.sleep(2)
             if process.poll() is not None:
@@ -455,7 +455,7 @@ def configure_server():
                 stdout, stderr = process.communicate(timeout=1)
                 if stderr:
                     logger.error(f"Server startup error details: {stderr}")
-            except:
+            except subprocess.TimeoutExpired:
                 pass
             flash(f"Error starting server: {str(e)}", "danger")
             return redirect(url_for("server.home"))
@@ -619,7 +619,7 @@ def start_server(server_id):
 
         # Update the server status and PID in the database
         try:
-            with SafeDatabaseOperation(db.session) as session:
+            with SafeDatabaseOperation(db.session):
                 server.status = "Running"
                 server.pid = process.pid
                 # Session will be committed automatically
@@ -634,7 +634,7 @@ def start_server(server_id):
             # If database update fails, try to terminate the process
             try:
                 process.terminate()
-                logger.warning(f"Terminated server process due to database error")
+                logger.warning("Terminated server process due to database error")
             except Exception as term_error:
                 logger.error(
                     f"Failed to terminate process after database error: {term_error}"
@@ -698,7 +698,7 @@ def stop_server(server_id):
 
         # Update database status
         try:
-            with SafeDatabaseOperation(db.session) as session:
+            with SafeDatabaseOperation(db.session):
                 server.status = "Stopped"
                 server.pid = None
                 # Session will be committed automatically
@@ -717,7 +717,7 @@ def stop_server(server_id):
         logger.info(f"Process {pid} for server {server.server_name} was not running")
         # Update status anyway since the process doesn't exist
         try:
-            with SafeDatabaseOperation(db.session) as session:
+            with SafeDatabaseOperation(db.session):
                 server.status = "Stopped"
                 server.pid = None
         except DatabaseError as e:
@@ -751,8 +751,6 @@ def delete_server(server_id):
     if request.method == "POST":
         # Stop the server if it is running
         if server.status == "Running":
-            server_dir = os.path.join("servers", server.server_name)
-            pid_file = os.path.join(server_dir, "server.pid")
             if server.pid:
                 try:
                     os.kill(server.pid, signal.SIGTERM)  # Stop the server

@@ -461,7 +461,7 @@ class TestServerOwnership:
                 with patch("os.path.getsize") as mock_getsize:
                     mock_getsize.return_value = 1024  # Non-zero size
 
-                    response = client.post(
+                    client.post(
                         "/configure_server",
                         data={
                             "server_name": "testserver",

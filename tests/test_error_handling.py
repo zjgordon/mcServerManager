@@ -276,7 +276,7 @@ class TestSafeFileOperation:
     def test_file_not_found_error(self):
         """Test FileOperationError when file not found."""
         with pytest.raises(FileOperationError) as exc_info:
-            with SafeFileOperation("/nonexistent/file.txt", "r") as file:
+            with SafeFileOperation("/nonexistent/file.txt", "r"):
                 pass
         assert "Failed to open file" in str(exc_info.value)
 
@@ -359,7 +359,7 @@ class TestRouteErrorHandler:
         def test_route():
             raise ValidationError("Invalid input")
 
-        with app.test_client() as test_client:
+        with app.test_client():
             with app.test_request_context("/test"):
                 # The decorator should catch the ValidationError and redirect
                 # Since we can't easily test redirects in this context, we'll test that
