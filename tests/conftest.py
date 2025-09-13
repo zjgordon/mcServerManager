@@ -19,9 +19,16 @@ def app():
     test_config = {
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
-        'SECRET_KEY': 'test-secret-key',
+        'SECRET_KEY': 'test-secret-key-for-testing-only',
         'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
-        'SQLALCHEMY_TRACK_MODIFICATIONS': False
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'RATELIMIT_ENABLED': False,  # Disable rate limiting for testing
+        'APP_TITLE': 'Minecraft Server Manager Test',
+        'SERVER_HOSTNAME': 'localhost',
+        'MAX_TOTAL_MEMORY_MB': '8192',
+        'DEFAULT_SERVER_MEMORY_MB': '1024',
+        'MIN_SERVER_MEMORY_MB': '512',
+        'MAX_SERVER_MEMORY_MB': '4096'
     }
     
     # Create app with test config
@@ -135,6 +142,52 @@ def authenticated_client(client, admin_user):
         sess['_user_id'] = str(admin_user.id)
         sess['_fresh'] = True
     return client
+
+
+@pytest.fixture
+def app_no_admin():
+    """Create and configure a new app instance for each test without admin user."""
+    # Create a temporary file for the test database
+    db_fd, db_path = tempfile.mkstemp()
+    
+    # Set test configuration
+    test_config = {
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
+        'SECRET_KEY': 'test-secret-key-for-testing-only',
+        'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'RATELIMIT_ENABLED': False,  # Disable rate limiting for testing
+        'APP_TITLE': 'Minecraft Server Manager Test',
+        'SERVER_HOSTNAME': 'localhost',
+        'MAX_TOTAL_MEMORY_MB': '8192',
+        'DEFAULT_SERVER_MEMORY_MB': '1024',
+        'MIN_SERVER_MEMORY_MB': '512',
+        'MAX_SERVER_MEMORY_MB': '4096'
+    }
+    
+    # Create app with test config
+    app = create_app()
+    app.config.update(test_config)
+    
+    with app.app_context():
+        # Drop all tables first to ensure clean state
+        db.drop_all()
+        db.create_all()
+        
+        # Don't create admin user - for tests that need to test admin setup
+        
+        yield app
+        
+    # Clean up
+    os.close(db_fd)
+    os.unlink(db_path)
+
+
+@pytest.fixture
+def client_no_admin(app_no_admin):
+    """A test client for the app without admin user."""
+    return app_no_admin.test_client()
 
 
 @pytest.fixture

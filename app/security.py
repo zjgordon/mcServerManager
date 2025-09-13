@@ -219,6 +219,10 @@ def rate_limit(max_attempts=5, window_seconds=60, key_func=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            # Skip rate limiting if disabled in configuration
+            if not current_app.config.get('RATELIMIT_ENABLED', True):
+                return f(*args, **kwargs)
+            
             if key_func:
                 key = key_func()
             else:

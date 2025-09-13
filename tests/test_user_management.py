@@ -73,24 +73,24 @@ class TestUserModel:
 class TestAdminSetup:
     """Test admin account setup functionality."""
     
-    def test_admin_setup_page_access(self, client):
+    def test_admin_setup_page_access(self, client_no_admin):
         """Test access to admin setup page."""
-        response = client.get('/set_admin_password')
+        response = client_no_admin.get('/set_admin_password')
         assert response.status_code == 200
         assert b'Create Admin Account' in response.data
     
-    def test_admin_setup_validation(self, client):
+    def test_admin_setup_validation(self, client_no_admin):
         """Test admin setup form validation."""
         # Test short username
-        response = client.post('/set_admin_password', data={
+        response = client_no_admin.post('/set_admin_password', data={
             'username': 'ab',
-            'password': 'password123',
-            'confirm_password': 'password123'
+            'password': 'SecurePass123',
+            'confirm_password': 'SecurePass123'
         })
         assert b'Username must be at least 3 characters long' in response.data
         
         # Test short password
-        response = client.post('/set_admin_password', data={
+        response = client_no_admin.post('/set_admin_password', data={
             'username': 'admin',
             'password': '123',
             'confirm_password': '123'
@@ -98,32 +98,32 @@ class TestAdminSetup:
         assert b'Password must be at least 8 characters long' in response.data
         
         # Test password mismatch
-        response = client.post('/set_admin_password', data={
+        response = client_no_admin.post('/set_admin_password', data={
             'username': 'admin',
-            'password': 'password123',
-            'confirm_password': 'password456'
+            'password': 'SecurePass123',
+            'confirm_password': 'SecurePass456'
         })
         assert b'Passwords do not match' in response.data
     
-    def test_admin_setup_success(self, client, app):
+    def test_admin_setup_success(self, client_no_admin, app_no_admin):
         """Test successful admin account creation."""
-        with app.app_context():
-            # Ensure no admin exists
+        with app_no_admin.app_context():
+            # Ensure no admin exists (should already be the case with app_no_admin)
             User.query.filter_by(is_admin=True).delete()
             db.session.commit()
             
-            response = client.post('/set_admin_password', data={
+            response = client_no_admin.post('/set_admin_password', data={
                 'username': 'admin',
                 'email': 'admin@example.com',
-                'password': 'password123',
-                'confirm_password': 'password123'
+                'password': 'SecurePass123',
+                'confirm_password': 'SecurePass123'
             })
             
             # Should redirect to login
             assert response.status_code == 302
             
             # Check admin was created
-            admin = User.query.filter_by(username='admin_user_mgmt').first()
+            admin = User.query.filter_by(username='admin').first()
             assert admin is not None
             assert admin.is_admin is True
             assert admin.email == 'admin@example.com'
