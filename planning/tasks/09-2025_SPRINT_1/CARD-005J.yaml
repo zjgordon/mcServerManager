@@ -1,0 +1,36 @@
+id: CARD-005J
+title: Fix Security Test Assertions and Validation
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All security validation tests pass
+  - Regex patterns work correctly
+  - File upload validation works as expected
+  - CSRF protection tests pass
+  - Security policies work correctly in test environment
+artifacts:
+  - Fixed regex patterns in security validation tests
+  - Updated file upload validation test expectations
+  - Fixed CSRF protection test setup
+  - Test execution results showing passing security tests
+notes: |
+  This card fixes security test assertion issues:
+  
+  1. Security validation tests failing
+  2. Regex pattern matching not working correctly
+  3. File upload validation tests failing
+  4. CSRF protection tests not working
+  
+  The solution involves:
+  - Fixing regex patterns in security validation tests
+  - Updating file upload validation test expectations
+  - Fixing CSRF protection test setup
+  - Ensuring security policies work correctly in test environment
+  
+  Files affected: tests/test_security_improvements.py, tests/test_security.py
+  
+  This is a surgical fix focused on test assertion accuracy
+  without changing application security policies or validation logic.

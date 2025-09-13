@@ -53,3 +53,11 @@ Fixed critical SQLAlchemy session management issue in test fixtures that was cau
 **Owner:** cursor  
 
 Fixed authentication test infrastructure issues that were causing redirect problems and session management failures. The core issue was that the `check_admin_setup()` before_request handler was redirecting to admin setup when no admin user with password existed, preventing login page from loading in tests. Implemented surgical fix by modifying the `app` fixture to automatically create a default admin user during test setup, ensuring admin setup redirects don't interfere with test flow. Also updated the `admin_user` fixture to reuse existing admin user to prevent UNIQUE constraint violations. This ensures session management works correctly across test boundaries and flash messages are properly captured and asserted.
+
+## 2025-01-09 - CARD-005C: Fix Database Constraint Violations in Test Data
+
+**Epic:** Epic 1 – Test Suite Reliability  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed critical database constraint violations in the test suite that were causing widespread test failures. The main issues were NOT NULL constraint failures for server.owner_id and UNIQUE constraint failures for user.username. Implemented surgical fixes by ensuring all Server objects have valid owner_id references and using unique usernames across different test files. Updated test fixtures to create users first, commit them to get valid IDs, then create servers with proper foreign key relationships. This eliminates database constraint violations and ensures proper foreign key relationships work correctly throughout the test suite.

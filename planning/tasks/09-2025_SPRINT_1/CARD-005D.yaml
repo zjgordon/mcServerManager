@@ -1,0 +1,34 @@
+id: CARD-005D
+title: Fix Custom Exception Handling in Tests
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All custom exceptions raise correctly in tests
+  - Test assertions match actual exception behavior
+  - Error handling decorators work correctly in test environment
+  - No exception type mismatches in test expectations
+  - All affected tests pass with proper exception handling
+artifacts:
+  - Updated utility functions with proper exception raising
+  - Modified test assertions to match actual exception types
+  - Test execution results showing proper exception handling
+notes: |
+  This card fixes custom exception handling issues in the test suite:
+  
+  1. Custom exceptions not being raised as expected
+  2. Error handling decorators interfering with test assertions
+  3. Exception type mismatches in test expectations
+  
+  The solution involves:
+  - Reviewing and fixing exception raising in utility functions
+  - Updating test assertions to match actual exception types
+  - Fixing error handling decorators to not interfere with test flow
+  - Ensuring proper exception propagation in test environment
+  
+  Files affected: tests/test_utils.py, tests/test_error_handling.py
+  
+  This is a surgical fix focused on ensuring exceptions work correctly in tests
+  without changing the application's error handling behavior.

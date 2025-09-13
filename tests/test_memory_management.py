@@ -55,20 +55,29 @@ class TestMemoryCalculation:
     def test_get_total_allocated_memory_with_servers(self, app):
         """Test total allocated memory with servers."""
         with app.app_context():
+            # Create a user first
+            from werkzeug.security import generate_password_hash
+            user = User(username='testuser1', email='test1@example.com', is_admin=False)
+            user.password_hash = generate_password_hash('password123')
+            db.session.add(user)
+            db.session.commit()
+            
             # Create test servers with different memory allocations
             server1 = Server(
                 server_name='server1',
                 version='1.20.1',
                 port=25565,
                 status='Stopped',
-                memory_mb=1024
+                memory_mb=1024,
+                owner_id=user.id
             )
             server2 = Server(
                 server_name='server2',
                 version='1.20.1',
                 port=25575,
                 status='Running',
-                memory_mb=2048
+                memory_mb=2048,
+                owner_id=user.id
             )
             
             db.session.add_all([server1, server2])
@@ -80,13 +89,21 @@ class TestMemoryCalculation:
     def test_get_available_memory(self, app):
         """Test available memory calculation."""
         with app.app_context():
+            # Create a user first
+            from werkzeug.security import generate_password_hash
+            user = User(username='testuser2', email='test2@example.com', is_admin=False)
+            user.password_hash = generate_password_hash('password123')
+            db.session.add(user)
+            db.session.commit()
+            
             # Create a server with 1024MB allocation
             server = Server(
                 server_name='testserver',
                 version='1.20.1',
                 port=25565,
                 status='Stopped',
-                memory_mb=1024
+                memory_mb=1024,
+                owner_id=user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -124,13 +141,21 @@ class TestMemoryValidation:
     def test_validate_memory_allocation_exceeds_total(self, app):
         """Test memory allocation that exceeds total limit."""
         with app.app_context():
+            # Create a user first
+            from werkzeug.security import generate_password_hash
+            user = User(username='testuser3', email='test3@example.com', is_admin=False)
+            user.password_hash = generate_password_hash('password123')
+            db.session.add(user)
+            db.session.commit()
+            
             # Create servers that use most of the available memory
             server1 = Server(
                 server_name='server1',
                 version='1.20.1',
                 port=25565,
                 status='Stopped',
-                memory_mb=7000  # Use most of 8192MB limit
+                memory_mb=7000,  # Use most of 8192MB limit
+                owner_id=user.id
             )
             db.session.add(server1)
             db.session.commit()
@@ -144,13 +169,21 @@ class TestMemoryValidation:
     def test_validate_memory_allocation_with_exclude(self, app):
         """Test memory validation excluding a specific server (for updates)."""
         with app.app_context():
+            # Create a user first
+            from werkzeug.security import generate_password_hash
+            user = User(username='testuser4', email='test4@example.com', is_admin=False)
+            user.password_hash = generate_password_hash('password123')
+            db.session.add(user)
+            db.session.commit()
+            
             # Create a server
             server = Server(
                 server_name='server1',
                 version='1.20.1',
                 port=25565,
                 status='Stopped',
-                memory_mb=1024
+                memory_mb=1024,
+                owner_id=user.id
             )
             db.session.add(server)
             db.session.commit()
@@ -216,7 +249,7 @@ class TestMemoryInServerCreation:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_memory',
                 password_hash='test_hash',
                 is_admin=True
             )
@@ -271,7 +304,7 @@ class TestMemoryInServerCreation:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_memory',
                 password_hash='test_hash',
                 is_admin=True
             )
@@ -300,7 +333,7 @@ class TestMemoryInServerCreation:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_memory',
                 password_hash='test_hash',
                 is_admin=True
             )
@@ -416,6 +449,13 @@ class TestMemoryEdgeCases:
     def test_memory_validation_with_multiple_servers(self, app):
         """Test memory validation with multiple servers."""
         with app.app_context():
+            # Create a user first
+            from werkzeug.security import generate_password_hash
+            user = User(username='testuser5', email='test5@example.com', is_admin=False)
+            user.password_hash = generate_password_hash('password123')
+            db.session.add(user)
+            db.session.commit()
+            
             # Create multiple servers
             servers = []
             for i in range(5):
@@ -424,7 +464,8 @@ class TestMemoryEdgeCases:
                     version='1.20.1',
                     port=25565 + i,
                     status='Stopped',
-                    memory_mb=1024
+                    memory_mb=1024,
+                    owner_id=user.id
                 )
                 servers.append(server)
             

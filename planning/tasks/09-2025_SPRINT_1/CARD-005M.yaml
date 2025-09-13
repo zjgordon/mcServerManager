@@ -1,0 +1,35 @@
+id: CARD-005M
+title: Fix Memory Management Tests and Calculations
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All memory management tests pass
+  - Memory calculations work correctly
+  - Memory validation functions properly
+  - Memory allocation works as expected
+  - Memory usage summary tests pass
+artifacts:
+  - Fixed memory calculation logic in tests
+  - Updated memory validation test expectations
+  - Test execution results showing passing memory management tests
+notes: |
+  This card fixes memory management test issues:
+  
+  1. Memory calculation tests failing
+  2. Memory validation tests not working
+  3. Memory allocation tests failing
+  4. Memory usage summary tests failing
+  
+  The solution involves:
+  - Fixing memory calculation logic in tests
+  - Updating memory validation test expectations
+  - Ensuring proper memory allocation in test environment
+  - Fixing memory usage summary tests
+  
+  Files affected: tests/test_memory_management.py
+  
+  This is a surgical fix focused on test accuracy for memory management
+  without changing application memory handling or allocation logic.

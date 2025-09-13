@@ -1,0 +1,34 @@
+id: CARD-005E
+title: Fix Network Error Mocking in Tests
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Network error mocking works correctly
+  - No application context errors in network tests
+  - Mock patches apply correctly to target functions
+  - All network error tests pass with proper mocking
+  - Context manager issues resolved in network error scenarios
+artifacts:
+  - Fixed mock patching for network-related functions
+  - Updated test configurations for proper application context
+  - Test execution results showing working network error mocking
+notes: |
+  This card fixes network error mocking issues in the test suite:
+  
+  1. Network error mocking not working correctly
+  2. RuntimeError: Working outside of application context errors
+  3. Mock patches not applying correctly
+  
+  The solution involves:
+  - Fixing mock patching for network-related functions
+  - Ensuring proper application context in network error tests
+  - Updating mock configurations to work with error handling decorators
+  - Fixing context manager issues in network error scenarios
+  
+  Files affected: tests/test_utils.py, tests/test_server_routes.py, tests/test_integration.py
+  
+  This is a surgical fix focused on test mocking infrastructure without
+  changing the application's network error handling behavior.

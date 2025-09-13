@@ -1,0 +1,34 @@
+id: CARD-005K
+title: Fix Password Policy Tests and Validation
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All password policy tests pass
+  - Password validation works correctly
+  - Weak password detection works as expected
+  - Regex patterns for password validation work correctly
+  - Password policy validation functions properly in test environment
+artifacts:
+  - Fixed regex patterns for password validation
+  - Updated password policy test expectations
+  - Test execution results showing passing password policy tests
+notes: |
+  This card fixes password policy test issues:
+  
+  1. Password policy validation tests failing
+  2. Regex pattern matching for password validation not working
+  3. Weak password detection tests failing
+  
+  The solution involves:
+  - Fixing regex patterns for password validation
+  - Updating password policy test expectations
+  - Ensuring password validation works correctly in test environment
+  - Fixing weak password detection logic
+  
+  Files affected: tests/test_security_improvements.py
+  
+  This is a surgical fix focused on test assertion accuracy
+  without changing application password policy or validation logic.

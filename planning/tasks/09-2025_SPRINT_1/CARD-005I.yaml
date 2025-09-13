@@ -1,0 +1,34 @@
+id: CARD-005I
+title: Fix Status Code Assertions in Tests
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All status code assertions pass
+  - Redirect behavior properly handled
+  - Authentication flow works correctly in tests
+  - No false negatives in status code tests
+  - Test expectations match actual HTTP behavior
+artifacts:
+  - Updated status code expectations to match actual behavior
+  - Fixed redirect handling in test requests
+  - Test execution results showing passing status code tests
+notes: |
+  This card fixes status code assertion issues in the test suite:
+  
+  1. Status code assertions failing (expecting 200, getting 302)
+  2. Redirect behavior not properly handled in tests
+  3. Authentication redirects interfering with test expectations
+  
+  The solution involves:
+  - Updating status code expectations to match actual behavior
+  - Fixing redirect handling in test requests
+  - Ensuring proper authentication flow in tests
+  - Updating test assertions to account for redirect behavior
+  
+  Files affected: tests/test_auth.py, tests/test_server_routes.py, tests/test_security.py
+  
+  This is a surgical fix focused on test assertion accuracy
+  without changing application HTTP behavior or redirect logic.

@@ -1,0 +1,35 @@
+id: CARD-005G
+title: Fix Test Data Setup and Cleanup
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - No test data leakage between tests
+  - Port allocation tests run independently
+  - File system operations properly mocked
+  - Test data properly cleaned up between tests
+  - All affected tests pass with proper isolation
+artifacts:
+  - Updated test fixtures with proper cleanup
+  - Fixed port allocation test isolation
+  - Improved file system operation mocking
+  - Test execution results showing proper isolation
+notes: |
+  This card fixes test data setup and cleanup issues:
+  
+  1. Test data not properly cleaned up between tests
+  2. Port allocation tests interfering with each other
+  3. File system operations not properly mocked
+  
+  The solution involves:
+  - Implementing proper test data cleanup in fixtures
+  - Fixing port allocation test isolation
+  - Improving file system operation mocking
+  - Ensuring test independence
+  
+  Files affected: tests/test_memory_management.py, tests/test_integration.py, tests/test_utils.py
+  
+  This is a surgical fix focused on test isolation and cleanup
+  without changing application logic or data handling.

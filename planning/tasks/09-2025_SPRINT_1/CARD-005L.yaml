@@ -1,0 +1,35 @@
+id: CARD-005L
+title: Fix Integration Test Workflows and Scenarios
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All integration workflow tests pass
+  - Multi-user scenarios work correctly
+  - Error recovery workflows function properly
+  - Data persistence works as expected
+  - Test isolation maintained in integration tests
+artifacts:
+  - Fixed workflow test setup and teardown
+  - Updated integration test configurations
+  - Test execution results showing passing integration tests
+notes: |
+  This card fixes integration test workflow issues:
+  
+  1. Complete workflow tests failing
+  2. Multi-user workflow tests not working
+  3. Error recovery workflow tests failing
+  4. Data persistence workflow tests failing
+  
+  The solution involves:
+  - Fixing workflow test setup and teardown
+  - Ensuring proper test isolation in integration tests
+  - Fixing multi-user test scenarios
+  - Updating error recovery test expectations
+  
+  Files affected: tests/test_integration.py, tests/test_memory_management.py
+  
+  This is a surgical fix focused on test workflow reliability
+  without changing application business logic or workflows.

@@ -19,7 +19,7 @@ class TestCompleteWorkflows:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_integration',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )
@@ -184,7 +184,7 @@ class TestCompleteWorkflows:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_integration',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )
@@ -244,7 +244,7 @@ class TestCompleteWorkflows:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_integration',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )
@@ -288,18 +288,22 @@ class TestCompleteWorkflows:
     def test_concurrent_server_operations(self, client, app):
         """Test handling of concurrent server operations."""
         with app.app_context():
-            # Create admin and servers
+            # Create admin first
             admin = User(
-                username='admin',
+                username='admin_integration',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )
+            db.session.add(admin)
+            db.session.commit()
             
+            # Create servers with admin.id
             server1 = Server(
                 server_name='server1',
                 version='1.20.1',
                 port=25565,
-                status='Stopped'
+                status='Stopped',
+                owner_id=admin.id
             )
             
             server2 = Server(
@@ -307,15 +311,16 @@ class TestCompleteWorkflows:
                 version='1.20.1',
                 port=25575,
                 status='Running',
-                pid=12345
+                pid=12345,
+                owner_id=admin.id
             )
             
-            db.session.add_all([admin, server1, server2])
+            db.session.add_all([server1, server2])
             db.session.commit()
             
             # Login
             client.post('/login', data={
-                'username': 'admin',
+                'username': 'admin_integration',
                 'password': 'adminpass'
             })
             
@@ -332,7 +337,7 @@ class TestCompleteWorkflows:
         with app.app_context():
             # Create admin
             admin = User(
-                username='admin',
+                username='admin_integration',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )
@@ -420,7 +425,7 @@ class TestCompleteWorkflows:
         with app.app_context():
             # Create admin
             admin = User(
-                username='admin',
+                username='admin_integration',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )

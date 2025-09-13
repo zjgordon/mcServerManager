@@ -123,7 +123,7 @@ class TestAdminSetup:
             assert response.status_code == 302
             
             # Check admin was created
-            admin = User.query.filter_by(username='admin').first()
+            admin = User.query.filter_by(username='admin_user_mgmt').first()
             assert admin is not None
             assert admin.is_admin is True
             assert admin.email == 'admin@example.com'
@@ -212,7 +212,7 @@ class TestUserManagement:
         """Test successful user addition by admin."""
         with app.app_context():
             # Create admin user
-            admin = User(username='admin', password_hash='hash', is_admin=True)
+            admin = User(username='admin_user_mgmt', password_hash='hash', is_admin=True)
             db.session.add(admin)
             db.session.commit()
             
@@ -241,7 +241,7 @@ class TestUserManagement:
         """Test manage users page access."""
         with app.app_context():
             # Create admin user
-            admin = User(username='admin', password_hash='hash', is_admin=True)
+            admin = User(username='admin_user_mgmt', password_hash='hash', is_admin=True)
             db.session.add(admin)
             db.session.commit()
             
@@ -258,7 +258,7 @@ class TestUserManagement:
         """Test user editing functionality."""
         with app.app_context():
             # Create admin and regular user
-            admin = User(username='admin', password_hash='hash', is_admin=True)
+            admin = User(username='admin_user_mgmt', password_hash='hash', is_admin=True)
             user = User(username='testuser', password_hash='hash', is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()
@@ -288,7 +288,7 @@ class TestUserManagement:
         """Test user deletion functionality."""
         with app.app_context():
             # Create admin and regular user
-            admin = User(username='admin', password_hash='hash', is_admin=True)
+            admin = User(username='admin_user_mgmt', password_hash='hash', is_admin=True)
             user = User(username='testuser', password_hash='hash', is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()
@@ -308,9 +308,13 @@ class TestUserManagement:
     def test_delete_user_with_servers(self, client, app):
         """Test that users with servers cannot be deleted."""
         with app.app_context():
-            # Create admin and user with server
-            admin = User(username='admin', password_hash='hash', is_admin=True)
+            # Create admin and user first
+            admin = User(username='admin_user_mgmt', password_hash='hash', is_admin=True)
             user = User(username='testuser', password_hash='hash', is_admin=False)
+            db.session.add_all([admin, user])
+            db.session.commit()
+            
+            # Create server with user.id
             server = Server(
                 server_name='testserver',
                 version='1.20.1',
@@ -319,7 +323,7 @@ class TestUserManagement:
                 memory_mb=1024,
                 owner_id=user.id
             )
-            db.session.add_all([admin, user, server])
+            db.session.add(server)
             db.session.commit()
             
             # Login as admin
@@ -428,7 +432,7 @@ class TestServerOwnership:
         """Test that admins can access all servers."""
         with app.app_context():
             # Create admin and regular user
-            admin = User(username='admin', password_hash='hash', is_admin=True)
+            admin = User(username='admin_user_mgmt', password_hash='hash', is_admin=True)
             user = User(username='user', password_hash='hash', is_admin=False)
             db.session.add_all([admin, user])
             db.session.commit()
@@ -524,7 +528,7 @@ class TestFirstTimeSetup:
         with app.app_context():
             # Create admin with password
             admin = User(
-                username='admin',
+                username='admin_user_mgmt',
                 password_hash='hash',
                 is_admin=True,
                 is_active=True

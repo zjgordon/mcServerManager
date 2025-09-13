@@ -1,0 +1,30 @@
+id: CARD-005A
+title: Fix SQLAlchemy Session Management in Test Fixtures
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All DetachedInstanceError exceptions eliminated from test suite
+  - Server objects remain bound to session throughout test lifecycle
+  - No database session leaks between tests
+  - Test fixtures properly manage SQLAlchemy sessions
+  - All affected tests pass without session-related errors
+artifacts:
+  - Modified tests/conftest.py with proper session management
+  - Updated test fixtures for session binding
+  - Test execution results showing eliminated DetachedInstanceError
+notes: |
+  This card addresses the most critical issue in the test suite - SQLAlchemy session management.
+  The DetachedInstanceError occurs in 20+ tests when Server objects become detached from the
+  database session after fixture creation. The fix involves:
+  
+  1. Modifying the test_server fixture to ensure proper session management
+  2. Adding db.session.refresh() calls after object creation
+  3. Implementing proper session scoping in fixtures
+  4. Adding session cleanup in teardown methods
+  
+  Files affected: tests/conftest.py, tests/test_server_routes.py, tests/test_memory_management.py, tests/test_security.py
+  
+  This is a surgical fix that should not affect application code, only test infrastructure.

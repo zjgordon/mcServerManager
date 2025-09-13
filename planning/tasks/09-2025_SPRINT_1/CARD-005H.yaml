@@ -1,0 +1,34 @@
+id: CARD-005H
+title: Fix Flash Message Assertions in Tests
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All flash message assertions pass
+  - Redirects handled correctly in tests
+  - Expected messages properly captured and validated
+  - Flash message capture works in test responses
+  - No false negatives in flash message tests
+artifacts:
+  - Updated test assertions to follow redirects properly
+  - Fixed flash message capture in test responses
+  - Test execution results showing passing flash message tests
+notes: |
+  This card fixes flash message assertion issues in the test suite:
+  
+  1. Flash message assertions failing due to redirect behavior
+  2. Expected messages not appearing in response data
+  3. Redirect handling interfering with message capture
+  
+  The solution involves:
+  - Updating test assertions to follow redirects properly
+  - Fixing flash message capture in test responses
+  - Ensuring proper redirect handling in tests
+  - Updating expected message content to match actual behavior
+  
+  Files affected: tests/test_auth.py, tests/test_server_routes.py, tests/test_user_management.py
+  
+  This is a surgical fix focused on test assertion behavior
+  without changing application flash message functionality.

@@ -1,0 +1,34 @@
+id: CARD-005F
+title: Fix Test Configuration Issues
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All configuration requirements met in test environment
+  - No missing environment variable errors
+  - Secret key properly configured for tests
+  - Test configuration includes all required settings
+  - Configuration loading works correctly in test environment
+artifacts:
+  - Updated tests/conftest.py with proper test configuration
+  - Modified config/pytest.ini with required settings
+  - Test execution results showing proper configuration
+notes: |
+  This card fixes test configuration issues:
+  
+  1. Missing or incorrect test configuration
+  2. Environment variable dependencies not met
+  3. Secret key requirements not satisfied
+  
+  The solution involves:
+  - Updating test configuration to include all required settings
+  - Setting up proper environment variables for tests
+  - Ensuring secret key is properly configured
+  - Fixing configuration loading in test environment
+  
+  Files affected: tests/conftest.py, config/pytest.ini
+  
+  This is a surgical fix focused on test environment configuration
+  without changing production configuration or application behavior.

@@ -1,10 +1,9 @@
-active_card: CARD-005C
+active_card: CARD-005D
 breadcrumb:
-  step: 'CARD-005B completed - authentication test infrastructure fixed, resolving redirect issues and session management problems'
-  last_commit: 'fix: [CARD-005B] Fix authentication test infrastructure and session management'
-  next_action: 'Start at CARD-005C - Next test suite reliability improvement'
+  step: 'CARD-005C completed - database constraint violations in test data fixed, ensuring proper foreign key relationships'
+  last_commit: 'fix: [CARD-005C] Fix database constraint violations in test data'
+  next_action: 'Start at CARD-005D - Next test suite reliability improvement'
 queue:
-  - CARD-005C
   - CARD-005D
   - CARD-005E
   - CARD-005F

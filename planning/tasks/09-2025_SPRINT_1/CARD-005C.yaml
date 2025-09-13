@@ -1,0 +1,34 @@
+id: CARD-005C
+title: Fix Database Constraint Violations in Test Data
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - No database constraint violations in tests
+  - All required fields properly populated in test data
+  - Foreign key relationships work correctly
+  - Server objects have valid owner_id references
+  - All affected tests pass without constraint errors
+artifacts:
+  - Updated test fixtures with proper foreign key setup
+  - Modified test data creation to include all required fields
+  - Test execution results showing eliminated constraint violations
+notes: |
+  This card addresses database constraint violations in the test suite, specifically:
+  
+  1. NOT NULL constraint failed: server.owner_id errors
+  2. Missing required fields in test data creation
+  3. Foreign key relationship setup issues
+  
+  The solution involves:
+  - Ensuring all Server objects have valid owner_id references
+  - Updating test fixtures to include all required fields
+  - Fixing foreign key relationship setup in test data
+  - Adding proper cleanup for test data
+  
+  Files affected: tests/test_memory_management.py, tests/test_integration.py, tests/test_user_management.py
+  
+  This is a surgical fix to test data setup, ensuring proper database relationships
+  without changing application schema or business logic.

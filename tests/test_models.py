@@ -56,7 +56,7 @@ class TestUserModel:
         with app.app_context():
             # Create admin user
             admin = User(
-                username='admin',
+                username='admin_models',
                 password_hash=generate_password_hash('adminpass'),
                 is_admin=True
             )
@@ -72,7 +72,7 @@ class TestUserModel:
             db.session.commit()
             
             # Verify admin status
-            admin_user = User.query.filter_by(username='admin').first()
+            admin_user = User.query.filter_by(username='admin_models').first()
             regular_user = User.query.filter_by(username='user').first()
             
             assert admin_user.is_admin is True
@@ -96,14 +96,14 @@ class TestUserModel:
         """Test that password_hash can be null (for initial admin setup)."""
         with app.app_context():
             user = User(
-                username='admin',
+                username='admin_models',
                 password_hash=None,
                 is_admin=True
             )
             db.session.add(user)
             db.session.commit()
             
-            created_user = User.query.filter_by(username='admin').first()
+            created_user = User.query.filter_by(username='admin_models').first()
             assert created_user.password_hash is None
     
     def test_user_flask_login_integration(self, app):
@@ -132,7 +132,7 @@ class TestServerModel:
         with app.app_context():
             # Create admin user in the same session context
             admin_user = User(
-                username='admin',
+                username='admin_models',
                 password_hash='test_hash',
                 is_admin=True,
                 is_active=True
@@ -180,7 +180,7 @@ class TestServerModel:
         with app.app_context():
             # Create admin user in the same session context
             admin_user = User(
-                username='admin',
+                username='admin_models',
                 password_hash='test_hash',
                 is_admin=True,
                 is_active=True

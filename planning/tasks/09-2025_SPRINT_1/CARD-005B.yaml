@@ -1,0 +1,33 @@
+id: CARD-005B
+title: Fix Authentication Test Infrastructure and Session Management
+epic: Epic 1 – Test Suite Reliability
+sprint: 09-2025_SPRINT_1
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All authentication tests pass without redirect issues
+  - Session management works correctly across test boundaries
+  - Flash messages are properly captured and asserted
+  - Admin setup redirects don't interfere with test flow
+  - authenticated_client fixture works correctly
+artifacts:
+  - Modified tests/conftest.py with proper admin setup handling
+  - Updated authentication test fixtures
+  - Test execution results showing passing auth tests
+notes: |
+  This card fixes authentication flow problems in the test suite. Issues include:
+  
+  1. Admin setup redirects interfering with test expectations
+  2. Session authentication not working correctly in tests
+  3. Flash message assertions failing due to redirect behavior
+  
+  The solution involves:
+  - Modifying conftest.py to properly handle admin setup in test environment
+  - Fixing session management in authenticated_client fixture
+  - Updating test assertions to account for redirect behavior
+  - Ensuring proper admin user setup before authentication tests
+  
+  Files affected: tests/test_auth.py, tests/test_user_management.py, tests/test_security.py
+  
+  This is a surgical fix focused on test infrastructure, not application logic.
