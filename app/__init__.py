@@ -10,6 +10,7 @@ from .extensions import csrf, db, login_manager, migrate
 from .health import health_bp
 from .logging import logger, setup_logging
 from .models import BackupSchedule, Configuration, Server, User
+from .routes.api.backup_routes import backup_api_bp
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .security import add_security_headers, audit_log
@@ -35,6 +36,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(server_bp)
     app.register_blueprint(health_bp)
+    app.register_blueprint(backup_api_bp)
 
     # Template context processor for global variables
     @app.context_processor
