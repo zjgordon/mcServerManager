@@ -12,3 +12,4 @@
 - CARD-005E: ✅ Completed - network error mocking in tests fixed, ensuring proper error message display and test assertions
 - CARD-005F: ✅ Completed - test configuration issues fixed, resolving rate limiting and environment variable problems
 - CARD-005G: ✅ Completed - test data setup and cleanup issues fixed, ensuring proper test isolation and eliminating data leakage
+- CARD-005H: ✅ Completed - flash message assertions in tests fixed, reducing failures from 17 to 6 and ensuring proper redirect handling

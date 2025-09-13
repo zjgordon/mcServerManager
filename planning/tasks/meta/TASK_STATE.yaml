@@ -1,10 +1,9 @@
-active_card: CARD-005H
+active_card: CARD-005I
 breadcrumb:
-  step: 'CARD-005G completed - test data setup and cleanup issues fixed, ensuring proper test isolation and eliminating data leakage'
-  last_commit: 'fix: [CARD-005G] Fix test data setup and cleanup issues'
-  next_action: 'Start at CARD-005H - Next test suite reliability improvement'
+  step: 'CARD-005H completed - flash message assertions in tests fixed, reducing failures from 17 to 6 and ensuring proper redirect handling'
+  last_commit: 'fix: [CARD-005H] Fix flash message assertions in tests'
+  next_action: 'Start at CARD-005I - Next test suite reliability improvement'
 queue:
-  - CARD-005H
   - CARD-005I
   - CARD-005J
   - CARD-005K
