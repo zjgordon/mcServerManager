@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document tracks the progress and outcomes of all completed sprints for the Minecraft Server Manager project.
+This document tracks the progress and outcomes of all completed sprints for the
+Minecraft Server Manager project.
 
 ## Sprint History
 
@@ -96,7 +97,8 @@ This document tracks the progress and outcomes of all completed sprints for the 
 ### Overall Progress
 
 - **Total Sprints Completed:** 2
-- **Features Implemented:** Core server management, user authentication, process management, memory optimization
+- **Features Implemented:** Core server management, user authentication, process
+  management, memory optimization
 - **Bugs Fixed:** Multiple stability and security fixes
 - **Test Coverage:** Comprehensive test suite implemented
 - **Security Enhancements:** Multiple security updates and vulnerability patches

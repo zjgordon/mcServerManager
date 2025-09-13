@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document provides a summary of all 23 task cards created for Sprint 1: Safe Commits and Development Guardrails.
+This document provides a summary of all 23 task cards created for Sprint 1: Safe
+Commits and Development Guardrails.
 
 ## Card Organization by Phase
 
@@ -53,7 +54,8 @@ This document provides a summary of all 23 task cards created for Sprint 1: Safe
 
 1. **CARD-001** → **CARD-002** → **CARD-003** → **CARD-004** (Environment setup)
 2. **CARD-005** → **CARD-006** (Project structure)
-3. **CARD-007** → **CARD-008** → **CARD-009** → **CARD-010** → **CARD-011** → **CARD-012** (Pre-commit setup)
+3. **CARD-007** → **CARD-008** → **CARD-009** → **CARD-010** → **CARD-011** →
+   **CARD-012** (Pre-commit setup)
 4. **CARD-013** → **CARD-014** → **CARD-015** → **CARD-016** (Testing infrastructure)
 5. **CARD-017** → **CARD-018** (Workflow integration)
 6. **CARD-019** → **CARD-020** → **CARD-021** (Monitoring and stability)

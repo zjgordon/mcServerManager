@@ -2,7 +2,11 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive plan to fix the failing test suite for the Minecraft Server Manager application. Currently, **74 tests are failing** out of 185 total tests, representing a 40% failure rate. The plan is structured into bite-sized, surgical tasks that can be completed by a single engineer to achieve a fully passing test suite.
+This document outlines a comprehensive plan to fix the failing test suite for the
+Minecraft Server Manager application. Currently, **74 tests are failing** out of
+185 total tests, representing a 40% failure rate. The plan is structured into
+bite-sized, surgical tasks that can be completed by a single engineer to achieve
+a fully passing test suite.
 
 ## Current Test Status
 
@@ -47,7 +51,8 @@ This document outlines a comprehensive plan to fix the failing test suite for th
 #### Task 1.1: Fix SQLAlchemy Session Management
 
 **Estimated Time**: 4-6 hours
-**Files Affected**: `tests/conftest.py`, `tests/test_server_routes.py`, `tests/test_memory_management.py`, `tests/test_security.py`
+**Files Affected**: `tests/conftest.py`, `tests/test_server_routes.py`,
+`tests/test_memory_management.py`, `tests/test_security.py`
 
 **Issues**:
 
@@ -95,7 +100,8 @@ This document outlines a comprehensive plan to fix the failing test suite for th
 #### Task 1.3: Fix Database Constraint Violations
 
 **Estimated Time**: 2-3 hours
-**Files Affected**: `tests/test_memory_management.py`, `tests/test_integration.py`, `tests/test_user_management.py`
+**Files Affected**: `tests/test_memory_management.py`, `tests/test_integration.py`,
+`tests/test_user_management.py`
 
 **Issues**:
 
@@ -195,7 +201,8 @@ This document outlines a comprehensive plan to fix the failing test suite for th
 #### Task 3.2: Fix Test Data Setup and Cleanup
 
 **Estimated Time**: 2-3 hours
-**Files Affected**: `tests/test_memory_management.py`, `tests/test_integration.py`, `tests/test_utils.py`
+**Files Affected**: `tests/test_memory_management.py`, `tests/test_integration.py`,
+`tests/test_utils.py`
 
 **Issues**:
 
@@ -375,8 +382,10 @@ This document outlines a comprehensive plan to fix the failing test suite for th
 
 ### Approach
 
-1. **Surgical Changes**: Implement the smallest possible changes to fix each issue
-2. **Incremental Progress**: Complete tasks in priority order, testing after each phase
+1. **Surgical Changes**: Implement the smallest possible changes to fix each
+   issue
+2. **Incremental Progress**: Complete tasks in priority order, testing after
+   each phase
 3. **Isolation**: Ensure fixes don't introduce new failures
 4. **Documentation**: Document any changes made to test infrastructure
 
@@ -422,6 +431,12 @@ This document outlines a comprehensive plan to fix the failing test suite for th
 
 ## Conclusion
 
-This plan provides a structured approach to fixing the failing test suite. By addressing issues in priority order and implementing surgical changes, we can achieve a fully passing test suite while maintaining code quality and test reliability. The plan is designed to be executed by a single engineer and provides clear acceptance criteria for each task.
+This plan provides a structured approach to fixing the failing test suite. By
+addressing issues in priority order and implementing surgical changes, we can
+achieve a fully passing test suite while maintaining code quality and test
+reliability. The plan is designed to be executed by a single engineer and
+provides clear acceptance criteria for each task.
 
-Each task is bite-sized and can be completed independently, allowing for incremental progress and easy tracking of improvements. The focus on surgical changes ensures that we don't introduce new issues while fixing existing ones.
+Each task is bite-sized and can be completed independently, allowing for
+incremental progress and easy tracking of improvements. The focus on surgical
+changes ensures that we don't introduce new issues while fixing existing ones.
