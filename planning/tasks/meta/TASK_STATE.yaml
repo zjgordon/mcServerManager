@@ -1,10 +1,9 @@
-active_card: CARD-005M
+active_card: CARD-005N
 breadcrumb:
-  step: 'CARD-005L completed - integration test issues fixed, resolving authentication, memory configuration, and test isolation problems with surgical fixes'
-  last_commit: 'fix: [CARD-005L] Fix integration test issues'
-  next_action: 'Start at CARD-005M - Next test suite reliability improvement'
+  step: 'CARD-005M completed - memory management tests and calculations fixed, with core memory functionality verified (19/21 tests passing)'
+  last_commit: 'fix: [CARD-005M] Fix memory management tests and calculations'
+  next_action: 'Start at CARD-005N - Next test suite reliability improvement'
 queue:
-  - CARD-005M
   - CARD-005N
   - CARD-006
   - CARD-007

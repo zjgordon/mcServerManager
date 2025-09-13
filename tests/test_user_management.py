@@ -365,7 +365,8 @@ class TestServerOwnership:
                  patch('os.path.exists') as mock_exists, \
                  patch('builtins.open', create=True) as mock_open, \
                  patch('app.error_handlers.SafeFileOperation') as mock_safe_file, \
-                 patch('app.error_handlers.SafeDatabaseOperation') as mock_safe_db:
+                 patch('app.error_handlers.SafeDatabaseOperation') as mock_safe_db, \
+                 patch('time.sleep') as mock_sleep:
                 
                 mock_port.return_value = 25565
                 mock_version.return_value = {
@@ -397,8 +398,20 @@ class TestServerOwnership:
                 # Mock context managers
                 mock_safe_file.return_value.__enter__.return_value = mock_file
                 mock_safe_file.return_value.__exit__.return_value = None
-                mock_safe_db.return_value.__enter__.return_value = db.session
-                mock_safe_db.return_value.__exit__.return_value = None
+                
+                # Mock the SafeDatabaseOperation to actually commit
+                def mock_db_context_manager(session):
+                    class MockContext:
+                        def __enter__(self):
+                            return session
+                        def __exit__(self, exc_type, exc_val, exc_tb):
+                            if not exc_type:
+                                session.commit()
+                    return MockContext()
+                mock_safe_db.side_effect = mock_db_context_manager
+                
+                # Mock time.sleep to prevent actual delays
+                mock_sleep.return_value = None
                 
                 response = client.post('/configure_server', data={
                     'server_name': 'testserver',
