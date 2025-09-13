@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.2] - 2024-11-16 to 2025-09-04
 
-### Added
+### Added (v0.0.2)
 
 - Code review and cleanup processes
 - AI-assisted development improvements
@@ -88,14 +88,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test coverage
 - Documentation updates
 
-### Changed
+### Changed (v0.0.2)
 
 - Significantly improved code quality
 - Enhanced user experience
 - Better resource management
 - Improved stability
 
-### Fixed
+### Fixed (v0.0.2)
 
 - Multiple bug fixes and stability improvements
 - Security vulnerabilities
@@ -104,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.1] - 2024-11-16
 
-### Added
+### Added (v0.0.1)
 
 - Initial HarvardX school project implementation
 - Complete Flask application structure (24 files, 1,245 lines)
