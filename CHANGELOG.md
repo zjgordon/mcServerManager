@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0-alpha] - 2025-09-04
 
 ### Added
+
 - **Core Server Management**
   - Complete server lifecycle management (create, start, stop, delete, backup)
   - Dynamic version selection with automatic exclusion filtering
@@ -51,18 +52,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Error handling testing
 
 ### Changed
+
 - Enhanced error handling and security measures
 - Improved user experience with polished UI
 - Better memory management and resource optimization
 - Comprehensive code review and cleanup
 
 ### Fixed
+
 - Multiple stability and security fixes
 - Bug fixes from comprehensive testing
 - Process management improvements
 - Memory leak prevention
 
 ### Security
+
 - Multiple security updates and vulnerability patches
 - Enhanced authentication and authorization
 - Improved input validation and sanitization
@@ -72,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.2] - 2024-11-16 to 2025-09-04
 
 ### Added
+
 - Code review and cleanup processes
 - AI-assisted development improvements
 - Enhanced security measures
@@ -84,12 +89,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation updates
 
 ### Changed
+
 - Significantly improved code quality
 - Enhanced user experience
 - Better resource management
 - Improved stability
 
 ### Fixed
+
 - Multiple bug fixes and stability improvements
 - Security vulnerabilities
 - Process management issues
@@ -98,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.1] - 2024-11-16
 
 ### Added
+
 - Initial HarvardX school project implementation
 - Complete Flask application structure (24 files, 1,245 lines)
 - User authentication system with login/logout functionality
@@ -111,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Server configuration capabilities
 
 ### Notes
+
 - Developed without AI assistance as part of academic coursework
 - Comprehensive initial implementation covering all core features
 - Solid foundation established for future enhancements
@@ -120,9 +129,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Release Notes
 
 ### Alpha Release (v0.1.0-alpha)
+
 This alpha release represents a significant milestone in the development of Minecraft Server Manager. The application has evolved from a HarvardX school project into a production-ready server management system with enterprise-grade features.
 
 **Key Highlights:**
+
 - Complete server lifecycle management
 - Advanced process monitoring and reconciliation
 - Comprehensive security features
@@ -131,11 +142,13 @@ This alpha release represents a significant milestone in the development of Mine
 - Extensive testing and quality assurance
 
 **Known Issues:**
+
 - This is an alpha release and may contain bugs
 - Some advanced features may require additional testing
 - Performance optimization is ongoing
 
 **Upgrade Notes:**
+
 - This is the first official release
 - No migration required for new installations
 - See installation instructions in README.md
@@ -145,6 +158,7 @@ This alpha release represents a significant milestone in the development of Mine
 ## Future Releases
 
 ### Planned for v0.2.0
+
 - [ ] Docker containerization
 - [ ] REST API endpoints
 - [ ] WebSocket support for real-time updates
@@ -153,6 +167,7 @@ This alpha release represents a significant milestone in the development of Mine
 - [ ] Multi-server clustering support
 
 ### Planned for v1.0.0
+
 - [ ] Production-ready stability
 - [ ] Performance optimizations
 - [ ] Advanced monitoring and alerting

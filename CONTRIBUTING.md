@@ -5,6 +5,7 @@ Thank you for your interest in contributing to Minecraft Server Manager! This do
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - Git
 - Basic knowledge of Flask, SQLAlchemy, and web development
@@ -13,24 +14,28 @@ Thank you for your interest in contributing to Minecraft Server Manager! This do
 ### Development Setup
 
 1. **Fork and Clone**
+
    ```bash
    git clone https://github.com/yourusername/mcServerManager.git
    cd mcServerManager
    ```
 
 2. **Create Virtual Environment**
+
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install Dependencies**
+
    ```bash
    pip install -r requirements.txt
    pip install -r requirements-dev.txt  # If available
    ```
 
 4. **Set Up Development Environment**
+
    ```bash
    # Create development configuration
    cp config.example.json config.json
@@ -38,11 +43,13 @@ Thank you for your interest in contributing to Minecraft Server Manager! This do
    ```
 
 5. **Run Tests**
+
    ```bash
    pytest
    ```
 
 6. **Start Development Server**
+
    ```bash
    python run.py
    ```
@@ -50,13 +57,16 @@ Thank you for your interest in contributing to Minecraft Server Manager! This do
 ## 📋 Development Guidelines
 
 ### Code Style
+
 - Follow PEP 8 Python style guidelines
 - Use meaningful variable and function names
 - Write comprehensive docstrings for functions and classes
 - Keep functions small and focused on single responsibilities
 
 ### Commit Messages
+
 Use clear, descriptive commit messages following this format:
+
 ```
 type(scope): brief description
 
@@ -66,6 +76,7 @@ Fixes #issue_number
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -75,6 +86,7 @@ Fixes #issue_number
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```
 feat(auth): add two-factor authentication support
 
@@ -96,6 +108,7 @@ Fixes #456
 ### Pull Request Process
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -106,26 +119,31 @@ Fixes #456
    - Update documentation if needed
 
 3. **Test Your Changes**
+
    ```bash
    pytest
    pytest --cov=app  # Run with coverage
    ```
 
 4. **Commit Changes**
+
    ```bash
    git add .
    git commit -m "feat(scope): your commit message"
    ```
 
 5. **Push and Create PR**
+
    ```bash
    git push origin feature/your-feature-name
    ```
+
    Then create a pull request on GitHub.
 
 ## 🧪 Testing
 
 ### Running Tests
+
 ```bash
 # Run all tests
 pytest
@@ -141,6 +159,7 @@ pytest -v
 ```
 
 ### Writing Tests
+
 - Write tests for all new functionality
 - Aim for high test coverage
 - Use descriptive test names
@@ -148,6 +167,7 @@ pytest -v
 - Mock external dependencies
 
 ### Test Categories
+
 - **Unit Tests**: Test individual functions and methods
 - **Integration Tests**: Test component interactions
 - **Security Tests**: Test authentication, authorization, and security features
@@ -156,6 +176,7 @@ pytest -v
 ## 🏗️ Architecture Guidelines
 
 ### Project Structure
+
 ```
 app/
 ├── __init__.py          # Flask app initialization
@@ -234,12 +255,14 @@ When requesting features:
 ## 🔒 Security
 
 ### Reporting Security Issues
+
 - **DO NOT** create public issues for security vulnerabilities
 - Email security issues to: [security@example.com]
 - Include detailed information about the vulnerability
 - Allow time for response before public disclosure
 
 ### Security Guidelines
+
 - Never commit secrets or API keys
 - Use environment variables for sensitive configuration
 - Follow secure coding practices
@@ -249,12 +272,14 @@ When requesting features:
 ## 📚 Documentation
 
 ### Code Documentation
+
 - Write docstrings for all public functions and classes
 - Use type hints where appropriate
 - Comment complex logic
 - Keep README.md updated
 
 ### API Documentation
+
 - Document all API endpoints
 - Include request/response examples
 - Specify authentication requirements
@@ -263,12 +288,15 @@ When requesting features:
 ## 🏷️ Release Process
 
 ### Version Numbering
+
 We follow [Semantic Versioning](https://semver.org/):
+
 - **MAJOR**: Breaking changes
 - **MINOR**: New features (backward compatible)
 - **PATCH**: Bug fixes (backward compatible)
 
 ### Release Checklist
+
 - [ ] All tests passing
 - [ ] Documentation updated
 - [ ] CHANGELOG.md updated
@@ -278,12 +306,14 @@ We follow [Semantic Versioning](https://semver.org/):
 ## 🤝 Community Guidelines
 
 ### Code of Conduct
+
 - Be respectful and inclusive
 - Welcome newcomers and help them learn
 - Focus on constructive feedback
 - Respect different opinions and approaches
 
 ### Getting Help
+
 - Check existing issues and discussions
 - Ask questions in GitHub discussions
 - Join our community chat (if available)

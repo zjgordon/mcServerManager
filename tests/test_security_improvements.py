@@ -1,12 +1,19 @@
 """
 Security improvement tests for the Minecraft Server Manager.
 """
-import pytest
 import re
 from unittest.mock import patch
+
+import pytest
+
 from app.security import (
-    SecurityUtils, RateLimiter, PasswordPolicyError,
-    SecurityError, validate_file_upload, secure_filename, audit_log
+    PasswordPolicyError,
+    RateLimiter,
+    SecurityError,
+    SecurityUtils,
+    audit_log,
+    secure_filename,
+    validate_file_upload,
 )
 
 
@@ -17,8 +24,7 @@ class TestPasswordPolicy:
         """Test password minimum length requirement."""
         with app.app_context():
             # Test short password
-            with pytest.raises(PasswordPolicyError,
-                               match="at least 8 characters"):
+            with pytest.raises(PasswordPolicyError, match="at least 8 characters"):
                 SecurityUtils.validate_password("short")
 
             # Test valid password
@@ -58,19 +64,18 @@ class TestPasswordPolicy:
         """Test that password cannot contain username."""
         with app.app_context():
             # Test password containing username
-            with pytest.raises(PasswordPolicyError,
-                               match="cannot contain your username"):
+            with pytest.raises(
+                PasswordPolicyError, match="cannot contain your username"
+            ):
                 SecurityUtils.validate_password("admin123", "admin")
 
             # Test valid password
-            assert SecurityUtils.validate_password(
-                "ValidPass123", "admin"
-            ) is True
+            assert SecurityUtils.validate_password("ValidPass123", "admin") is True
 
     def test_weak_password_detection(self, app):
         """Test detection of common weak passwords."""
         with app.app_context():
-            weak_passwords = ['password', '123456', 'qwerty', 'admin']
+            weak_passwords = ["password", "123456", "qwerty", "admin"]
 
             for weak_pass in weak_passwords:
                 with pytest.raises(PasswordPolicyError, match="too common"):
@@ -87,7 +92,7 @@ class TestInputSanitization:
                 "<script>alert('xss')</script>",
                 "javascript:alert('xss')",
                 "onload=alert('xss')",
-                "vbscript:alert('xss')"
+                "vbscript:alert('xss')",
             ]
 
             for dangerous_input in dangerous_inputs:
@@ -138,7 +143,8 @@ class TestRateLimiting:
 
         # Wait for window to expire (simulate with time manipulation)
         import time
-        with patch('time.time', return_value=time.time() + 2):
+
+        with patch("time.time", return_value=time.time() + 2):
             assert limiter.is_allowed("test_key", 5, 1) is True
 
     def test_rate_limiter_remaining_attempts(self):
@@ -161,7 +167,7 @@ class TestFileUploadSecurity:
         """Test validation of valid file upload."""
         with app.app_context():
             # Mock request with valid file
-            with patch('app.security.request') as mock_request:
+            with patch("app.security.request") as mock_request:
                 mock_request.content_length = 1024  # 1KB
 
                 assert validate_file_upload("test.jar") is True
@@ -184,7 +190,7 @@ class TestFileUploadSecurity:
                 "../../../etc/passwd",
                 "..\\..\\..\\windows\\system32\\cmd.exe",
                 "/etc/passwd",
-                "C:\\Windows\\System32\\cmd.exe"
+                "C:\\Windows\\System32\\cmd.exe",
             ]
 
             for dangerous_file in dangerous_files:
@@ -195,7 +201,7 @@ class TestFileUploadSecurity:
         """Test file size limit enforcement."""
         with app.app_context():
             # Mock request with oversized file
-            with patch('app.security.request') as mock_request:
+            with patch("app.security.request") as mock_request:
                 mock_request.content_length = 20 * 1024 * 1024  # 20MB
 
                 with pytest.raises(SecurityError, match="exceeds maximum"):
@@ -208,7 +214,7 @@ class TestFileUploadSecurity:
                 "file<script>alert('xss')</script>.jar",
                 "file with spaces.jar",
                 "file/with/slashes.jar",
-                "file\\with\\backslashes.jar"
+                "file\\with\\backslashes.jar",
             ]
 
             for dangerous_name in dangerous_names:
@@ -221,7 +227,7 @@ class TestFileUploadSecurity:
                 assert "\\" not in secure_name
 
                 # Should contain timestamp
-                assert re.search(r'\d{8}_\d{6}', secure_name)
+                assert re.search(r"\d{8}_\d{6}", secure_name)
 
 
 class TestSecurityHeaders:
@@ -230,17 +236,18 @@ class TestSecurityHeaders:
     def test_security_headers_presence(self, app):
         """Test that security headers are added to responses."""
         with app.app_context():
-            from app.security import add_security_headers
             from flask import make_response
+
+            from app.security import add_security_headers
 
             response = make_response("test")
             secured_response = add_security_headers(response)
 
             # Check for security headers
-            assert secured_response.headers.get('X-Content-Type-Options') == 'nosniff'
-            assert secured_response.headers.get('X-Frame-Options') == 'SAMEORIGIN'
-            assert secured_response.headers.get('X-XSS-Protection') == '1; mode=block'
-            assert 'Content-Security-Policy' in secured_response.headers
+            assert secured_response.headers.get("X-Content-Type-Options") == "nosniff"
+            assert secured_response.headers.get("X-Frame-Options") == "SAMEORIGIN"
+            assert secured_response.headers.get("X-XSS-Protection") == "1; mode=block"
+            assert "Content-Security-Policy" in secured_response.headers
 
 
 class TestAuditLogging:
@@ -249,26 +256,26 @@ class TestAuditLogging:
     def test_audit_log_format(self, app):
         """Test audit log entry format."""
         with app.app_context():
-            with patch('app.security.current_user') as mock_user:
+            with patch("app.security.current_user") as mock_user:
                 mock_user.is_authenticated = True
                 mock_user.id = 123
 
-                with patch('app.security.request') as mock_request:
-                    mock_request.remote_addr = '192.168.1.100'
-                    mock_request.headers.get.return_value = 'Test Browser'
+                with patch("app.security.request") as mock_request:
+                    mock_request.remote_addr = "192.168.1.100"
+                    mock_request.headers.get.return_value = "Test Browser"
 
                     # Capture log output
-                    with patch('app.security.current_app.logger.info') as mock_logger:
-                        audit_log('test_action', {'detail': 'test'})
+                    with patch("app.security.current_app.logger.info") as mock_logger:
+                        audit_log("test_action", {"detail": "test"})
 
                         # Verify log was called
                         mock_logger.assert_called_once()
 
                         # Verify log format
                         log_call = mock_logger.call_args[0][0]
-                        assert 'AUDIT:' in log_call
-                        assert 'test_action' in log_call
-                        assert '192.168.1.100' in log_call
+                        assert "AUDIT:" in log_call
+                        assert "test_action" in log_call
+                        assert "192.168.1.100" in log_call
 
 
 class TestCSRFProtection:
@@ -276,9 +283,9 @@ class TestCSRFProtection:
 
     def test_csrf_token_in_forms(self, client):
         """Test that forms include CSRF tokens."""
-        response = client.get('/login')
+        response = client.get("/login")
         assert response.status_code == 200
-        assert 'csrf_token' in response.data.decode()
+        assert "csrf_token" in response.data.decode()
 
 
 class TestAuthenticationSecurity:
@@ -287,14 +294,13 @@ class TestAuthenticationSecurity:
     def test_login_rate_limiting(self, client, app):
         """Test login rate limiting."""
         # Enable rate limiting for this test
-        app.config['RATELIMIT_ENABLED'] = True
+        app.config["RATELIMIT_ENABLED"] = True
 
         # Make multiple login attempts
         for i in range(6):
-            response = client.post('/login', data={
-                'username': f'testuser{i}',
-                'password': 'wrongpassword'
-            })
+            response = client.post(
+                "/login", data={"username": f"testuser{i}", "password": "wrongpassword"}
+            )
 
         # Should get rate limited
         assert response.status_code == 429  # Too Many Requests
@@ -302,21 +308,24 @@ class TestAuthenticationSecurity:
     def test_password_policy_enforcement(self, client, app):
         """Test password policy enforcement."""
         # Try to create admin with weak password
-        response = client.post('/set_admin_password', data={
-            'username': 'admin',
-            'password': 'weak',
-            'confirm_password': 'weak'
-        }, follow_redirects=True)
+        response = client.post(
+            "/set_admin_password",
+            data={"username": "admin", "password": "weak", "confirm_password": "weak"},
+            follow_redirects=True,
+        )
 
-        assert b'Password must be at least 8 characters long' in response.data
+        assert b"Password must be at least 8 characters long" in response.data
 
     def test_input_sanitization_in_forms(self, client, app):
         """Test input sanitization in forms."""
         # Try to submit form with XSS payload
-        response = client.post('/login', data={
-            'username': '<script>alert("xss")</script>',
-            'password': 'password123'
-        })
+        response = client.post(
+            "/login",
+            data={
+                "username": '<script>alert("xss")</script>',
+                "password": "password123",
+            },
+        )
 
         # Should not crash and should sanitize input
         assert response.status_code == 200
@@ -327,10 +336,10 @@ class TestSessionSecurity:
 
     def test_session_configuration(self, app):
         """Test session security configuration."""
-        assert app.config['SESSION_COOKIE_HTTPONLY'] is True
-        assert app.config['SESSION_COOKIE_SAMESITE'] == 'Lax'
-        assert app.config['PERMANENT_SESSION_LIFETIME'] == 3600  # 1 hour
-        assert app.config['SESSION_REFRESH_EACH_REQUEST'] is True
+        assert app.config["SESSION_COOKIE_HTTPONLY"] is True
+        assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
+        assert app.config["PERMANENT_SESSION_LIFETIME"] == 3600  # 1 hour
+        assert app.config["SESSION_REFRESH_EACH_REQUEST"] is True
 
 
 class TestConfigurationSecurity:
@@ -339,23 +348,23 @@ class TestConfigurationSecurity:
     def test_secret_key_generation(self, app):
         """Test secure secret key generation."""
         # Should not use default weak key
-        assert app.config['SECRET_KEY'] != 'your_secret_key'
+        assert app.config["SECRET_KEY"] != "your_secret_key"
 
         # Should be a secure random key
-        assert len(app.config['SECRET_KEY']) >= 32
+        assert len(app.config["SECRET_KEY"]) >= 32
 
     def test_security_headers_configuration(self, app):
         """Test security headers configuration."""
-        headers = app.config.get('SECURITY_HEADERS', {})
+        headers = app.config.get("SECURITY_HEADERS", {})
 
-        assert 'X-Content-Type-Options' in headers
-        assert 'X-Frame-Options' in headers
-        assert 'X-XSS-Protection' in headers
-        assert 'Content-Security-Policy' in headers
+        assert "X-Content-Type-Options" in headers
+        assert "X-Frame-Options" in headers
+        assert "X-XSS-Protection" in headers
+        assert "Content-Security-Policy" in headers
 
     def test_password_policy_configuration(self, app):
         """Test password policy configuration."""
-        assert app.config['PASSWORD_MIN_LENGTH'] >= 8
-        assert app.config['PASSWORD_REQUIRE_UPPERCASE'] is True
-        assert app.config['PASSWORD_REQUIRE_LOWERCASE'] is True
-        assert app.config['PASSWORD_REQUIRE_DIGITS'] is True
+        assert app.config["PASSWORD_MIN_LENGTH"] >= 8
+        assert app.config["PASSWORD_REQUIRE_UPPERCASE"] is True
+        assert app.config["PASSWORD_REQUIRE_LOWERCASE"] is True
+        assert app.config["PASSWORD_REQUIRE_DIGITS"] is True

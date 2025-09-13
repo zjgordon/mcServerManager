@@ -6,7 +6,7 @@
     <div class="mb-4">
         <h1 class="text-gradient-mc pixel-font-lg">{% if current_user.is_admin %}All Minecraft Servers{% else %}Your Minecraft Servers{% endif %}</h1>
     </div>
-    
+
     <!-- Memory Usage Summary -->
     {% if memory_summary %}
     <div class="card mb-4">
@@ -29,9 +29,9 @@
                 </div>
             </div>
             <div class="progress mt-2">
-                <div class="progress-bar" role="progressbar" 
+                <div class="progress-bar" role="progressbar"
                      style="width: {{ memory_summary.usage_percentage }}%"
-                     aria-valuenow="{{ memory_summary.usage_percentage }}" 
+                     aria-valuenow="{{ memory_summary.usage_percentage }}"
                      aria-valuemin="0" aria-valuemax="100">
                     {{ memory_summary.usage_percentage }}%
                 </div>
@@ -72,11 +72,11 @@
             <div class="col-md-4">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="serverSearch" class="form-control search-input" 
+                    <input type="text" id="serverSearch" class="form-control search-input"
                            placeholder="Search servers...">
                 </div>
             </div>
-            
+
             <!-- Second Third: Status Filter -->
             <div class="col-md-4">
                 <select id="statusFilter" class="form-control filter-select">
@@ -85,7 +85,7 @@
                     <option value="stopped">Stopped</option>
                 </select>
             </div>
-            
+
             <!-- Third Third: Version Filter -->
             <div class="col-md-4">
                 <div class="d-flex gap-2">
@@ -95,7 +95,7 @@
                         <option value="{{ version }}">{{ version }}</option>
                         {% endfor %}
                     </select>
-                    
+
                     <!-- Clear Filters Button -->
                     <button id="clearFilters" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-times"></i>
@@ -103,7 +103,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Results Counter -->
         <div class="text-center mt-2">
             <span id="resultsCounter" class="text-muted small"></span>
@@ -126,7 +126,7 @@
         </div>
     </div>
     {% endif %}
-    
+
 
 
     {% if servers %}
@@ -203,8 +203,8 @@
                                     </button>
                                 </form>
                             {% endif %}
-                            <button type="button" class="btn btn-mc btn-mc-primary btn-sm" 
-                                    onclick="copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}')" 
+                            <button type="button" class="btn btn-mc btn-mc-primary btn-sm"
+                                    onclick="copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}')"
                                     data-tooltip="Copy server connection link to clipboard">
                                 <i class="fas fa-share"></i> Share
                             </button>
@@ -221,7 +221,7 @@
                             </form>
                             <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <button type="submit" class="btn btn-mc btn-mc-danger btn-sm" 
+                                <button type="submit" class="btn btn-mc btn-mc-danger btn-sm"
                                         data-tooltip="Permanently delete this server and all its files"
                                         onclick="return confirmDeleteServer({{ server.id }}, '{{ server.server_name }}', {{ (server.owner_id == current_user.id) | lower }}, '{{ server.owner.username }}');">
                                     <i class="fas fa-trash"></i> Delete
@@ -249,7 +249,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Server Information Tags -->
             <div class="server-info-tags">
                 <div class="info-tag memory-tag">
@@ -269,7 +269,7 @@
                 </div>
                 {% endif %}
             </div>
-            
+
             <!-- Control Panel -->
             <div class="control-panel">
                 <!-- Status Indicator -->
@@ -277,7 +277,7 @@
                     <div class="status-dot-small"></div>
                     <span class="status-text-small">{% if server.is_running %}Running{% else %}Stopped{% endif %}</span>
                 </div>
-                
+
                 <!-- Start/Stop Button -->
                 {% if not server.is_running %}
                     <form action="{{ url_for('server.start_server', server_id=server.id) }}" method="post" style="display:inline;">
@@ -294,21 +294,21 @@
                         </button>
                     </form>
                 {% endif %}
-                
+
                 <!-- Share Button -->
-                <button type="button" class="control-btn share-btn" 
-                        onclick="copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}')" 
+                <button type="button" class="control-btn share-btn"
+                        onclick="copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}')"
                         data-tooltip="Copy server link">
                     📤
                 </button>
-                
+
                 <!-- Console Button -->
-                <button class="control-btn console-btn" 
-                        onclick="showConsole({{ server.id }}, '{{ server.server_name }}')" 
+                <button class="control-btn console-btn"
+                        onclick="showConsole({{ server.id }}, '{{ server.server_name }}')"
                         data-tooltip="View console">
                     ⬜
                 </button>
-                
+
                 <!-- Backup Button -->
                 <form action="{{ url_for('server.backup_server', server_id=server.id) }}" method="post" style="display:inline;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -316,11 +316,11 @@
                         ⬇
                     </button>
                 </form>
-                
+
                 <!-- Delete Button -->
                 <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="control-btn delete-btn" 
+                    <button type="submit" class="control-btn delete-btn"
                             data-tooltip="Delete server"
                             onclick="return confirmDeleteServer({{ server.id }}, '{{ server.server_name }}', {{ (server.owner_id == current_user.id) | lower }}, '{{ server.owner.username }}');">
                         ✕
@@ -404,7 +404,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="analytics-card">
                         <div class="analytics-metric">
                             <div class="analytics-icon success">
@@ -418,7 +418,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="analytics-card">
                         <div class="analytics-metric">
                             <div class="analytics-icon warning">
@@ -432,7 +432,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="analytics-card">
                         <div class="analytics-metric">
                             <div class="analytics-icon danger">
@@ -451,7 +451,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="analytics-card">

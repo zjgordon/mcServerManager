@@ -1,0 +1,76 @@
+# Additional pre-commit hooks configuration
+# This file provides additional configuration for specific hooks
+
+# Python hooks configuration
+python_hooks:
+  black:
+    line_length: 88
+    target_version: py311
+    skip_string_normalization: false
+    
+  isort:
+    profile: black
+    line_length: 88
+    multi_line_output: 3
+    
+  flake8:
+    max_line_length: 88
+    extend_ignore: E203,W503
+    max_complexity: 10
+    
+  mypy:
+    ignore_missing_imports: true
+    no_strict_optional: true
+    show_error_codes: true
+    
+  bandit:
+    severity: medium
+    confidence: medium
+    exclude_dirs: [tests, venv, node_modules]
+    
+  pydocstyle:
+    convention: google
+    add_ignore: D100,D101,D102,D103,D104,D105,D106,D107
+
+# JavaScript/TypeScript hooks configuration
+js_hooks:
+  prettier:
+    print_width: 80
+    tab_width: 2
+    use_tabs: false
+    semi: true
+    single_quote: true
+    quote_props: as-needed
+    trailing_comma: es5
+    bracket_spacing: true
+    arrow_parens: avoid
+    
+  eslint:
+    config_file: .eslintrc.js
+    fix: true
+
+# Shell hooks configuration
+shell_hooks:
+  shellcheck:
+    severity: warning
+    exclude: SC1091,SC1090
+    
+  shfmt:
+    indent: 2
+    binary_next_line: true
+    space_redirects: true
+
+# General hooks configuration
+general_hooks:
+  trailing_whitespace:
+    exclude: '\.(md|txt|json|yaml|yml)$'
+    
+  end_of_file_fixer:
+    exclude: '\.(md|txt|json|yaml|yml)$'
+    
+  check_yaml:
+    unsafe: true
+    
+  detect_secrets:
+    baseline: .secrets.baseline
+    exclude: '\.(baseline|lock)$'

@@ -14,13 +14,13 @@
                 <div class="card-body">
                     <form action="{{ url_for('auth.login') }}" method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        
+
                         <div class="form-group">
                             <label for="username" class="form-label">
                                 <i class="fas fa-user"></i> Username
                             </label>
-                            <input type="text" name="username" id="username" class="form-control" required 
-                                   pattern="[a-zA-Z0-9_-]{3,50}" 
+                            <input type="text" name="username" id="username" class="form-control" required
+                                   pattern="[a-zA-Z0-9_-]{3,50}"
                                    placeholder="Enter your username"
                                    data-tooltip="Username must be 3-50 characters, letters, numbers, underscores, and hyphens only">
                         </div>
@@ -28,7 +28,7 @@
                             <label for="password" class="form-label">
                                 <i class="fas fa-lock"></i> Password
                             </label>
-                            <input type="password" name="password" id="password" class="form-control" required 
+                            <input type="password" name="password" id="password" class="form-control" required
                                    minlength="8" placeholder="Enter your password"
                                    data-tooltip="Password must be at least 8 characters long">
                         </div>

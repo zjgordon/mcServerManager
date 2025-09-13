@@ -67,12 +67,12 @@
                                     <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ url_for('auth.edit_user', user_id=user.id) }}" 
+                                            <a href="{{ url_for('auth.edit_user', user_id=user.id) }}"
                                                class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
                                             {% if user.id != current_user.id %}
-                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
                                                         onclick="confirmDelete({{ user.id }}, '{{ user.username }}')">
                                                     <i class="fas fa-trash"></i> Delete
                                                 </button>

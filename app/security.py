@@ -1,28 +1,32 @@
 """
 Security utilities for the Minecraft Server Manager.
 """
+import hashlib
 import re
 import time
-import hashlib
 from datetime import datetime, timedelta
 from functools import wraps
-from flask import request, current_app, abort
-from flask_login import current_user
+
 import jwt
+from flask import abort, current_app, request
+from flask_login import current_user
 
 
 class SecurityError(Exception):
     """Base exception for security-related errors."""
+
     pass
 
 
 class PasswordPolicyError(SecurityError):
     """Exception raised when password doesn't meet policy requirements."""
+
     pass
 
 
 class RateLimitError(SecurityError):
     """Exception raised when rate limit is exceeded."""
+
     pass
 
 
@@ -46,8 +50,16 @@ class SecurityUtils:
 
         # Check for common weak passwords first (before other validations)
         weak_passwords = {
-            'password', '123456', '123456789', 'qwerty', 'abc123',
-            'password123', 'admin', 'letmein', 'welcome', 'monkey'
+            "password",
+            "123456",
+            "123456789",
+            "qwerty",
+            "abc123",
+            "password123",
+            "admin",
+            "letmein",
+            "welcome",
+            "monkey",
         }
         if password.lower() in weak_passwords:
             raise PasswordPolicyError(
@@ -56,36 +68,36 @@ class SecurityUtils:
 
         # Prevent username in password (before other validations)
         if username and username.lower() in password.lower():
-            raise PasswordPolicyError(
-                "Password cannot contain your username"
-            )
+            raise PasswordPolicyError("Password cannot contain your username")
 
-        min_length = current_app.config['PASSWORD_MIN_LENGTH']
+        min_length = current_app.config["PASSWORD_MIN_LENGTH"]
         if len(password) < min_length:
             raise PasswordPolicyError(
                 f"Password must be at least {min_length} characters long"
             )
 
-        if (current_app.config['PASSWORD_REQUIRE_UPPERCASE'] and
-                not re.search(r'[A-Z]', password)):
+        if current_app.config["PASSWORD_REQUIRE_UPPERCASE"] and not re.search(
+            r"[A-Z]", password
+        ):
             raise PasswordPolicyError(
                 "Password must contain at least one uppercase letter"
             )
 
-        if (current_app.config['PASSWORD_REQUIRE_LOWERCASE'] and
-                not re.search(r'[a-z]', password)):
+        if current_app.config["PASSWORD_REQUIRE_LOWERCASE"] and not re.search(
+            r"[a-z]", password
+        ):
             raise PasswordPolicyError(
                 "Password must contain at least one lowercase letter"
             )
 
-        if (current_app.config['PASSWORD_REQUIRE_DIGITS'] and
-                not re.search(r'\d', password)):
-            raise PasswordPolicyError(
-                "Password must contain at least one digit"
-            )
+        if current_app.config["PASSWORD_REQUIRE_DIGITS"] and not re.search(
+            r"\d", password
+        ):
+            raise PasswordPolicyError("Password must contain at least one digit")
 
-        if (current_app.config['PASSWORD_REQUIRE_SPECIAL'] and
-                not re.search(r'[!@#$%^&*(),.?":{}|<>]', password)):
+        if current_app.config["PASSWORD_REQUIRE_SPECIAL"] and not re.search(
+            r'[!@#$%^&*(),.?":{}|<>]', password
+        ):
             raise PasswordPolicyError(
                 "Password must contain at least one special character"
             )
@@ -115,10 +127,19 @@ class SecurityUtils:
             text = text[:max_length]
 
         # Remove potentially dangerous characters
-        dangerous_chars = ['<', '>', '"', "'", '&', 'javascript:',
-                           'vbscript:', 'onload=', 'onerror=']
+        dangerous_chars = [
+            "<",
+            ">",
+            '"',
+            "'",
+            "&",
+            "javascript:",
+            "vbscript:",
+            "onload=",
+            "onerror=",
+        ]
         for char in dangerous_chars:
-            text = text.replace(char, '')
+            text = text.replace(char, "")
 
         return text
 
@@ -135,14 +156,12 @@ class SecurityUtils:
             str: JWT token
         """
         payload = {
-            'data': data,
-            'exp': datetime.utcnow() + timedelta(seconds=expires_in),
-            'iat': datetime.utcnow(),
-            'iss': 'minecraft-server-manager'
+            "data": data,
+            "exp": datetime.utcnow() + timedelta(seconds=expires_in),
+            "iat": datetime.utcnow(),
+            "iss": "minecraft-server-manager",
         }
-        return jwt.encode(
-            payload, current_app.config['SECRET_KEY'], algorithm='HS256'
-        )
+        return jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm="HS256")
 
     @staticmethod
     def verify_secure_token(token):
@@ -157,9 +176,9 @@ class SecurityUtils:
         """
         try:
             payload = jwt.decode(
-                token, current_app.config['SECRET_KEY'], algorithms=['HS256']
+                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
-            return payload['data']
+            return payload["data"]
         except jwt.ExpiredSignatureError:
             return None
         except jwt.InvalidTokenError:
@@ -203,9 +222,7 @@ class RateLimiter:
             self.attempts[key] = []
 
         # Remove old attempts outside the window
-        self.attempts[key] = [
-            t for t in self.attempts[key] if now - t < window_seconds
-        ]
+        self.attempts[key] = [t for t in self.attempts[key] if now - t < window_seconds]
 
         # Check if under limit
         if len(self.attempts[key]) < max_attempts:
@@ -222,9 +239,7 @@ class RateLimiter:
             return max_attempts
 
         # Remove old attempts outside the window
-        self.attempts[key] = [
-            t for t in self.attempts[key] if now - t < window_seconds
-        ]
+        self.attempts[key] = [t for t in self.attempts[key] if now - t < window_seconds]
 
         return max(0, max_attempts - len(self.attempts[key]))
 
@@ -242,11 +257,12 @@ def rate_limit(max_attempts=5, window_seconds=60, key_func=None):
         window_seconds (int): Time window in seconds
         key_func (callable): Function to generate rate limit key
     """
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             # Skip rate limiting if disabled in configuration
-            if not current_app.config.get('RATELIMIT_ENABLED', True):
+            if not current_app.config.get("RATELIMIT_ENABLED", True):
                 return f(*args, **kwargs)
 
             if key_func:
@@ -258,19 +274,24 @@ def rate_limit(max_attempts=5, window_seconds=60, key_func=None):
                 abort(429, description="Rate limit exceeded.")
 
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
 
 def require_https():
     """Decorator to require HTTPS in production."""
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not request.is_secure and not current_app.debug:
                 abort(400, description="HTTPS is required for this endpoint.")
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
 
@@ -287,12 +308,12 @@ def audit_log(action, details=None, user_id=None):
         user_id = current_user.id
 
     log_entry = {
-        'timestamp': datetime.utcnow().isoformat(),
-        'action': action,
-        'user_id': user_id,
-        'ip_address': request.remote_addr,
-        'user_agent': request.headers.get('User-Agent', ''),
-        'details': details or {}
+        "timestamp": datetime.utcnow().isoformat(),
+        "action": action,
+        "user_id": user_id,
+        "ip_address": request.remote_addr,
+        "user_agent": request.headers.get("User-Agent", ""),
+        "details": details or {},
     }
 
     # In a production environment, this would be logged to a secure audit log
@@ -309,7 +330,7 @@ def add_security_headers(response):
     Returns:
         response: Response with security headers
     """
-    headers = current_app.config.get('SECURITY_HEADERS', {})
+    headers = current_app.config.get("SECURITY_HEADERS", {})
 
     for header, value in headers.items():
         response.headers[header] = value
@@ -336,31 +357,29 @@ def validate_file_upload(filename, allowed_extensions=None, max_size=None):
         raise SecurityError("No file provided")
 
     # Check for path traversal in filename first
-    if '..' in filename or '/' in filename or '\\' in filename:
+    if ".." in filename or "/" in filename or "\\" in filename:
         raise SecurityError("Invalid filename")
 
     # Check file extension
     if allowed_extensions is None:
         allowed_extensions = current_app.config.get(
-            'ALLOWED_EXTENSIONS', {'jar', 'zip', 'tar.gz'}
+            "ALLOWED_EXTENSIONS", {"jar", "zip", "tar.gz"}
         )
 
     # Handle compound extensions like .tar.gz
     filename_lower = filename.lower()
-    file_ext = ''
-    if filename_lower.endswith('.tar.gz'):
-        file_ext = 'tar.gz'
-    elif '.' in filename:
-        file_ext = filename.rsplit('.', 1)[1].lower()
+    file_ext = ""
+    if filename_lower.endswith(".tar.gz"):
+        file_ext = "tar.gz"
+    elif "." in filename:
+        file_ext = filename.rsplit(".", 1)[1].lower()
 
     if file_ext not in allowed_extensions:
         raise SecurityError(f"File type '{file_ext}' is not allowed")
 
     # Check file size
     if max_size is None:
-        max_size = current_app.config.get(
-            'MAX_CONTENT_LENGTH', 16 * 1024 * 1024
-        )
+        max_size = current_app.config.get("MAX_CONTENT_LENGTH", 16 * 1024 * 1024)
 
     if request.content_length and request.content_length > max_size:
         raise SecurityError(
@@ -381,12 +400,11 @@ def secure_filename(filename):
         str: Secure filename
     """
     # Remove dangerous characters
-    filename = re.sub(r'[^\w\-_.]', '_', filename)
+    filename = re.sub(r"[^\w\-_.]", "_", filename)
 
     # Add timestamp to prevent conflicts
-    timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-    name, ext = (filename.rsplit('.', 1) if '.' in filename
-                 else (filename, ''))
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    name, ext = filename.rsplit(".", 1) if "." in filename else (filename, "")
 
     return f"{name}_{timestamp}.{ext}" if ext else f"{name}_{timestamp}"
 
@@ -394,20 +412,22 @@ def secure_filename(filename):
 # Password validation decorator
 def validate_password_policy(f):
     """Decorator to validate password policy in forms."""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if request.method == 'POST':
-            password = (request.form.get('password') or
-                        request.form.get('new_password'))
-            username = request.form.get('username')
+        if request.method == "POST":
+            password = request.form.get("password") or request.form.get("new_password")
+            username = request.form.get("username")
 
             if password:
                 try:
                     SecurityUtils.validate_password(password, username)
                 except PasswordPolicyError as e:
                     from flask import flash
-                    flash(str(e), 'danger')
+
+                    flash(str(e), "danger")
                     return f(*args, **kwargs)
 
         return f(*args, **kwargs)
+
     return decorated_function

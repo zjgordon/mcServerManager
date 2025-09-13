@@ -16,31 +16,31 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="form-group">
                             <label for="username">Username:</label>
-                            <input type="text" name="username" id="username" class="form-control" 
+                            <input type="text" name="username" id="username" class="form-control"
                                    value="{{ request.form.username or user.username }}" required minlength="3">
                             <small class="form-text text-muted">Minimum 3 characters</small>
                         </div>
                         <div class="form-group">
                             <label for="email">Email:</label>
-                            <input type="email" name="email" id="email" class="form-control" 
+                            <input type="email" name="email" id="email" class="form-control"
                                    value="{{ request.form.email or user.email or '' }}">
                             <small class="form-text text-muted">Optional</small>
                         </div>
                         <div class="form-group form-check">
-                            <input type="checkbox" name="is_admin" id="is_admin" class="form-check-input" 
+                            <input type="checkbox" name="is_admin" id="is_admin" class="form-check-input"
                                    {% if request.form.get('is_admin') or user.is_admin %}checked{% endif %}>
                             <label for="is_admin" class="form-check-label">Admin privileges</label>
                             <small class="form-text text-muted">Grant this user administrative access</small>
                         </div>
                         <div class="form-group form-check">
-                            <input type="checkbox" name="is_active" id="is_active" class="form-check-input" 
+                            <input type="checkbox" name="is_active" id="is_active" class="form-check-input"
                                    {% if request.form.get('is_active') or user.is_active %}checked{% endif %}>
                             <label for="is_active" class="form-check-label">Active account</label>
                             <small class="form-text text-muted">Allow this user to log in</small>
                         </div>
-                        
+
                         <hr>
-                        
+
                         <h5>User Statistics</h5>
                         <div class="row">
                             <div class="col-md-6">
@@ -52,9 +52,9 @@
                                 <p><strong>Last Login:</strong> {{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</p>
                             </div>
                         </div>
-                        
+
                         <hr>
-                        
+
                         <h5>Reset Password</h5>
                         <div class="form-group">
                             <label for="new_password">New Password:</label>
@@ -65,7 +65,7 @@
                             <label for="confirm_password">Confirm New Password:</label>
                             <input type="password" name="confirm_password" id="confirm_password" class="form-control">
                         </div>
-                        
+
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Update User</button>
                             <a href="{{ url_for('auth.manage_users') }}" class="btn btn-secondary">Cancel</a>

@@ -16,6 +16,7 @@ This is the alpha release of Minecraft Server Manager, featuring a complete serv
 ## 🚀 Features
 
 ### Core Server Management
+
 - **Server Lifecycle**: Create, start, stop, delete, and backup Minecraft servers
 - **Version Selection**: Choose from available Minecraft versions with automatic exclusion filtering
 - **Dynamic Port Allocation**: Automatic port assignment with conflict detection
@@ -23,6 +24,7 @@ This is the alpha release of Minecraft Server Manager, featuring a complete serv
 - **Memory Management**: Configurable memory allocation with system-wide limits and per-server defaults
 
 ### User Management & Security
+
 - **Role-Based Access Control**: Admin and regular user roles with granular permissions
 - **Secure Authentication**: Password hashing, rate limiting, and session management
 - **User Administration**: Comprehensive user management interface for administrators
@@ -30,6 +32,7 @@ This is the alpha release of Minecraft Server Manager, featuring a complete serv
 - **First-Time Setup**: Automatic admin account creation on first launch
 
 ### Process Management & Monitoring
+
 - **Real-time Status Verification**: Accurate server status reporting with process validation
 - **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft processes
 - **Startup Reconciliation**: Ensures database consistency with actual running processes
@@ -37,6 +40,7 @@ This is the alpha release of Minecraft Server Manager, featuring a complete serv
 - **Process Oversight**: Admin interface for process monitoring and management
 
 ### System Administration
+
 - **Memory Configuration**: Admin-configurable system-wide memory limits
 - **System Monitoring**: Real-time memory usage and allocation statistics
 - **Resource Tracking**: Monitor total memory allocation across all servers
@@ -46,11 +50,13 @@ This is the alpha release of Minecraft Server Manager, featuring a complete serv
 ## 🛠️ Installation
 
 ### Prerequisites
+
 - **Python 3.8+** with pip
 - **Java 8+** (for Minecraft servers)
 - **Linux/Unix** system (tested on Ubuntu, CentOS, Debian)
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -68,6 +74,7 @@ python run.py
 ```
 
 ### Environment Configuration
+
 Create a `.env` file or set environment variables:
 
 ```bash
@@ -91,6 +98,7 @@ PASSWORD_MIN_LENGTH=8
 ```
 
 ### First-Time Setup
+
 1. **Launch the application**: `python run.py`
 2. **Create Admin Account**: Set up the initial administrator account
 3. **Configure System Settings**: Set memory limits and system configuration
@@ -99,23 +107,27 @@ PASSWORD_MIN_LENGTH=8
 ## 🎮 Usage
 
 ### Web Interface
+
 - **URL**: `http://localhost:5000` (default)
 - **Authentication**: Login with admin or user credentials
 - **Responsive Design**: Works on desktop and mobile devices
 
 ### Creating Servers
+
 1. **Select Version**: Choose from available Minecraft versions
 2. **Configure Settings**: Set server properties and memory allocation
 3. **Server Setup**: Automatic EULA acceptance and configuration generation
 4. **Launch**: Start the server with one click
 
 ### Managing Servers
+
 - **Start/Stop**: Control server lifecycle
 - **Backup**: Create server backups with compression
 - **Monitor**: Real-time status and resource usage
 - **Configure**: Modify server properties and settings
 
 ### Admin Features
+
 - **User Management**: Create, edit, and delete user accounts
 - **System Configuration**: Set memory limits and monitor resources
 - **Process Management**: Monitor and reconcile server processes
@@ -124,6 +136,7 @@ PASSWORD_MIN_LENGTH=8
 ## 🔧 Maintenance
 
 ### Process Management
+
 The application automatically manages server processes and provides tools for oversight:
 
 ```bash
@@ -138,16 +151,19 @@ curl -X POST \
 ```
 
 ### Logs and Monitoring
+
 - **Application Logs**: `app.log` - General application logging
 - **Status Check Logs**: `logs/status_check.log` - Automated status check results
 - **Process Monitoring**: Admin interface for real-time process oversight
 
 ### Database Management
+
 - **Automatic Setup**: Database tables created on first run
 - **SQLite Default**: Uses SQLite for simplicity (can be changed to PostgreSQL/MySQL)
 - **Backup**: Regular database backups recommended
 
 ### Updates and Maintenance
+
 ```bash
 # Update dependencies
 pip install -r requirements.txt --upgrade
@@ -178,6 +194,7 @@ pip install -r requirements.txt --upgrade
 - **Testing**: pytest, pytest-flask
 
 ### Directory Structure
+
 ```
 mcServerManager/
 ├── app/                    # Main application package
@@ -195,6 +212,7 @@ mcServerManager/
 ```
 
 ### Key Components
+
 - **Server Management**: Handles Minecraft server lifecycle
 - **User Management**: Authentication and authorization system
 - **Process Management**: Real-time process monitoring and reconciliation

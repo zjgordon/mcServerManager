@@ -106,13 +106,13 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    
+
     <!-- Custom JavaScript for UX improvements -->
     <script>
         // Global functions for Phase 3 features
         let currentConsoleServerId = null;
         let consoleRefreshInterval = null;
-        
+
         // Enhanced delete confirmation system
         window.confirmDeleteServer = function(serverId, serverName, isOwner, ownerName) {
             if (isOwner) {
@@ -123,7 +123,7 @@
                 return confirmDeleteOtherUserServer(serverName, ownerName);
             }
         };
-        
+
         function confirmDeleteOwnServer(serverName) {
             const message = `⚠️ DELETE SERVER CONFIRMATION ⚠️\n\n` +
                           `You are about to permanently delete your server:\n` +
@@ -134,11 +134,11 @@
                           `• Cannot be undone\n\n` +
                           `Are you absolutely sure you want to proceed?\n\n` +
                           `Type "DELETE" to confirm:`;
-            
+
             const userInput = prompt(message);
             return userInput === "DELETE";
         }
-        
+
         function confirmDeleteOtherUserServer(serverName, ownerName) {
             // First confirmation
             const firstMessage = `🚨 ADMIN DELETE WARNING 🚨\n\n` +
@@ -147,12 +147,12 @@
                                `Owner: ${ownerName}\n\n` +
                                `This is a serious administrative action that will permanently delete all data.\n\n` +
                                `Type "I UNDERSTAND" to proceed to final confirmation:`;
-            
+
             const firstInput = prompt(firstMessage);
             if (firstInput !== "I UNDERSTAND") {
                 return false;
             }
-            
+
             // Second confirmation
             const secondMessage = `🚨 FINAL ADMIN CONFIRMATION 🚨\n\n` +
                                 `You are about to PERMANENTLY DELETE:\n` +
@@ -165,11 +165,11 @@
                                 `• The owner will lose all their data\n\n` +
                                 `This is your final chance to cancel.\n\n` +
                                 `Type "DELETE USER SERVER" to confirm:`;
-            
+
             const secondInput = prompt(secondMessage);
             return secondInput === "DELETE USER SERVER";
         }
-        
+
         // Make functions globally accessible
         window.showConsole = function(serverId, serverName) {
             console.log('showConsole called with:', serverId, serverName);
@@ -178,7 +178,7 @@
             const title = document.getElementById('consoleModalTitle');
             console.log('Modal element:', modal);
             console.log('Title element:', title);
-            
+
             if (title) {
                 title.innerHTML = `<i class="fas fa-terminal"></i> Console - ${serverName}`;
             }
@@ -191,12 +191,12 @@
             loadConsoleLogs();
             startConsoleAutoRefresh();
         };
-        
+
         window.showAnalytics = function() {
             console.log('showAnalytics called');
             const modal = document.getElementById('analyticsModal');
             console.log('Analytics modal element:', modal);
-            
+
             if (modal) {
                 modal.classList.add('active');
                 console.log('Analytics modal should be visible now');
@@ -207,22 +207,22 @@
                 console.error('Analytics modal not found!');
             }
         };
-        
+
         window.closeModal = function(modalId) {
             document.getElementById(modalId).classList.remove('active');
             if (modalId === 'consoleModal') {
                 stopConsoleAutoRefresh();
             }
         };
-        
+
         window.refreshConsole = function() {
             loadConsoleLogs();
         };
-        
+
         window.clearConsole = function() {
             document.getElementById('consoleOutput').innerHTML = '';
         };
-        
+
         window.downloadLogs = function() {
             const logs = document.getElementById('consoleOutput').textContent;
             const blob = new Blob([logs], { type: 'text/plain' });
@@ -233,11 +233,11 @@
             a.click();
             URL.revokeObjectURL(url);
         };
-        
+
         // Server sharing functionality
         window.copyServerLink = function(hostname, port, serverName) {
             const serverLink = `${hostname}:${port}`;
-            
+
             // Try to copy to clipboard using modern API
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(serverLink).then(() => {
@@ -251,7 +251,7 @@
                 fallbackCopyToClipboard(serverLink, serverName);
             }
         };
-        
+
         function fallbackCopyToClipboard(text, serverName) {
             // Create a temporary textarea element
             const textArea = document.createElement('textarea');
@@ -262,7 +262,7 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
+
             try {
                 const successful = document.execCommand('copy');
                 if (successful) {
@@ -274,10 +274,10 @@
                 console.error('Fallback copy failed:', err);
                 showCopyError(serverName);
             }
-            
+
             document.body.removeChild(textArea);
         }
-        
+
         function showCopySuccess(serverName, serverLink) {
             // Create a temporary success message
             const successDiv = document.createElement('div');
@@ -292,9 +292,9 @@
                     </button>
                 </div>
             `;
-            
+
             document.body.appendChild(successDiv);
-            
+
             // Auto-remove after 4 seconds
             setTimeout(() => {
                 if (successDiv.parentNode) {
@@ -302,7 +302,7 @@
                 }
             }, 4000);
         }
-        
+
         function showCopyError(serverName) {
             // Create a temporary error message
             const errorDiv = document.createElement('div');
@@ -317,9 +317,9 @@
                     </button>
                 </div>
             `;
-            
+
             document.body.appendChild(errorDiv);
-            
+
             // Auto-remove after 5 seconds
             setTimeout(() => {
                 if (errorDiv.parentNode) {
@@ -334,31 +334,31 @@
             const bulkBar = document.getElementById('bulkOperationsBar');
             const bulkCount = document.getElementById('bulkCount');
             const selectAllCheckbox = document.getElementById('selectAll');
-            
+
             if (checkedBoxes.length > 0) {
                 bulkBar.classList.add('active');
                 bulkCount.textContent = `${checkedBoxes.length} server${checkedBoxes.length !== 1 ? 's' : ''} selected`;
             } else {
                 bulkBar.classList.remove('active');
             }
-            
+
             if (selectAllCheckbox) {
                 selectAllCheckbox.checked = checkedBoxes.length === checkboxes.length;
                 selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
             }
         };
-        
+
         window.toggleAllSelection = function() {
             const selectAllCheckbox = document.getElementById('selectAll');
             const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
-            
+
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
             });
-            
+
             updateBulkSelection();
         };
-        
+
         window.clearSelection = function() {
             const checkboxes = document.querySelectorAll('.server-checkbox');
             checkboxes.forEach(checkbox => {
@@ -366,57 +366,57 @@
             });
             updateBulkSelection();
         };
-        
+
         window.bulkStart = function() {
             const selectedIds = getSelectedServerIds();
             if (selectedIds.length === 0) return;
-            
+
             if (confirm(`Start ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
                 performBulkOperation('start', selectedIds);
             }
         };
-        
+
         window.bulkStop = function() {
             const selectedIds = getSelectedServerIds();
             if (selectedIds.length === 0) return;
-            
+
             if (confirm(`Stop ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
                 performBulkOperation('stop', selectedIds);
             }
         };
-        
+
         window.bulkBackup = function() {
             const selectedIds = getSelectedServerIds();
             if (selectedIds.length === 0) return;
-            
+
             if (confirm(`Backup ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
                 performBulkOperation('backup', selectedIds);
             }
         };
-        
+
         window.bulkDelete = function() {
             const selectedIds = getSelectedServerIds();
             if (selectedIds.length === 0) return;
-            
+
             if (confirm(`⚠️ Delete ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?\n\nThis action cannot be undone and will permanently delete all server files, including world data, configurations, and backups.`)) {
                 performBulkOperation('delete', selectedIds);
             }
         };
-        
+
         // Helper functions
         function getSelectedServerIds() {
             const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');
             return Array.from(checkboxes).map(cb => cb.dataset.serverId);
         }
-        
+
         function performBulkOperation(operation, serverIds) {
             console.log(`Performing bulk ${operation} on servers:`, serverIds);
-            
+
             serverIds.forEach(id => {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/server/${operation}/${id}`;
-                
+
                 const csrfToken = document.querySelector('input[name="csrf_token"]');
                 if (csrfToken) {
                     const csrfInput = document.createElement('input');
@@ -425,12 +425,12 @@
                     csrfInput.value = csrfToken.value;
                     form.appendChild(csrfInput);
                 }
-                
+
                 document.body.appendChild(form);
                 form.submit();
             });
         }
-        
+
         function loadConsoleLogs() {
             const consoleOutput = document.getElementById('consoleOutput');
             const sampleLogs = [
@@ -442,7 +442,7 @@
                 { timestamp: '12:35:01', level: 'info', message: 'Server started' },
                 { timestamp: '12:35:02', level: 'info', message: 'Done (3.456s)! For help, type "help"' }
             ];
-            
+
             consoleOutput.innerHTML = '';
             sampleLogs.forEach(log => {
                 const line = document.createElement('div');
@@ -454,16 +454,16 @@
                 `;
                 consoleOutput.appendChild(line);
             });
-            
+
             consoleOutput.scrollTop = consoleOutput.scrollHeight;
         }
-        
+
         function startConsoleAutoRefresh() {
             if (consoleRefreshInterval) clearInterval(consoleRefreshInterval);
             consoleRefreshInterval = setInterval(loadConsoleLogs, 5000);
             document.getElementById('consoleAutoRefresh').textContent = 'ON';
         }
-        
+
         function stopConsoleAutoRefresh() {
             if (consoleRefreshInterval) {
                 clearInterval(consoleRefreshInterval);
@@ -471,11 +471,11 @@
             }
             document.getElementById('consoleAutoRefresh').textContent = 'OFF';
         }
-        
+
         function drawAnalyticsCharts() {
             const statusCanvas = document.getElementById('statusChart');
             const memoryCanvas = document.getElementById('memoryChart');
-            
+
             if (statusCanvas) {
                 const ctx = statusCanvas.getContext('2d');
                 ctx.clearRect(0, 0, statusCanvas.width, statusCanvas.height);
@@ -485,7 +485,7 @@
                 ctx.fillText('Status Chart', statusCanvas.width/2, statusCanvas.height/2);
                 ctx.fillText('(Chart.js integration needed)', statusCanvas.width/2, statusCanvas.height/2 + 20);
             }
-            
+
             if (memoryCanvas) {
                 const ctx = memoryCanvas.getContext('2d');
                 ctx.clearRect(0, 0, memoryCanvas.width, memoryCanvas.height);
@@ -508,7 +508,7 @@
                         submitBtn.classList.add('btn-loading');
                         const originalText = submitBtn.innerHTML;
                         submitBtn.innerHTML = '<span class="btn-text">' + originalText + '</span>';
-                        
+
                         // Re-enable button after 5 seconds as fallback
                         setTimeout(() => {
                             submitBtn.classList.remove('btn-loading');
@@ -517,7 +517,7 @@
                     }
                 });
             });
-            
+
             // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 // Ctrl+N or Cmd+N for new server
@@ -528,7 +528,7 @@
                         createBtn.click();
                     }
                 }
-                
+
                 // Escape to close modals/alerts
                 if (e.key === 'Escape') {
                     const alerts = document.querySelectorAll('.alert');
@@ -540,7 +540,7 @@
                     });
                 }
             });
-            
+
             // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
@@ -551,21 +551,21 @@
                     }
                 }, 5000);
             });
-            
+
             // Add fade-in animation to main content
             const mainContent = document.querySelector('.container');
             if (mainContent) {
                 mainContent.classList.add('fade-in');
             }
         });
-        
+
         // Enhanced confirmation dialogs
         function confirmAction(message, callback) {
             if (confirm(message)) {
                 callback();
             }
         }
-        
+
         // Tooltip initialization
         function initTooltips() {
             const tooltips = document.querySelectorAll('[data-tooltip]');
@@ -573,25 +573,25 @@
                 element.classList.add('tooltip-custom');
             });
         }
-        
+
         // Initialize tooltips when DOM is ready
         document.addEventListener('DOMContentLoaded', initTooltips);
-        
+
         // Phase 2 UX Improvements
         document.addEventListener('DOMContentLoaded', function() {
             // View Toggle Functionality
             const viewToggleBtns = document.querySelectorAll('.view-toggle-btn');
             const tableView = document.getElementById('tableView');
             const cardView = document.getElementById('cardView');
-            
+
             viewToggleBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const view = this.dataset.view;
-                    
+
                     // Update active button
                     viewToggleBtns.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // Toggle views
                     if (view === 'table') {
                         tableView.classList.remove('hidden');
@@ -604,41 +604,41 @@
                     }
                 });
             });
-            
+
             // Restore preferred view
             const preferredView = localStorage.getItem('preferredView') || 'table';
             const preferredBtn = document.querySelector(`[data-view="${preferredView}"]`);
             if (preferredBtn) {
                 preferredBtn.click();
             }
-            
+
             // Search and Filter Functionality
             const searchInput = document.getElementById('serverSearch');
             const statusFilter = document.getElementById('statusFilter');
             const versionFilter = document.getElementById('versionFilter');
             const clearFiltersBtn = document.getElementById('clearFilters');
-            
+
             function filterServers() {
                 const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
                 const statusValue = statusFilter ? statusFilter.value : '';
                 const versionValue = versionFilter ? versionFilter.value : '';
-                
+
                 const serverRows = document.querySelectorAll('.server-row, .server-card');
-                
+
                 serverRows.forEach(row => {
                     const serverName = row.dataset.serverName.toLowerCase();
                     const serverVersion = row.dataset.serverVersion;
                     const serverStatus = row.dataset.serverStatus;
                     const serverPort = row.dataset.serverPort;
-                    
-                    const matchesSearch = !searchTerm || 
-                        serverName.includes(searchTerm) || 
-                        serverVersion.includes(searchTerm) || 
+
+                    const matchesSearch = !searchTerm ||
+                        serverName.includes(searchTerm) ||
+                        serverVersion.includes(searchTerm) ||
                         serverPort.includes(searchTerm);
-                    
+
                     const matchesStatus = !statusValue || serverStatus === statusValue;
                     const matchesVersion = !versionValue || serverVersion === versionValue;
-                    
+
                     if (matchesSearch && matchesStatus && matchesVersion) {
                         row.style.display = '';
                         row.classList.add('fade-in');
@@ -646,12 +646,12 @@
                         row.style.display = 'none';
                     }
                 });
-                
+
                 // Update results count
                 const visibleCount = document.querySelectorAll('.server-row:not([style*="display: none"]), .server-card:not([style*="display: none"])').length;
                 updateResultsCount(visibleCount);
             }
-            
+
             function updateResultsCount(count) {
                 let countElement = document.getElementById('resultsCount');
                 if (!countElement) {
@@ -665,14 +665,14 @@
                 }
                 countElement.textContent = `Showing ${count} server${count !== 1 ? 's' : ''}`;
             }
-            
+
             function clearFilters() {
                 if (searchInput) searchInput.value = '';
                 if (statusFilter) statusFilter.value = '';
                 if (versionFilter) versionFilter.value = '';
                 filterServers();
             }
-            
+
             // Event listeners
             if (searchInput) {
                 searchInput.addEventListener('input', filterServers);
@@ -686,20 +686,20 @@
             if (clearFiltersBtn) {
                 clearFiltersBtn.addEventListener('click', clearFilters);
             }
-            
+
             // Real-time Status Updates
             let updateInterval;
             const updateIndicator = document.getElementById('updateIndicator');
-            
+
             function startAutoRefresh() {
                 if (updateInterval) clearInterval(updateInterval);
-                
+
                 updateInterval = setInterval(() => {
                     if (updateIndicator) {
                         updateIndicator.classList.add('updating');
                         updateIndicator.querySelector('span').textContent = 'Updating...';
                     }
-                    
+
                     // Simulate status update (in real implementation, this would be an AJAX call)
                     setTimeout(() => {
                         if (updateIndicator) {
@@ -709,7 +709,7 @@
                     }, 1000);
                 }, 30000); // Update every 30 seconds
             }
-            
+
             function stopAutoRefresh() {
                 if (updateInterval) {
                     clearInterval(updateInterval);
@@ -719,7 +719,7 @@
                     updateIndicator.querySelector('span').textContent = 'Auto-refresh: OFF';
                 }
             }
-            
+
             // Toggle auto-refresh on indicator click
             if (updateIndicator) {
                 updateIndicator.addEventListener('click', function() {
@@ -730,10 +730,10 @@
                     }
                 });
             }
-            
+
             // Start auto-refresh by default
             startAutoRefresh();
-            
+
             // Enhanced Form Validation
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
@@ -742,7 +742,7 @@
                     input.addEventListener('blur', function() {
                         validateField(this);
                     });
-                    
+
                     input.addEventListener('input', function() {
                         if (this.classList.contains('is-invalid')) {
                             validateField(this);
@@ -750,18 +750,18 @@
                     });
                 });
             });
-            
+
             function validateField(field) {
                 const value = field.value.trim();
                 let isValid = true;
                 let errorMessage = '';
-                
+
                 // Required field validation
                 if (field.hasAttribute('required') && !value) {
                     isValid = false;
                     errorMessage = 'This field is required';
                 }
-                
+
                 // Pattern validation
                 if (isValid && field.hasAttribute('pattern')) {
                     const pattern = new RegExp(field.getAttribute('pattern'));
@@ -770,7 +770,7 @@
                         errorMessage = field.getAttribute('title') || 'Invalid format';
                     }
                 }
-                
+
                 // Min length validation
                 if (isValid && field.hasAttribute('minlength')) {
                     const minLength = parseInt(field.getAttribute('minlength'));
@@ -779,7 +779,7 @@
                         errorMessage = `Minimum length is ${minLength} characters`;
                     }
                 }
-                
+
                 // Update field appearance
                 if (isValid) {
                     field.classList.remove('is-invalid');
@@ -790,10 +790,10 @@
                     field.classList.add('is-invalid');
                     showFieldError(field, errorMessage);
                 }
-                
+
                 return isValid;
             }
-            
+
             function showFieldError(field, message) {
                 removeFieldError(field);
                 const errorDiv = document.createElement('div');
@@ -801,14 +801,14 @@
                 errorDiv.textContent = message;
                 field.parentNode.appendChild(errorDiv);
             }
-            
+
             function removeFieldError(field) {
                 const existingError = field.parentNode.querySelector('.invalid-feedback');
                 if (existingError) {
                     existingError.remove();
                 }
             }
-            
+
             // Phase 3: Advanced Features
             // Bulk Operations
             function updateBulkSelection() {
@@ -817,32 +817,32 @@
                 const bulkBar = document.getElementById('bulkOperationsBar');
                 const bulkCount = document.getElementById('bulkCount');
                 const selectAllCheckbox = document.getElementById('selectAll');
-                
+
                 if (checkedBoxes.length > 0) {
                     bulkBar.classList.add('active');
                     bulkCount.textContent = `${checkedBoxes.length} server${checkedBoxes.length !== 1 ? 's' : ''} selected`;
                 } else {
                     bulkBar.classList.remove('active');
                 }
-                
+
                 // Update select all checkbox
                 if (selectAllCheckbox) {
                     selectAllCheckbox.checked = checkedBoxes.length === checkboxes.length;
                     selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
                 }
             }
-            
+
             function toggleAllSelection() {
                 const selectAllCheckbox = document.getElementById('selectAll');
                 const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll)');
-                
+
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = selectAllCheckbox.checked;
                 });
-                
+
                 updateBulkSelection();
             }
-            
+
             function clearSelection() {
                 const checkboxes = document.querySelectorAll('.server-checkbox');
                 checkboxes.forEach(checkbox => {
@@ -850,59 +850,59 @@
                 });
                 updateBulkSelection();
             }
-            
+
             // Bulk operations
             function bulkStart() {
                 const selectedIds = getSelectedServerIds();
                 if (selectedIds.length === 0) return;
-                
+
                 if (confirm(`Start ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
                     performBulkOperation('start', selectedIds);
                 }
             }
-            
+
             function bulkStop() {
                 const selectedIds = getSelectedServerIds();
                 if (selectedIds.length === 0) return;
-                
+
                 if (confirm(`Stop ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
                     performBulkOperation('stop', selectedIds);
                 }
             }
-            
+
             function bulkBackup() {
                 const selectedIds = getSelectedServerIds();
                 if (selectedIds.length === 0) return;
-                
+
                 if (confirm(`Backup ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?`)) {
                     performBulkOperation('backup', selectedIds);
                 }
             }
-            
+
             function bulkDelete() {
                 const selectedIds = getSelectedServerIds();
                 if (selectedIds.length === 0) return;
-                
+
                 if (confirm(`⚠️ Delete ${selectedIds.length} server${selectedIds.length !== 1 ? 's' : ''}?\n\nThis action cannot be undone and will permanently delete all server files, including world data, configurations, and backups.`)) {
                     performBulkOperation('delete', selectedIds);
                 }
             }
-            
+
             function getSelectedServerIds() {
                 const checkboxes = document.querySelectorAll('.server-checkbox:not(#selectAll):checked');
                 return Array.from(checkboxes).map(cb => cb.dataset.serverId);
             }
-            
+
             function performBulkOperation(operation, serverIds) {
                 // In a real implementation, this would make AJAX calls to the server
                 console.log(`Performing bulk ${operation} on servers:`, serverIds);
-                
+
                 // Simulate operation
                 serverIds.forEach(id => {
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = `/server/${operation}/${id}`;
-                    
+
                     const csrfToken = document.querySelector('input[name="csrf_token"]');
                     if (csrfToken) {
                         const csrfInput = document.createElement('input');
@@ -911,16 +911,16 @@
                         csrfInput.value = csrfToken.value;
                         form.appendChild(csrfInput);
                     }
-                    
+
                     document.body.appendChild(form);
                     form.submit();
                 });
             }
-            
+
             // Console functionality
             let currentConsoleServerId = null;
             let consoleRefreshInterval = null;
-            
+
             function showConsole(serverId, serverName) {
                 currentConsoleServerId = serverId;
                 document.getElementById('consoleModalTitle').innerHTML = `<i class="fas fa-terminal"></i> Console - ${serverName}`;
@@ -928,14 +928,14 @@
                 loadConsoleLogs();
                 startConsoleAutoRefresh();
             }
-            
+
             function closeModal(modalId) {
                 document.getElementById(modalId).classList.remove('active');
                 if (modalId === 'consoleModal') {
                     stopConsoleAutoRefresh();
                 }
             }
-            
+
             function loadConsoleLogs() {
                 const consoleOutput = document.getElementById('consoleOutput');
                 // In a real implementation, this would fetch actual server logs
@@ -948,7 +948,7 @@
                     { timestamp: '12:35:01', level: 'info', message: 'Server started' },
                     { timestamp: '12:35:02', level: 'info', message: 'Done (3.456s)! For help, type "help"' }
                 ];
-                
+
                 consoleOutput.innerHTML = '';
                 sampleLogs.forEach(log => {
                     const line = document.createElement('div');
@@ -960,18 +960,18 @@
                     `;
                     consoleOutput.appendChild(line);
                 });
-                
+
                 consoleOutput.scrollTop = consoleOutput.scrollHeight;
             }
-            
+
             function refreshConsole() {
                 loadConsoleLogs();
             }
-            
+
             function clearConsole() {
                 document.getElementById('consoleOutput').innerHTML = '';
             }
-            
+
             function downloadLogs() {
                 // In a real implementation, this would download actual log files
                 const logs = document.getElementById('consoleOutput').textContent;
@@ -983,13 +983,13 @@
                 a.click();
                 URL.revokeObjectURL(url);
             }
-            
+
             function startConsoleAutoRefresh() {
                 if (consoleRefreshInterval) clearInterval(consoleRefreshInterval);
                 consoleRefreshInterval = setInterval(loadConsoleLogs, 5000);
                 document.getElementById('consoleAutoRefresh').textContent = 'ON';
             }
-            
+
             function stopConsoleAutoRefresh() {
                 if (consoleRefreshInterval) {
                     clearInterval(consoleRefreshInterval);
@@ -997,7 +997,7 @@
                 }
                 document.getElementById('consoleAutoRefresh').textContent = 'OFF';
             }
-            
+
             // Analytics functionality
             function showAnalytics() {
                 document.getElementById('analyticsModal').classList.add('active');
@@ -1006,12 +1006,12 @@
                     drawAnalyticsCharts();
                 }, 100);
             }
-            
+
             function drawAnalyticsCharts() {
                 // Simple chart implementation (in real app, use Chart.js or similar)
                 const statusCanvas = document.getElementById('statusChart');
                 const memoryCanvas = document.getElementById('memoryChart');
-                
+
                 if (statusCanvas) {
                     const ctx = statusCanvas.getContext('2d');
                     ctx.clearRect(0, 0, statusCanvas.width, statusCanvas.height);
@@ -1021,7 +1021,7 @@
                     ctx.fillText('Status Chart', statusCanvas.width/2, statusCanvas.height/2);
                     ctx.fillText('(Chart.js integration needed)', statusCanvas.width/2, statusCanvas.height/2 + 20);
                 }
-                
+
                 if (memoryCanvas) {
                     const ctx = memoryCanvas.getContext('2d');
                     ctx.clearRect(0, 0, memoryCanvas.width, memoryCanvas.height);
@@ -1032,7 +1032,7 @@
                     ctx.fillText('(Chart.js integration needed)', memoryCanvas.width/2, memoryCanvas.height/2 + 20);
                 }
             }
-            
+
             // Close modals on escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
@@ -1042,7 +1042,7 @@
                     });
                 }
             });
-            
+
             // Close modals when clicking outside
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal-overlay')) {

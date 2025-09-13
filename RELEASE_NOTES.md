@@ -4,13 +4,14 @@
 **Version:** 0.1.0-alpha  
 **Status:** Alpha Release
 
-## 🎉 Welcome to Minecraft Server Manager v0.1.0-alpha!
+## 🎉 Welcome to Minecraft Server Manager v0.1.0-alpha
 
 This is the first official alpha release of Minecraft Server Manager, a professional web application for creating, managing, and monitoring Minecraft game servers. This release represents a significant milestone in the project's development, evolving from a HarvardX school project into a production-ready server management system.
 
 ## 🚀 What's New
 
 ### Core Features
+
 - **Complete Server Lifecycle Management**: Create, start, stop, delete, and backup Minecraft servers
 - **Dynamic Version Selection**: Choose from available Minecraft versions with automatic exclusion filtering
 - **Smart Port Allocation**: Automatic port assignment with conflict detection
@@ -18,6 +19,7 @@ This is the first official alpha release of Minecraft Server Manager, a professi
 - **Memory Management**: Configurable memory allocation with system-wide limits and per-server defaults
 
 ### User Management & Security
+
 - **Role-Based Access Control**: Admin and regular user roles with granular permissions
 - **Secure Authentication**: Password hashing, rate limiting, and session management
 - **User Administration**: Comprehensive user management interface for administrators
@@ -25,6 +27,7 @@ This is the first official alpha release of Minecraft Server Manager, a professi
 - **First-Time Setup**: Automatic admin account creation on first launch
 
 ### Process Management & Monitoring
+
 - **Real-time Status Verification**: Accurate server status reporting with process validation
 - **Orphaned Process Detection**: Automatic identification of unmanaged Minecraft processes
 - **Startup Reconciliation**: Ensures database consistency with actual running processes
@@ -32,6 +35,7 @@ This is the first official alpha release of Minecraft Server Manager, a professi
 - **Process Oversight**: Admin interface for process monitoring and management
 
 ### System Administration
+
 - **Memory Configuration**: Admin-configurable system-wide memory limits
 - **System Monitoring**: Real-time memory usage and allocation statistics
 - **Resource Tracking**: Monitor total memory allocation across all servers
@@ -69,6 +73,7 @@ This is the first official alpha release of Minecraft Server Manager, a professi
 ## 🔧 Installation
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/mcServerManager.git
@@ -86,6 +91,7 @@ python run.py
 ```
 
 ### Requirements
+
 - Python 3.8+
 - Java 8+ (for Minecraft servers)
 - Linux/Unix system (tested on Ubuntu, CentOS, Debian)
@@ -93,6 +99,7 @@ python run.py
 ## 🧪 Testing
 
 The release includes a comprehensive test suite:
+
 - **Unit Tests**: Individual function and method testing
 - **Integration Tests**: Component interaction testing
 - **Security Tests**: Authentication, authorization, and security feature testing
@@ -100,6 +107,7 @@ The release includes a comprehensive test suite:
 - **Error Handling Tests**: Comprehensive error scenario testing
 
 Run tests with:
+
 ```bash
 pytest
 pytest --cov=app  # With coverage
@@ -116,6 +124,7 @@ pytest --cov=app  # With coverage
 ## 🐛 Known Issues
 
 This is an alpha release and may contain bugs. Known issues include:
+
 - Some advanced features may require additional testing
 - Performance optimization is ongoing
 - Documentation may need updates based on user feedback
@@ -123,6 +132,7 @@ This is an alpha release and may contain bugs. Known issues include:
 ## 🔮 What's Next
 
 ### Planned for v0.2.0
+
 - Docker containerization
 - REST API endpoints
 - WebSocket support for real-time updates
@@ -131,6 +141,7 @@ This is an alpha release and may contain bugs. Known issues include:
 - Multi-server clustering support
 
 ### Planned for v1.0.0
+
 - Production-ready stability
 - Performance optimizations
 - Advanced monitoring and alerting
@@ -143,6 +154,7 @@ This is an alpha release and may contain bugs. Known issues include:
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### How to Contribute
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes

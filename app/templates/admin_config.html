@@ -9,7 +9,7 @@
         </h1>
         <p class="text-muted">Configure system-wide memory allocation settings</p>
     </div>
-    
+
     <div class="row">
         <div class="col-md-8">
             <div class="card card-mc">
@@ -21,15 +21,15 @@
                 <div class="card-body">
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        
+
                         <div class="form-group">
                             <label for="app_title" class="form-label">
                                 <i class="fas fa-heading"></i> Application Title
                             </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="app_title" 
-                                   name="app_title" 
+                            <input type="text"
+                                   class="form-control"
+                                   id="app_title"
+                                   name="app_title"
                                    value="{{ app_title }}"
                                    placeholder="Minecraft Server Manager"
                                    maxlength="100"
@@ -38,15 +38,15 @@
                                 The title displayed in the header and browser tab
                             </small>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="server_hostname" class="form-label">
                                 <i class="fas fa-globe"></i> Server Hostname/DNS
                             </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="server_hostname" 
-                                   name="server_hostname" 
+                            <input type="text"
+                                   class="form-control"
+                                   id="server_hostname"
+                                   name="server_hostname"
                                    value="{{ server_hostname }}"
                                    placeholder="minecraft.server.local"
                                    maxlength="255"
@@ -55,24 +55,24 @@
                                 DNS name or IP address for server sharing links (e.g., minecraft.server.local)
                             </small>
                         </div>
-                        
+
                         <hr class="my-4">
-                        
+
                         <h6 class="pixel-font text-gradient-mc">
                             <i class="fas fa-memory"></i> Memory Configuration
                         </h6>
-                        
+
                         <div class="form-group">
                             <label for="max_total_mb" class="form-label">
                                 <i class="fas fa-server"></i> Total System Memory
                             </label>
                             <div class="input-group">
-                                <input type="number" 
-                                       class="form-control" 
-                                       id="max_total_mb" 
-                                       name="max_total_mb" 
+                                <input type="number"
+                                       class="form-control"
+                                       id="max_total_mb"
+                                       name="max_total_mb"
                                        value="{{ max_total_mb }}"
-                                       min="1024" 
+                                       min="1024"
                                        step="512"
                                        required>
                                 <div class="input-group-append">
@@ -83,18 +83,18 @@
                                 Total memory available for all Minecraft servers across all users
                             </small>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="max_per_server_mb" class="form-label">
                                 <i class="fas fa-cube"></i> Maximum Memory Per Server
                             </label>
                             <div class="input-group">
-                                <input type="number" 
-                                       class="form-control" 
-                                       id="max_per_server_mb" 
-                                       name="max_per_server_mb" 
+                                <input type="number"
+                                       class="form-control"
+                                       id="max_per_server_mb"
+                                       name="max_per_server_mb"
                                        value="{{ max_per_server_mb }}"
-                                       min="512" 
+                                       min="512"
                                        step="256"
                                        required>
                                 <div class="input-group-append">
@@ -105,7 +105,7 @@
                                 Maximum memory that can be allocated to a single server
                             </small>
                         </div>
-                        
+
                         <div class="form-group">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
@@ -117,7 +117,7 @@
                                 <small>Changes will take effect immediately and affect all users.</small>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <button type="submit" class="btn btn-mc btn-mc-primary">
                                 <i class="fas fa-save"></i> Save Configuration
@@ -130,7 +130,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card card-mc">
                 <div class="card-header card-mc-header">
@@ -141,28 +141,28 @@
                 <div class="card-body">
                     <h6><i class="fas fa-heading"></i> Application Title</h6>
                     <p class="small text-muted">
-                        The title displayed in the browser tab and application header. 
+                        The title displayed in the browser tab and application header.
                         This helps identify your server management instance.
                     </p>
-                    
+
                     <h6><i class="fas fa-globe"></i> Server Hostname/DNS</h6>
                     <p class="small text-muted">
-                        The DNS name or IP address used for server sharing links. 
+                        The DNS name or IP address used for server sharing links.
                         Players will use this to connect: <code>hostname:port</code>
                     </p>
-                    
+
                     <h6><i class="fas fa-server"></i> Total System Memory</h6>
                     <p class="small text-muted">
-                        This is the maximum amount of RAM that can be allocated across all Minecraft servers. 
+                        This is the maximum amount of RAM that can be allocated across all Minecraft servers.
                         Make sure this doesn't exceed your server's available RAM.
                     </p>
-                    
+
                     <h6><i class="fas fa-cube"></i> Maximum Per Server</h6>
                     <p class="small text-muted">
-                        This limits how much memory any single server can use. This prevents one user from 
+                        This limits how much memory any single server can use. This prevents one user from
                         consuming all available system memory.
                     </p>
-                    
+
                     <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
                     <ul class="small text-muted">
                         <li>Changes take effect immediately</li>

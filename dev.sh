@@ -48,7 +48,7 @@ check_port() {
 find_available_port() {
     local start_port=$1
     local port=$start_port
-    
+
     while check_port $port; do
         port=$((port + 1))
         if [ $port -gt $((start_port + 100)) ]; then
@@ -56,14 +56,14 @@ find_available_port() {
             exit 1
         fi
     done
-    
+
     echo $port
 }
 
 # Function to setup virtual environment
 setup_venv() {
     print_info "Setting up virtual environment..."
-    
+
     if [ ! -d "$VENV_DIR" ]; then
         print_info "Creating virtual environment in $VENV_DIR..."
         python3 -m venv "$VENV_DIR"
@@ -71,16 +71,16 @@ setup_venv() {
     else
         print_info "Virtual environment already exists"
     fi
-    
+
     # Activate virtual environment
     print_info "Activating virtual environment..."
     source "$VENV_DIR/bin/activate"
     print_success "Virtual environment activated"
-    
+
     # Upgrade pip
     print_info "Upgrading pip..."
     pip install --upgrade pip >/dev/null 2>&1
-    
+
     # Install/update dependencies
     if [ -f "$REQUIREMENTS_FILE" ]; then
         print_info "Installing/updating dependencies from $REQUIREMENTS_FILE..."
@@ -94,13 +94,13 @@ setup_venv() {
 # Function to setup environment variables
 setup_env_vars() {
     print_info "Setting up environment variables..."
-    
+
     # Set default environment variables if not already set
     export FLASK_APP="${FLASK_APP:-run.py}"
     export FLASK_ENV="${FLASK_ENV:-development}"
     export FLASK_DEBUG="${FLASK_DEBUG:-1}"
     export PYTHONPATH="${PYTHONPATH:-$(pwd)}"
-    
+
     # Load .env file if it exists
     if [ -f ".env" ]; then
         print_info "Loading environment variables from .env file..."
@@ -111,10 +111,10 @@ setup_env_vars() {
     else
         print_info "No .env file found, using defaults"
     fi
-    
+
     # Set port-specific environment variable
     export FLASK_RUN_PORT=$FLASK_PORT
-    
+
     print_success "Environment variables configured"
 }
 
@@ -122,9 +122,9 @@ setup_env_vars() {
 handle_port_conflicts() {
     local requested_port=${1:-$DEFAULT_PORT}
     local flask_port=$requested_port
-    
+
     print_info "Checking for port conflicts on port $requested_port..."
-    
+
     if check_port $requested_port; then
         print_warning "Port $requested_port is already in use"
         flask_port=$(find_available_port $requested_port)
@@ -132,7 +132,7 @@ handle_port_conflicts() {
     else
         print_success "Port $requested_port is available"
     fi
-    
+
     export FLASK_PORT=$flask_port
     print_info "Flask will run on port $flask_port"
 }
@@ -162,13 +162,13 @@ show_usage() {
 # Function to run tests
 run_tests() {
     print_info "Running tests..."
-    
+
     # Check if pytest is available
     if ! command -v pytest &> /dev/null; then
         print_error "pytest not found. Installing..."
         pip install pytest >/dev/null 2>&1
     fi
-    
+
     # Run tests
     if [ -d "tests" ]; then
         pytest tests/ -v
@@ -186,7 +186,7 @@ run_app() {
     print_info "Port: $FLASK_PORT"
     print_info "App: $FLASK_APP"
     echo ""
-    
+
     # Run the Flask application
     python "$FLASK_APP"
 }
@@ -196,7 +196,7 @@ main() {
     local port=$DEFAULT_PORT
     local mode="run"
     local command="run"
-    
+
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -229,19 +229,19 @@ main() {
                 ;;
         esac
     done
-    
+
     print_info "Minecraft Server Manager - Development Environment"
     print_info "=================================================="
-    
+
     # Setup virtual environment
     setup_venv
-    
+
     # Handle port conflicts
     handle_port_conflicts $port
-    
+
     # Setup environment variables
     setup_env_vars
-    
+
     # Execute command
     case $command in
         run)

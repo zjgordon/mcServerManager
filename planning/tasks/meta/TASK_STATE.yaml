@@ -1,10 +1,9 @@
-active_card: CARD-007
+active_card: CARD-008
 breadcrumb:
-  step: 'CARD-006 completed - configuration management centralized in config/ directory with environment-specific configs and validation'
-  last_commit: 'feat: [CARD-006] Centralize configuration management in config/ directory'
-  next_action: 'Start at CARD-007 - Next configuration improvement'
+  step: 'CARD-007 completed - pre-commit framework installed and configured with comprehensive hooks for code quality, formatting, and security'
+  last_commit: 'feat: [CARD-007] Install and configure pre-commit framework'
+  next_action: 'Start at CARD-008 - Next code quality improvement'
 queue:
-  - CARD-007
   - CARD-008
   - CARD-009
   - CARD-010

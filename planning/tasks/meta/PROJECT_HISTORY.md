@@ -135,6 +135,7 @@ Fixed password policy test issues and cleaned up security code quality problems.
 Successfully fixed integration test suite to pass all tests by implementing surgical fixes to authentication, memory configuration, and test isolation issues. Fixed password hashing in test fixtures to use proper Werkzeug security functions instead of hardcoded hashes. Updated memory configuration tests to work with actual database configuration instead of environment variables. Fixed memory usage summary calculations to work with the actual implementation. Simplified complex integration tests to focus on core functionality rather than complex server creation workflows, making tests more maintainable and focused on essential functionality. All integration tests now pass successfully, providing reliable test coverage for core application workflows.
 
 **Key Files Modified:**
+
 - `tests/conftest.py` - Fixed password hashing using generate_password_hash
 - `tests/test_memory_management.py` - Fixed environment variable handling and memory summary calculations  
 - `tests/test_integration.py` - Simplified integration tests to focus on core functionality
@@ -151,6 +152,7 @@ Successfully fixed integration test suite to pass all tests by implementing surg
 Successfully fixed memory management test suite with surgical improvements to test reliability and database context management. Fixed SafeDatabaseOperation context manager mocking in server creation tests to ensure proper database commits during test execution. Updated memory validation test assertions to handle redirect behavior correctly. Enhanced test mocking to include time.sleep patches for server startup processes. Core memory management functionality verified working correctly: memory configuration (2/2 tests pass), memory calculations (3/3 tests pass), memory validation (5/5 tests pass), memory display (3/3 tests pass), memory edge cases (4/4 tests pass), and memory allocation storage (1/1 test passes). The surgical approach focused on test infrastructure improvements without changing application memory handling logic.
 
 **Key Files Modified:**
+
 - `tests/test_memory_management.py` - Fixed SafeDatabaseOperation mocking and time.sleep patches
 - `tests/test_user_management.py` - Updated server creation test mocking for consistency
 
@@ -165,6 +167,7 @@ Successfully fixed memory management test suite with surgical improvements to te
 Successfully achieved 100% test suite pass rate (185/185 tests passing) by fixing server creation test mocking issues. The main problems were improper mocking of file existence checks and database context managers in server creation tests. Implemented surgical fixes by updating `os.path.exists` mocking to return `True` specifically for server JAR files, EULA files, and server properties files, and adding `os.path.getsize` mocking to return non-zero file sizes for server JAR verification. Also fixed `SafeDatabaseOperation` context manager mocking to properly return `False` from `__exit__` method to avoid suppressing exceptions. All server creation tests now pass correctly, ensuring complete test coverage for the server creation workflow.
 
 **Key Files Modified:**
+
 - `tests/test_memory_management.py` - Fixed file existence and database mocking in server creation tests
 - `tests/test_user_management.py` - Fixed file existence and database mocking in server ownership tests
 
@@ -179,6 +182,7 @@ Successfully achieved 100% test suite pass rate (185/185 tests passing) by fixin
 Successfully centralized configuration management by creating a comprehensive configuration system in the `config/` directory with environment-specific configurations (development, testing, production). Implemented a configuration factory pattern that automatically selects the appropriate configuration based on `FLASK_ENV` environment variable. Created base configuration class with common settings and validation, plus environment-specific classes with optimized settings for each environment. Added configuration validation methods and environment variable loading. Updated application imports to use the new centralized configuration system. Created comprehensive configuration documentation explaining the new structure, environment variables, and usage patterns. All 185 tests continue to pass, ensuring the configuration migration maintains full backward compatibility while providing enhanced organization and environment-specific optimizations.
 
 **Key Files Created:**
+
 - `config/__init__.py` - Configuration factory with automatic environment selection
 - `config/base.py` - Base configuration class with validation and common settings
 - `config/development.py` - Development-specific settings with relaxed security
@@ -187,7 +191,28 @@ Successfully centralized configuration management by creating a comprehensive co
 - `docs/configuration.md` - Comprehensive configuration documentation
 
 **Key Files Modified:**
+
 - `app/__init__.py` - Updated to use new configuration factory
 - `tests/test_memory_management.py` - Updated import to use new configuration system
 
 **Impact:** Configuration management is now centralized and environment-aware, providing better organization, validation, and environment-specific optimizations while maintaining full backward compatibility and test coverage.
+
+## 2025-01-09 - CARD-007: Install and configure pre-commit framework
+
+**Epic:** Epic 2 – Pre-commit Hooks and Code Quality  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully installed and configured comprehensive pre-commit framework with hooks for Python, JavaScript/TypeScript, Shell scripts, and general code quality. Created `.pre-commit-config.yaml` with black, isort, flake8, mypy for Python code formatting and linting, prettier and eslint for frontend code, shellcheck and shfmt for shell script validation, and general hooks for trailing whitespace, end-of-file fixing, and merge conflict detection. Added security hooks including semgrep for advanced security scanning. Created comprehensive documentation in `docs/pre-commit-setup.md` explaining installation, configuration, usage, and troubleshooting. Pre-commit hooks are now active and automatically format code, fix common issues, and enforce code quality standards on every commit.
+
+**Key Files Created:**
+- `.pre-commit-config.yaml` - Main pre-commit configuration with comprehensive hooks
+- `.pre-commit-hooks.yaml` - Additional hook configuration details
+- `docs/pre-commit-setup.md` - Comprehensive pre-commit documentation
+- `.secrets.baseline` - Secrets detection baseline file
+
+**Key Files Modified:**
+- `app/config.py` - Fixed long line formatting for CSP header
+- Multiple files - Automatically formatted by pre-commit hooks
+
+**Impact:** Pre-commit framework is now fully operational, providing automated code quality checks, formatting, and security scanning on every commit. This ensures consistent code style, catches issues early, and maintains high code quality standards across the entire project.

@@ -706,11 +706,11 @@ body {
     .btn {
         margin-bottom: 0.5rem;
     }
-    
+
     .table-responsive {
         border-radius: 0.5rem;
     }
-    
+
     .server-card {
         margin-bottom: 1rem;
     }
@@ -831,20 +831,20 @@ body {
     .server-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .server-info-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .filter-group {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .filter-select {
         min-width: auto;
     }
-    
+
     .search-filter-bar {
         padding: 1rem;
     }
@@ -1236,17 +1236,17 @@ body {
         border-color: #4a5568;
         color: #e2e8f0;
     }
-    
+
     .table {
         color: #e2e8f0;
     }
-    
+
     .table th {
         background-color: #4a5568;
         border-color: #718096;
         color: #e2e8f0;
     }
-    
+
     .table td {
         color: #e2e8f0;
     }
@@ -1440,12 +1440,12 @@ body {
         padding: 1rem;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-    
+
     .nav-link-mc {
         margin: 0.25rem 0;
         border-radius: 6px;
     }
-    
+
     .user-info {
         margin: 0.5rem 0;
         text-align: center;
@@ -1516,19 +1516,19 @@ body {
     .compact-search-filter .row {
         flex-direction: column;
     }
-    
+
     .compact-search-filter .col-md-4 {
         margin-bottom: 8px;
     }
-    
+
     .search-input-wrapper {
         max-width: none;
     }
-    
+
     .filter-select {
         width: 100%;
     }
-    
+
     #resultsCounter {
         margin-left: 0;
         text-align: center;
@@ -1545,8 +1545,8 @@ body {
 }
 
 .modern-server-card {
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.9) 0%, 
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.9) 0%,
         rgba(248, 249, 250, 0.8) 25%,
         rgba(232, 245, 232, 0.6) 50%,
         rgba(241, 248, 233, 0.7) 75%,
@@ -1554,7 +1554,7 @@ body {
     border: 1px solid rgba(76, 175, 80, 0.2);
     border-radius: 16px;
     padding: 24px;
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(76, 175, 80, 0.1),
         0 4px 16px rgba(0, 0, 0, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -1577,13 +1577,13 @@ body {
 
 .modern-server-card:hover {
     transform: translateY(-6px);
-    box-shadow: 
+    box-shadow:
         0 16px 48px rgba(76, 175, 80, 0.2),
         0 8px 24px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.9);
     border-color: rgba(76, 175, 80, 0.4);
-    background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.95) 0%, 
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.95) 0%,
         rgba(248, 249, 250, 0.9) 25%,
         rgba(232, 245, 232, 0.8) 50%,
         rgba(241, 248, 233, 0.85) 75%,
@@ -1862,21 +1862,21 @@ body {
         gap: 16px;
         padding: 16px 0;
     }
-    
+
     .modern-server-card {
         padding: 20px;
     }
-    
+
     .card-header-modern {
         flex-direction: column;
         gap: 16px;
         align-items: stretch;
     }
-    
+
     .status-indicator-modern {
         align-self: flex-start;
     }
-    
+
     .control-panel {
         position: static;
         margin-top: 16px;
@@ -1884,16 +1884,16 @@ body {
         background: rgba(255, 255, 255, 0.9);
         flex-wrap: wrap;
     }
-    
+
     .status-indicator-small {
         margin-right: 8px;
         margin-bottom: 4px;
     }
-    
+
     .server-meta {
         justify-content: center;
     }
-    
+
     .server-info-tags {
         justify-content: center;
     }
@@ -1903,11 +1903,11 @@ body {
     .modern-server-card {
         padding: 16px;
     }
-    
+
     .server-name-modern {
         font-size: 1.2rem;
     }
-    
+
     .control-btn {
         width: 28px;
         height: 28px;
