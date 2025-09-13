@@ -1,0 +1,29 @@
+id: CARD-002
+title: Create .env.example template with all required variables
+epic: Epic 1 – Repository Organization and Environment Setup
+sprint: 09-2025_SPRINT_1
+status: completed
+owner: cursor
+links: []
+acceptance:
+  - All environment variables from app/config.py documented
+  - Sensitive values replaced with placeholder examples
+  - Comments explain purpose of each variable
+  - Database, security, and external service variables included
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-002]
+artifacts:
+  - .env.example
+  - docs/environment-setup.md
+notes: |
+  The .env.example should include:
+  - SECRET_KEY with example value
+  - DATABASE_URL with SQLite example
+  - FLASK_ENV, FLASK_DEBUG settings
+  - API keys for external services (with placeholder values)
+  - Server configuration variables (host, port, etc.)
+  - Security-related variables (CSRF, rate limiting)
+  - Minecraft server specific variables
+  - Clear comments explaining each variable's purpose
+  - Instructions for copying to .env file

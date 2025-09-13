@@ -1,10 +1,9 @@
-active_card: CARD-002
+active_card: CARD-003
 breadcrumb:
-  step: 'CARD-001 completed - dev.sh development environment management script created'
-  last_commit: 'feat: [CARD-001] Add dev.sh development environment management script'
-  next_action: 'Start at CARD-002'
+  step: 'CARD-002 completed - .env.example template created with all environment variables documented'
+  last_commit: 'feat: [CARD-002] Add .env.example template with all required environment variables'
+  next_action: 'Start at CARD-003'
 queue:
-  - CARD-002
   - CARD-003
   - CARD-004
   - CARD-005
