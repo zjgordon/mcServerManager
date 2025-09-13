@@ -1,0 +1,38 @@
+id: CARD-037
+title: Implement backup monitoring and failure alerting
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Alerting integration working properly
+  - Backup-specific alert rules created
+  - Failure detection and notification functional
+  - Metrics tracking implemented
+  - Health dashboard created
+  - Alert testing and validation complete
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-037]
+artifacts:
+  - app/backup_scheduler.py (monitoring)
+  - app/alerts.py (backup alerts)
+  - app/monitoring.py (backup metrics)
+notes: |
+  Implement comprehensive monitoring and alerting for backup operations, failures, and system health.
+  
+  Alert Types:
+  - Backup failure alerts
+  - Backup corruption alerts
+  - Disk space warnings
+  - Schedule execution failures
+  - Backup verification failures
+  
+  Monitoring Metrics:
+  - Backup success/failure rates
+  - Backup duration and size trends
+  - Disk space usage patterns
+  - Schedule execution frequency
+  - Verification failure rates

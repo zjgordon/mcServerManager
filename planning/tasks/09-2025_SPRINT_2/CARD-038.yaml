@@ -1,0 +1,39 @@
+id: CARD-038
+title: Implement backup restore and recovery system
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Restore API endpoints implemented
+  - Server selection and validation working
+  - Progress tracking functional
+  - Preview and confirmation system working
+  - Rollback capabilities implemented
+  - Restore verification working
+  - Comprehensive error handling
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-038]
+artifacts:
+  - app/routes/api/backup_routes.py (restore endpoints)
+  - app/backup_scheduler.py (restore logic)
+  - app/templates/backup_management.html (restore UI)
+notes: |
+  Implement comprehensive backup restore functionality with server selection, validation, and recovery options.
+  
+  Restore Features:
+  - Backup selection and validation
+  - Server selection and compatibility checks
+  - Restore preview and confirmation
+  - Progress tracking and status updates
+  - Rollback on failure
+  - Restore verification and testing
+  
+  API Endpoints:
+  - GET    /api/backups/<server_id>/available    # List available backups
+  - POST   /api/backups/<server_id>/restore      # Trigger restore
+  - GET    /api/restores/<restore_id>/status     # Restore status
+  - POST   /api/restores/<restore_id>/rollback   # Rollback restore

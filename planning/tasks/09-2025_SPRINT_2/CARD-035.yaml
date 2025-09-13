@@ -1,0 +1,30 @@
+id: CARD-035
+title: Implement backup verification and integrity checks
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Multiple verification methods implemented
+  - Corruption detection working properly
+  - Validation reports generated
+  - Automatic repair when possible
+  - Quality scoring system functional
+  - Verification results properly logged
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-035]
+artifacts:
+  - app/backup_scheduler.py (enhanced verification)
+  - app/utils.py (verification utilities)
+notes: |
+  Enhance backup verification with comprehensive integrity checks, corruption detection, and recovery validation.
+  
+  Verification Methods:
+  - MD5/SHA256 checksum verification
+  - File system integrity checks
+  - Minecraft world file validation
+  - Optional restore test verification
+  - Backup completeness validation

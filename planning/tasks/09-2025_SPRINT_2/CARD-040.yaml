@@ -1,0 +1,34 @@
+id: CARD-040
+title: Create comprehensive documentation for backup scheduling system
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - User guide complete and clear
+  - Administrator guide comprehensive
+  - API documentation accurate
+  - Troubleshooting guide helpful
+  - Best practices documented
+  - Examples and screenshots included
+  - Documentation reviewed and tested
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-040]
+artifacts:
+  - docs/backup-scheduling.md (new file)
+  - docs/api/backup-endpoints.md (new file)
+  - README.md (update with backup features)
+notes: |
+  Create comprehensive documentation covering backup system usage, configuration, troubleshooting, and best practices.
+  
+  Documentation Sections:
+  - Getting started with backup scheduling
+  - Configuration options and settings
+  - Backup management and monitoring
+  - Restore procedures and recovery
+  - Troubleshooting common issues
+  - Performance optimization tips
+  - Security considerations

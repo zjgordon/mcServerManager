@@ -1,0 +1,31 @@
+id: CARD-033
+title: Create backup schedule management interface
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Backup management template created
+  - Form validation working properly
+  - Schedule status display functional
+  - Backup history table implemented
+  - Real-time updates working
+  - Mobile-responsive design
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-033]
+artifacts:
+  - app/templates/backup_management.html (new file)
+  - app/static/css/style.css
+  - app/static/js/backup-management.js (new file)
+notes: |
+  Create user interface for managing backup schedules with form validation and real-time status updates.
+  
+  UI Components:
+  - Schedule configuration form (type, time, retention)
+  - Active schedules list with enable/disable controls
+  - Backup history table with status and timestamps
+  - Manual backup trigger button
+  - Schedule status indicators

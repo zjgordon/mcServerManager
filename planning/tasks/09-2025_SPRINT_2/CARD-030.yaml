@@ -1,0 +1,30 @@
+id: CARD-030
+title: Implement backup job execution and verification logic
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Backup execution method implemented
+  - Backup verification using checksums
+  - Compression and metadata tracking working
+  - Error handling and retry logic implemented
+  - Backup status properly logged
+  - Unit tests for backup execution
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-030]
+artifacts:
+  - app/backup_scheduler.py (enhanced with execution logic)
+notes: |
+  Implement the core backup execution logic with verification, compression, and error handling.
+  
+  Key Features:
+  - execute_backup_job(server_id) method
+  - Backup verification using MD5/SHA256 checksums
+  - Compression using gzip or tar.gz
+  - Backup metadata tracking (size, duration, status)
+  - Error handling and retry logic
+  - Backup file naming with timestamps

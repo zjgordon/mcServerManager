@@ -1,0 +1,35 @@
+id: CARD-036
+title: Add backup compression and encryption options
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Multiple compression algorithms implemented
+  - Encryption support working properly
+  - Configuration options functional
+  - Decryption/decompression utilities working
+  - Performance metrics tracked
+  - Security best practices followed
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-036]
+artifacts:
+  - app/backup_scheduler.py (compression/encryption)
+  - requirements.txt (add cryptography)
+notes: |
+  Add configurable compression and encryption options for backup files to optimize storage and security.
+  
+  Compression Options:
+  - gzip (fast, moderate compression)
+  - bzip2 (slower, better compression)
+  - lzma (slowest, best compression)
+  - No compression (fastest, largest files)
+  
+  Encryption Options:
+  - AES-256 encryption
+  - Configurable encryption keys
+  - Optional password-based encryption
+  - Key management and rotation

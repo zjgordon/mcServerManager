@@ -1,0 +1,26 @@
+id: CARD-028
+title: Create database migration for backup_schedules table
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Migration file created in migrations/versions/
+  - Migration includes all required fields and constraints
+  - Foreign key relationship properly defined
+  - Migration can be applied and rolled back successfully
+  - No data loss during migration process
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-028]
+artifacts:
+  - migrations/versions/ (new migration file)
+notes: |
+  Generate and configure database migration for the new backup_schedules table using Flask-Migrate.
+  
+  Use command: flask db migrate -m "Add backup_schedules table"
+  
+  Ensure proper foreign key constraints and indexes are included.
+  Review generated migration file for accuracy and completeness.

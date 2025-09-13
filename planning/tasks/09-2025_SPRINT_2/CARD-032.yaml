@@ -1,0 +1,33 @@
+id: CARD-032
+title: Create backup management API endpoints
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - All API endpoints implemented and tested
+  - Proper authentication and authorization
+  - Input validation and error handling
+  - JSON response formatting
+  - API documentation comments
+  - Integration tests for all endpoints
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-032]
+artifacts:
+  - app/routes/api/backup_routes.py (new file)
+  - app/__init__.py (register blueprint)
+notes: |
+  Create REST API endpoints for managing backup schedules, viewing backup history, and manual backup operations.
+  
+  API Endpoints:
+  - GET    /api/backups/schedules              # List all backup schedules
+  - POST   /api/backups/schedules              # Create new schedule
+  - GET    /api/backups/schedules/<server_id>  # Get schedule for server
+  - PUT    /api/backups/schedules/<server_id>  # Update schedule
+  - DELETE /api/backups/schedules/<server_id>  # Delete schedule
+  - POST   /api/backups/<server_id>/trigger    # Manual backup trigger
+  - GET    /api/backups/<server_id>/history    # Backup history
+  - GET    /api/backups/<server_id>/status     # Backup status

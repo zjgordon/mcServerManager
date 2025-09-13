@@ -1,0 +1,34 @@
+id: CARD-039
+title: Create comprehensive test suite for backup scheduling system
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Unit test coverage > 90%
+  - Integration tests for all API endpoints
+  - End-to-end tests for complete workflows
+  - Performance tests for large operations
+  - Security tests for access control
+  - All tests passing consistently
+  - Test documentation complete
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-039]
+artifacts:
+  - tests/unit/test_backup_scheduler.py (new file)
+  - tests/integration/test_backup_api.py (new file)
+  - tests/e2e/test_backup_workflows.py (new file)
+notes: |
+  Create comprehensive unit, integration, and end-to-end tests for the backup scheduling system.
+  
+  Test Coverage:
+  - Backup scheduler core functionality
+  - API endpoint testing
+  - Database model testing
+  - UI component testing
+  - Backup verification testing
+  - Restore functionality testing
+  - Error handling and edge cases

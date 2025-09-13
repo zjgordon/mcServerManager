@@ -1,0 +1,30 @@
+id: CARD-034
+title: Add backup scheduling to server configuration flow
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Backup scheduling integrated into server creation
+  - Backup options visible in server configuration
+  - Backup schedule status shown in server details
+  - Backup schedule editing functional
+  - Form validation working properly
+  - UI consistent with existing design
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-034]
+artifacts:
+  - app/templates/configure_server.html
+  - app/templates/home.html
+  - app/routes/server_routes.py
+notes: |
+  Integrate backup scheduling options into the existing server configuration interface.
+  
+  Integration Points:
+  - Server creation form (optional backup scheduling)
+  - Server configuration page (backup schedule management)
+  - Server details view (backup schedule status)
+  - Server edit functionality (backup schedule updates)

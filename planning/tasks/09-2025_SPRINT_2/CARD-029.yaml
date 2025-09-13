@@ -1,0 +1,35 @@
+id: CARD-029
+title: Create app/backup_scheduler.py core module
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - APScheduler added to requirements.txt
+  - BackupScheduler class implemented with core methods
+  - Scheduler can be initialized and configured
+  - Basic schedule management methods working
+  - Error handling and logging implemented
+  - Unit tests pass for core functionality
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-029]
+artifacts:
+  - app/backup_scheduler.py (new file)
+  - requirements.txt (APScheduler dependency)
+notes: |
+  Create the core backup scheduler module with APScheduler integration.
+  
+  Key Methods:
+  - __init__(self, app=None)
+  - init_app(self, app)
+  - add_schedule(self, server_id, schedule_config)
+  - remove_schedule(self, server_id)
+  - update_schedule(self, server_id, schedule_config)
+  - start_scheduler(self)
+  - stop_scheduler(self)
+  - get_schedule_status(self, server_id)
+  
+  Include proper error handling and logging for scheduler operations.

@@ -1,0 +1,31 @@
+id: CARD-031
+title: Implement backup retention policy and cleanup logic
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Retention policy enforcement implemented
+  - Disk space monitoring and cleanup working
+  - Safety checks prevent accidental deletion
+  - Backup metadata properly tracked
+  - Cleanup operations logged and auditable
+  - Unit tests for retention logic
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-031]
+artifacts:
+  - app/backup_scheduler.py (enhanced with retention logic)
+notes: |
+  Implement automated backup cleanup based on retention policies and disk space management.
+  
+  Retention Policies:
+  - Keep last N backups (configurable per server)
+  - Delete backups older than X days
+  - Emergency cleanup when disk space is low
+  - Preserve at least one backup per server
+  
+  Key Method: cleanup_old_backups(server_id)
+  Include safety checks to prevent accidental deletion.

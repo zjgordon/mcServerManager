@@ -2,8 +2,20 @@ active_card: CARD-027
 breadcrumb:
   step: 'CARD-026 completed - updated development documentation for new pre-commit standards, including pre-commit setup guide, contributing guidelines, and comprehensive workflow documentation'
   last_commit: 'docs: [CARD-026] Update development documentation for new pre-commit standards'
-  next_action: 'Start at CARD-027 - Continue development workflow optimization'
+  next_action: 'Start at CARD-027 - Begin Automated Backup Scheduling System implementation'
 queue:
   - CARD-027
   - CARD-028
+  - CARD-029
+  - CARD-030
+  - CARD-031
+  - CARD-032
+  - CARD-033
+  - CARD-034
+  - CARD-035
+  - CARD-036
+  - CARD-037
+  - CARD-038
+  - CARD-039
+  - CARD-040
   

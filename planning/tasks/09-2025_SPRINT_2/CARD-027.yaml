@@ -1,0 +1,33 @@
+id: CARD-027
+title: Create BackupSchedule database model
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - BackupSchedule model created with all required fields
+  - Foreign key relationship to Server model established
+  - Validation methods for schedule_type and retention_days
+  - Model passes all database migration tests
+  - Model includes proper string representation
+  - Code compiles, lints, tests pass
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-027]
+artifacts:
+  - app/models.py (BackupSchedule model)
+notes: |
+  Create a new SQLAlchemy model for storing backup schedule configurations.
+  
+  Database Schema:
+  - id: INTEGER PRIMARY KEY AUTOINCREMENT
+  - server_id: INTEGER NOT NULL (foreign key to server table)
+  - schedule_type: VARCHAR(20) NOT NULL ('daily', 'weekly', 'monthly')
+  - schedule_time: TIME NOT NULL
+  - retention_days: INTEGER NOT NULL DEFAULT 30
+  - enabled: BOOLEAN NOT NULL DEFAULT TRUE
+  - last_backup: DATETIME (nullable)
+  - created_at: DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  
+  Include proper validation methods and __repr__ method for debugging.
