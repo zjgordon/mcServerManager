@@ -890,3 +890,23 @@ docs/health-monitoring.md explaining endpoint usage, response formats,
 monitoring integration, and security considerations. All health check
 endpoints include proper error handling, response time measurement, and
 graceful degradation for robust application monitoring.
+
+## 2025-01-09 - CARD-020: Implement structured logging and error monitoring
+
+**Epic:** Epic 5 – Application Stability and Monitoring  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully implemented comprehensive structured logging and error
+monitoring system for mcServerManager with JSON-formatted logs, error
+tracking, performance monitoring, security event logging, and alerting
+capabilities. Created app/logging.py with StructuredLogger class providing
+JSON-formatted logs with context information, request tracking, and user
+context. Implemented app/alerts.py with AlertManager class supporting
+configurable alert rules for CPU, memory, disk space, database connections,
+and error rates with email and webhook notifications. Updated existing
+error handling to use structured logging and integrated alerting with
+monitoring system. Created comprehensive documentation in
+docs/logging-monitoring.md explaining usage patterns, configuration, and
+best practices. All 185 tests pass with enhanced logging and monitoring
+capabilities providing robust application observability and alerting.

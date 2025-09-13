@@ -297,27 +297,28 @@ def require_https():
 
 def audit_log(action, details=None, user_id=None):
     """
-    Log security-relevant actions for audit purposes.
+    Log security-relevant actions for audit purposes using structured logging.
 
     Args:
         action (str): Action being performed
         details (dict): Additional details about the action
         user_id (int): ID of the user performing the action
     """
+    from .logging import logger
+
     if not user_id and current_user.is_authenticated:
         user_id = current_user.id
 
-    log_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "action": action,
-        "user_id": user_id,
-        "ip_address": request.remote_addr,
-        "user_agent": request.headers.get("User-Agent", ""),
-        "details": details or {},
-    }
-
-    # In a production environment, this would be logged to a secure audit log
-    current_app.logger.info(f"AUDIT: {log_entry}")
+    # Use structured logging for security events
+    logger.security_event(
+        action,
+        {
+            "user_id": user_id,
+            "ip_address": request.remote_addr,
+            "user_agent": request.headers.get("User-Agent", ""),
+            "details": details or {},
+        },
+    )
 
 
 def add_security_headers(response):

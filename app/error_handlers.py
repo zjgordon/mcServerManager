@@ -1,25 +1,16 @@
 """
 Centralized error handling utilities for the Minecraft Server Manager.
 """
-import logging
 import subprocess
-import traceback
 from functools import wraps
 
 import psutil
 import requests
-from flask import current_app, flash, redirect, request, url_for
+from flask import flash, redirect, request, url_for
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.exceptions import HTTPException
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("app.log"), logging.StreamHandler()],
-)
-
-logger = logging.getLogger(__name__)
+from .logging import logger
 
 
 class AppError(Exception):
@@ -63,26 +54,18 @@ class DatabaseError(AppError):
 
 
 def log_error(error, context=None):
-    """Log an error with context information."""
+    """Log an error with context information using structured logging."""
     context = context or {}
 
-    # Get debug status safely, handling cases where we're outside app context
-    debug_mode = False
-    try:
-        debug_mode = current_app.debug
-    except RuntimeError:
-        # We're outside application context, assume debug=False for safety
-        debug_mode = False
+    # Use the structured logger's error tracking
+    logger.error_tracking(error, context)
 
-    error_info = {
+    # Return simplified error info for backward compatibility
+    return {
         "error_type": type(error).__name__,
         "error_message": str(error),
         "context": context,
-        "traceback": traceback.format_exc() if debug_mode else None,
     }
-
-    logger.error(f"Application error: {error_info}")
-    return error_info
 
 
 def flash_error(message, category="danger"):

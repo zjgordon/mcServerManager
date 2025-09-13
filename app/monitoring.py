@@ -7,15 +7,16 @@ This module provides comprehensive monitoring capabilities including:
 - Disk space monitoring
 - Application performance metrics
 - Process monitoring
+- Alert integration
 """
 
-import logging
 import time
 from typing import Any, Dict
 
 import psutil
 
-logger = logging.getLogger(__name__)
+from .alerts import check_database_alerts, check_system_alerts
+from .logging import logger
 
 
 def get_system_metrics() -> Dict[str, Any]:
@@ -43,7 +44,7 @@ def get_system_metrics() -> Dict[str, Any]:
         process_memory = current_process.memory_info()
         process_cpu = current_process.cpu_percent()
 
-        return {
+        metrics = {
             "status": "healthy",
             "timestamp": time.time(),
             "cpu": {
@@ -69,6 +70,11 @@ def get_system_metrics() -> Dict[str, Any]:
                 "usage_percent": round((disk.used / disk.total) * 100, 2),
             },
         }
+
+        # Check for alerts
+        check_system_alerts(metrics)
+
+        return metrics
     except Exception as e:
         logger.error(f"Failed to collect system metrics: {e}")
         return {
@@ -119,7 +125,7 @@ def get_application_metrics() -> Dict[str, Any]:
             logger.debug(f"Could not get database pool metrics: {e}")
             pool_metrics = {"error": "Pool metrics unavailable"}
 
-        return {
+        metrics = {
             "status": "healthy",
             "timestamp": time.time(),
             "database": {
@@ -130,6 +136,11 @@ def get_application_metrics() -> Dict[str, Any]:
             },
             "application": config_metrics,
         }
+
+        # Check database alerts
+        check_database_alerts(pool_metrics)
+
+        return metrics
     except Exception as e:
         logger.error(f"Failed to collect application metrics: {e}")
         return {

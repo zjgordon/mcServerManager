@@ -264,18 +264,20 @@ class TestAuditLogging:
                     mock_request.remote_addr = "192.168.1.100"
                     mock_request.headers.get.return_value = "Test Browser"
 
-                    # Capture log output
-                    with patch("app.security.current_app.logger.info") as mock_logger:
+                    # Capture log output using the new structured logger
+                    with patch("app.logging.logger.security_event") as mock_logger:
                         audit_log("test_action", {"detail": "test"})
 
                         # Verify log was called
                         mock_logger.assert_called_once()
 
                         # Verify log format
-                        log_call = mock_logger.call_args[0][0]
-                        assert "AUDIT:" in log_call
-                        assert "test_action" in log_call
-                        assert "192.168.1.100" in log_call
+                        call_args = mock_logger.call_args
+                        assert call_args[0][0] == "test_action"  # action
+                        assert call_args[0][1]["user_id"] == 123  # user_id
+                        assert (
+                            call_args[0][1]["ip_address"] == "192.168.1.100"
+                        )  # ip_address
 
 
 class TestCSRFProtection:
@@ -299,7 +301,11 @@ class TestAuthenticationSecurity:
         # Make multiple login attempts
         for i in range(6):
             response = client.post(
-                "/login", data={"username": f"testuser{i}", "password": "wrongpassword"}
+                "/login",
+                data={
+                    "username": f"testuser{i}",
+                    "password": "wrongpassword",  # pragma: allowlist secret
+                },
             )
 
         # Should get rate limited
@@ -310,7 +316,11 @@ class TestAuthenticationSecurity:
         # Try to create admin with weak password
         response = client.post(
             "/set_admin_password",
-            data={"username": "admin", "password": "weak", "confirm_password": "weak"},
+            data={
+                "username": "admin",
+                "password": "weak",  # pragma: allowlist secret
+                "confirm_password": "weak",  # pragma: allowlist secret
+            },
             follow_redirects=True,
         )
 
@@ -322,8 +332,8 @@ class TestAuthenticationSecurity:
         response = client.post(
             "/login",
             data={
-                "username": '<script>alert("xss")</script>',
-                "password": "password123",
+                "username": '<script>alert("xss")</script>',  # pragma: allowlist secret
+                "password": "password123",  # pragma: allowlist secret
             },
         )
 
@@ -348,7 +358,7 @@ class TestConfigurationSecurity:
     def test_secret_key_generation(self, app):
         """Test secure secret key generation."""
         # Should not use default weak key
-        assert app.config["SECRET_KEY"] != "your_secret_key"
+        assert app.config["SECRET_KEY"] != "your_secret_key"  # pragma: allowlist secret
 
         # Should be a secure random key
         assert len(app.config["SECRET_KEY"]) >= 32

@@ -1,4 +1,3 @@
-import logging
 import os
 
 from flask import Flask, redirect, request, url_for
@@ -9,17 +8,19 @@ from config import get_config
 from .error_handlers import init_error_handlers
 from .extensions import csrf, db, login_manager
 from .health import health_bp
+from .logging import logger, setup_logging
 from .models import User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .security import add_security_headers, audit_log
 
-logger = logging.getLogger(__name__)
-
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(get_config())
+
+    # Initialize structured logging
+    setup_logging(app)
 
     # Initialize extensions
     db.init_app(app)
