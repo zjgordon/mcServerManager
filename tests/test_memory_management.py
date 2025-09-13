@@ -29,18 +29,38 @@ class TestMemoryConfiguration:
     def test_get_memory_config_with_env_vars(self, app):
         """Test getting memory configuration with environment variables."""
         with app.app_context():
-            with patch.dict('os.environ', {
-                'MAX_TOTAL_MEMORY_MB': '16384',
-                'DEFAULT_SERVER_MEMORY_MB': '2048',
-                'MIN_SERVER_MEMORY_MB': '1024',
-                'MAX_SERVER_MEMORY_MB': '8192'
-            }):
-                config = get_memory_config()
-                
-                assert config['max_total_mb'] == 16384
-                assert config['default_server_mb'] == 2048
-                assert config['min_server_mb'] == 1024
-                assert config['max_server_mb'] == 8192
+            from app.models import Configuration
+            from app.utils import update_app_config
+            
+            # Update configuration in database instead of environment variables
+            update_app_config(
+                app_title='Test App',
+                server_hostname='testhost',
+                max_total_mb=16384,
+                max_per_server_mb=8192
+            )
+            
+            # Also update the other memory settings
+            config_entries = [
+                ('default_server_mb', '2048'),
+                ('min_server_mb', '1024')
+            ]
+            
+            for key, value in config_entries:
+                config_entry = Configuration.query.filter_by(key=key).first()
+                if config_entry:
+                    config_entry.value = value
+                else:
+                    config_entry = Configuration(key=key, value=value)
+                    db.session.add(config_entry)
+            db.session.commit()
+            
+            config = get_memory_config()
+            
+            assert config['max_total_mb'] == 16384
+            assert config['default_server_mb'] == 2048
+            assert config['min_server_mb'] == 1024
+            assert config['max_server_mb'] == 8192
 
 
 class TestMemoryCalculation:
@@ -231,8 +251,12 @@ class TestMemoryInServerCreation:
                  patch('app.routes.server_routes.get_version_info') as mock_version, \
                  patch('requests.get') as mock_requests, \
                  patch('subprocess.Popen') as mock_popen, \
+                 patch('subprocess.check_output') as mock_check_output, \
                  patch('os.makedirs'), \
-                 patch('builtins.open', create=True) as mock_open:
+                 patch('os.path.exists') as mock_exists, \
+                 patch('builtins.open', create=True) as mock_open, \
+                 patch('app.error_handlers.SafeFileOperation') as mock_safe_file, \
+                 patch('app.error_handlers.SafeDatabaseOperation') as mock_safe_db:
                 
                 mock_port.return_value = 25565
                 mock_version.return_value = {
@@ -240,12 +264,32 @@ class TestMemoryInServerCreation:
                 }
                 mock_response = MagicMock()
                 mock_response.iter_content.return_value = [b'jar content']
+                mock_response.raise_for_status.return_value = None
                 mock_requests.return_value = mock_response
+                
+                # Mock Java version check
+                mock_check_output.return_value = "java version 1.8.0_291"
+                
+                # Mock subprocess for server startup
                 mock_process = MagicMock()
+                mock_process.pid = 12345
+                mock_process.poll.return_value = None  # Process is running
+                mock_process.communicate.return_value = ("Server started", "")
                 mock_popen.return_value = mock_process
+                
                 mock_file = MagicMock()
                 mock_file.__enter__.return_value.read.return_value = "template {server_port}"
+                mock_file.__enter__.return_value.write.return_value = None
                 mock_open.return_value = mock_file
+                
+                # Mock file existence checks
+                mock_exists.return_value = True
+                
+                # Mock context managers
+                mock_safe_file.return_value.__enter__.return_value = mock_file
+                mock_safe_file.return_value.__exit__.return_value = None
+                mock_safe_db.return_value.__enter__.return_value = db.session
+                mock_safe_db.return_value.__exit__.return_value = None
                 
                 response = client.post('/configure_server', data={
                     'server_name': 'testserver',
@@ -315,8 +359,12 @@ class TestMemoryInServerCreation:
                  patch('app.routes.server_routes.get_version_info') as mock_version, \
                  patch('requests.get') as mock_requests, \
                  patch('subprocess.Popen') as mock_popen, \
+                 patch('subprocess.check_output') as mock_check_output, \
                  patch('os.makedirs'), \
-                 patch('builtins.open', create=True) as mock_open:
+                 patch('os.path.exists') as mock_exists, \
+                 patch('builtins.open', create=True) as mock_open, \
+                 patch('app.error_handlers.SafeFileOperation') as mock_safe_file, \
+                 patch('app.error_handlers.SafeDatabaseOperation') as mock_safe_db:
                 
                 mock_port.return_value = 25565
                 mock_version.return_value = {
@@ -324,12 +372,32 @@ class TestMemoryInServerCreation:
                 }
                 mock_response = MagicMock()
                 mock_response.iter_content.return_value = [b'jar content']
+                mock_response.raise_for_status.return_value = None
                 mock_requests.return_value = mock_response
+                
+                # Mock Java version check
+                mock_check_output.return_value = "java version 1.8.0_291"
+                
+                # Mock subprocess for server startup
                 mock_process = MagicMock()
+                mock_process.pid = 12345
+                mock_process.poll.return_value = None  # Process is running
+                mock_process.communicate.return_value = ("Server started", "")
                 mock_popen.return_value = mock_process
+                
                 mock_file = MagicMock()
                 mock_file.__enter__.return_value.read.return_value = "template {server_port}"
+                mock_file.__enter__.return_value.write.return_value = None
                 mock_open.return_value = mock_file
+                
+                # Mock file existence checks
+                mock_exists.return_value = True
+                
+                # Mock context managers
+                mock_safe_file.return_value.__enter__.return_value = mock_file
+                mock_safe_file.return_value.__exit__.return_value = None
+                mock_safe_db.return_value.__enter__.return_value = db.session
+                mock_safe_db.return_value.__exit__.return_value = None
                 
                 response = client.post('/configure_server', data={
                     'server_name': 'testserver',

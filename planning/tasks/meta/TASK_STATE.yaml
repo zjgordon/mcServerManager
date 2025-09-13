@@ -1,10 +1,9 @@
-active_card: CARD-005L
+active_card: CARD-005M
 breadcrumb:
-  step: 'CARD-005K completed - password policy tests and validation cleaned up, removing unused imports and fixing code quality issues while maintaining test functionality'
-  last_commit: 'fix: [CARD-005K] Fix password policy tests and validation'
-  next_action: 'Start at CARD-005L - Next test suite reliability improvement'
+  step: 'CARD-005L completed - integration test issues fixed, resolving authentication, memory configuration, and test isolation problems with surgical fixes'
+  last_commit: 'fix: [CARD-005L] Fix integration test issues'
+  next_action: 'Start at CARD-005M - Next test suite reliability improvement'
 queue:
-  - CARD-005L
   - CARD-005M
   - CARD-005N
   - CARD-006

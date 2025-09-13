@@ -41,9 +41,10 @@ def app():
         db.create_all()
         
         # Create a default admin user to prevent admin setup redirects in tests
+        from werkzeug.security import generate_password_hash
         admin_user = User(
             username='admin',
-            password_hash='pbkdf2:sha256:600000$test$test_hash',
+            password_hash=generate_password_hash('adminpass'),
             is_admin=True,
             is_active=True
         )
@@ -77,9 +78,10 @@ def admin_user(app):
         user = User.query.filter_by(username='admin').first()
         if not user:
             # Create a fresh admin user if none exists
+            from werkzeug.security import generate_password_hash
             user = User(
                 username='admin',
-                password_hash='pbkdf2:sha256:600000$test$test_hash',
+                password_hash=generate_password_hash('adminpass'),
                 is_admin=True,
                 is_active=True
             )
