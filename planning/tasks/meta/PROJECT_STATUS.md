@@ -121,3 +121,4 @@ RELEASE_NOTES.md)
 ## 09-2025_SPRINT_2 Status
 
 - CARD-027: ✅ Completed - BackupSchedule database model created with comprehensive schema, validation methods, and foreign key relationship to Server model
+- CARD-028: ✅ Completed - Database migration for backup_schedules table created with proper foreign key constraints and check constraints

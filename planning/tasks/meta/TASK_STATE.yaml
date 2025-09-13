@@ -1,10 +1,9 @@
-active_card: CARD-028
+active_card: CARD-029
 breadcrumb:
-  step: 'CARD-027 completed - BackupSchedule database model created with comprehensive schema, validation methods, and foreign key relationship to Server model'
-  last_commit: 'feat: [CARD-027] Create BackupSchedule database model'
-  next_action: 'Start at CARD-028 - Continue Automated Backup Scheduling System implementation'
+  step: 'CARD-028 completed - Database migration for backup_schedules table created with proper foreign key constraints and check constraints'
+  last_commit: 'feat: [CARD-028] Create database migration for backup_schedules table'
+  next_action: 'Start at CARD-029 - Continue Automated Backup Scheduling System implementation'
 queue:
-  - CARD-028
   - CARD-029
   - CARD-030
   - CARD-031

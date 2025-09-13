@@ -9,7 +9,7 @@ from .error_handlers import init_error_handlers
 from .extensions import csrf, db, login_manager, migrate
 from .health import health_bp
 from .logging import logger, setup_logging
-from .models import User
+from .models import BackupSchedule, Configuration, Server, User
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .security import add_security_headers, audit_log

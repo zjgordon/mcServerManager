@@ -1026,3 +1026,16 @@ enabled flag, last_backup tracking, and created_at timestamp. Implemented proper
 for schedule_type and retention_days with database constraints. Added relationship to Server model
 with backref for backup_schedules. Model includes proper string representation for debugging.
 All tests pass (185/185) with no linting errors.
+
+## 2025-01-09 - CARD-028: Create database migration for backup_schedules table
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created Flask-Migrate database migration for backup_schedules table with proper foreign key
+constraints and check constraints. Migration includes all required fields (id, server_id,
+schedule_type, schedule_time, retention_days, enabled, last_backup, created_at) with proper
+data types and constraints. Added table existence check to handle cases where table already
+exists from db.create_all(). Migration can be applied and rolled back successfully without
+data loss. All 185 tests pass with 54.96% coverage and no linting errors.
