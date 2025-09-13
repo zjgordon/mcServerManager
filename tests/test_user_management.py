@@ -594,7 +594,8 @@ class TestMemoryManagementWithUsers:
             assert user2_memory == 2048
             assert total_memory == 3072
 
-            # Test memory usage summary (note: get_memory_usage_summary doesn't support user_id parameter)
+            # Test memory usage summary (note: get_memory_usage_summary doesn't
+            # support user_id parameter)
             user1_summary = get_memory_usage_summary()
             assert user1_summary["allocated_memory_mb"] == 3072  # Total for all users
             assert user1_summary["available_memory_mb"] == 5120  # 8192 - 3072

@@ -366,7 +366,8 @@ class TestRouteErrorHandler:
                 # the ValidationError is properly caught and handled (not re-raised)
                 try:
                     result = test_route()
-                    # If we get here, the decorator caught the error and returned a redirect
+                    # If we get here, the decorator caught the error and returned a
+                    # redirect
                     assert result is not None
                 except ValidationError:
                     # This should not happen - the decorator should catch it

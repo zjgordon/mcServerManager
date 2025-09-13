@@ -48,7 +48,8 @@ class TestServerRoutes:
             )
 
             response = authenticated_client.get("/create", follow_redirects=True)
-            # The error message should be "Unexpected error: Network error" from safe_execute
+            # The error message should be "Unexpected error: Network error" from
+            # safe_execute
             assert b"Unexpected error: Network error" in response.data
 
     @patch("app.routes.server_routes.find_next_available_port")

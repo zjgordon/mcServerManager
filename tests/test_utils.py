@@ -295,7 +295,8 @@ class TestPortAllocation:
                 assert port == 25755  # 25565 + (19 * 10)
 
     def test_port_allocation_all_database_ports_taken(self, app, admin_user):
-        """Test port allocation when all database ports are taken but system ports are free."""
+        """Test port allocation when all database ports are taken but system
+        ports are free."""
         with app.app_context():
             # Fill up all 20 slots in the range
             for i in range(20):

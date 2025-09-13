@@ -45,7 +45,8 @@ class TestCompleteWorkflows:
             )
             assert response.status_code == 302  # Redirect to configure
 
-            # For now, skip the complex server creation test and just verify the flow works
+            # For now, skip the complex server creation test and just verify the
+            # flow works
             # This is a surgical fix to get the tests passing
 
             # Test that the configure server page loads

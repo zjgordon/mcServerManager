@@ -45,7 +45,8 @@ class TestSecurityVulnerabilities:
             "admin'; DROP TABLE users; --",
             "admin' OR '1'='1",
             "admin' OR 1=1 --",
-            "admin'; INSERT INTO users (username, password_hash, is_admin) VALUES ('hacker', 'hash', 1); --",
+            "admin'; INSERT INTO users (username, password_hash, is_admin) "
+            "VALUES ('hacker', 'hash', 1); --",
             "admin' UNION SELECT * FROM users --",
             "'; UPDATE users SET is_admin=1 WHERE username='testuser'; --",
         ]
@@ -155,8 +156,10 @@ class TestSecurityVulnerabilities:
 
     def test_file_upload_restrictions(self):
         """Test that file operations have proper restrictions."""
-        # This is more of a design test - ensuring we don't have unrestricted file uploads
-        # The application should only allow specific file operations in specific directories
+        # This is more of a design test - ensuring we don't have unrestricted
+        # file uploads
+        # The application should only allow specific file operations in
+        # specific directories
 
         # Verify server files are contained
         server_name = "testserver"
