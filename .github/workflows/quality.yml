@@ -1,0 +1,69 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Run Black formatter check
+      run: black --check --diff .
+
+    - name: Run isort import sorting check
+      run: isort --check-only --diff .
+
+    - name: Run flake8 linting
+      run: flake8 .
+
+    - name: Run mypy type checking
+      run: mypy .
+
+    - name: Run pydocstyle documentation check
+      run: pydocstyle .
+
+    - name: Run markdownlint
+      uses: DavidAnson/markdownlint-cli-action@v1
+      with:
+        files: '**/*.md'
+        config: '.markdownlint.json'
+        ignore: 'node_modules/**'
+
+    - name: Check for trailing whitespace
+      run: |
+        if grep -r '[[:space:]]$' --include="*.py" --include="*.md" --include="*.yml" --include="*.yaml" .; then
+          echo "Trailing whitespace found"
+          exit 1
+        fi
+
+    - name: Check for merge conflict markers
+      run: |
+        if grep -r '<<<<<<< HEAD\|=======\|>>>>>>> ' .; then
+          echo "Merge conflict markers found"
+          exit 1
+        fi

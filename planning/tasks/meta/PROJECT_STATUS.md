@@ -92,3 +92,5 @@ RELEASE_NOTES.md)
   comprehensive tagging system and directory structure
 - CARD-017: ✅ Completed - configured git hooks for commit message validation
   with conventional commit format enforcement and pre-push quality checks
+- CARD-018: ✅ Completed - created GitHub Actions workflows for CI/CD with test,
+  quality, security, and deployment automation

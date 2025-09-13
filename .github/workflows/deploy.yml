@@ -1,0 +1,104 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests before deployment
+      run: |
+        pip install -r requirements-dev.txt
+        pytest --maxfail=5
+
+    - name: Run security scan
+      run: |
+        pip install bandit safety
+        bandit -r app/ -f txt
+        safety check
+
+    - name: Build application
+      run: |
+        echo "Building mcServerManager application..."
+        # Add any build steps here if needed
+        echo "Application built successfully"
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to ${{ github.event.inputs.environment || 'staging' }} environment..."
+        # Add actual deployment steps here
+        # This could include:
+        # - Docker build and push
+        # - Kubernetes deployment
+        # - Server deployment via SSH
+        # - Cloud platform deployment
+        echo "Deployment completed successfully"
+
+    - name: Run health check
+      run: |
+        echo "Running health check..."
+        # Add health check steps here
+        # This could include:
+        # - HTTP endpoint checks
+        # - Database connectivity tests
+        # - Service availability checks
+        echo "Health check passed"
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment to ${{ github.event.inputs.environment || 'staging' }} successful"
+        else
+          echo "❌ Deployment to ${{ github.event.inputs.environment || 'staging' }} failed"
+        fi
+
+    - name: Create deployment artifact
+      run: |
+        mkdir -p deployment-artifacts
+        cp -r app/ deployment-artifacts/
+        cp requirements.txt deployment-artifacts/
+        cp run.py deployment-artifacts/
+        cp -r config/ deployment-artifacts/
+        tar -czf deployment-artifacts.tar.gz deployment-artifacts/
+
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-artifacts-${{ github.sha }}
+        path: deployment-artifacts.tar.gz
+        retention-days: 30

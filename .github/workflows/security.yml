@@ -1,0 +1,109 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Run bandit security scan
+      run: |
+        bandit -r app/ -f json -o bandit-report.json || true
+        bandit -r app/ -f txt
+
+    - name: Run safety dependency check
+      run: |
+        safety check --json --output safety-report.json || true
+        safety check
+
+    - name: Run semgrep security analysis
+      run: |
+        semgrep --config=auto --json --output=semgrep-report.json . || true
+        semgrep --config=auto .
+
+    - name: Run detect-secrets scan
+      run: |
+        detect-secrets scan --baseline .secrets.baseline
+        detect-secrets audit .secrets.baseline
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+          semgrep-report.json
+
+    - name: Comment PR with security findings
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = '## Security Scan Results\n\n';
+          
+          // Bandit results
+          if (fs.existsSync('bandit-report.json')) {
+            const banditData = JSON.parse(fs.readFileSync('bandit-report.json', 'utf8'));
+            if (banditData.results && banditData.results.length > 0) {
+              comment += '### Bandit Security Issues\n';
+              banditData.results.forEach(result => {
+                comment += `- **${result.issue_severity}**: ${result.issue_text} (${result.filename}:${result.line_number})\n`;
+              });
+              comment += '\n';
+            }
+          }
+          
+          // Safety results
+          if (fs.existsSync('safety-report.json')) {
+            const safetyData = JSON.parse(fs.readFileSync('safety-report.json', 'utf8'));
+            if (safetyData.vulnerabilities && safetyData.vulnerabilities.length > 0) {
+              comment += '### Dependency Vulnerabilities\n';
+              safetyData.vulnerabilities.forEach(vuln => {
+                comment += `- **${vuln.package_name}**: ${vuln.advisory}\n`;
+              });
+              comment += '\n';
+            }
+          }
+          
+          if (comment === '## Security Scan Results\n\n') {
+            comment += '✅ No security issues found!\n';
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
