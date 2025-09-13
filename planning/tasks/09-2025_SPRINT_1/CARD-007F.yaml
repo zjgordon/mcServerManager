@@ -2,7 +2,7 @@ id: CARD-007F
 title: Fix shell script issues in dev.sh
 epic: Epic 1 – Repository Organization and Environment Setup
 sprint: 09-2025_SPRINT_1
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:

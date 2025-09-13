@@ -194,7 +194,6 @@ run_app() {
 # Main function
 main() {
     local port=$DEFAULT_PORT
-    local mode="run"
     local command="run"
 
     # Parse command line arguments
