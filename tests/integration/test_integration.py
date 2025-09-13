@@ -3,9 +3,13 @@ Integration tests for the Minecraft Server Manager.
 """
 from unittest.mock import patch
 
+import pytest
+
 from app.models import User
 
 
+@pytest.mark.integration
+@pytest.mark.e2e
 class TestCompleteWorkflows:
     """Test complete user workflows."""
 

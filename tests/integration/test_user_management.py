@@ -3,10 +3,14 @@ Tests for user management functionality.
 """
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from app.extensions import db
 from app.models import Server, User
 
 
+@pytest.mark.integration
+@pytest.mark.user
 class TestUserModel:
     """Test User model functionality."""
 
@@ -190,6 +194,8 @@ class TestUserAuthentication:
             assert response.status_code == 302  # Redirect to login
 
 
+@pytest.mark.integration
+@pytest.mark.user
 class TestUserManagement:
     """Test user management functionality."""
 

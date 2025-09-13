@@ -31,6 +31,8 @@ from app.extensions import db
 from app.models import Server, User
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestCustomExceptions:
     """Test custom exception classes."""
 
@@ -61,6 +63,8 @@ class TestCustomExceptions:
         assert error.message == "Validation failed"
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestNetworkErrorDecorator:
     """Test network error handling decorator."""
 
@@ -116,6 +120,8 @@ class TestNetworkErrorDecorator:
             assert "HTTP error" in str(exc_info.value)
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestFileOperationsDecorator:
     """Test file operations error handling decorator."""
 
@@ -154,6 +160,8 @@ class TestFileOperationsDecorator:
             assert "Permission denied" in str(exc_info.value)
 
 
+@pytest.mark.unit
+@pytest.mark.server
 class TestServerOperationsDecorator:
     """Test server operations error handling decorator."""
 
@@ -192,6 +200,8 @@ class TestServerOperationsDecorator:
             assert "Permission denied" in str(exc_info.value)
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestDatabaseOperationsDecorator:
     """Test database operations error handling decorator."""
 
@@ -218,6 +228,8 @@ class TestDatabaseOperationsDecorator:
             assert "integrity constraint violated" in str(exc_info.value)
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestSafeExecute:
     """Test safe_execute utility function."""
 
@@ -257,6 +269,8 @@ class TestSafeExecute:
             assert "Unexpected error" in error
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestSafeFileOperation:
     """Test SafeFileOperation context manager."""
 
@@ -297,6 +311,8 @@ class TestSafeFileOperation:
             os.unlink(temp_file)
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestSafeDatabaseOperation:
     """Test SafeDatabaseOperation context manager."""
 
@@ -334,6 +350,8 @@ class TestSafeDatabaseOperation:
             assert len(users) == 1
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestRouteErrorHandler:
     """Test route error handler decorator."""
 
@@ -374,6 +392,8 @@ class TestRouteErrorHandler:
                     pytest.fail("ValidationError should have been caught by decorator")
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestLogError:
     """Test error logging functionality."""
 
@@ -401,6 +421,8 @@ class TestLogError:
             assert error_info["context"] == {}
 
 
+@pytest.mark.unit
+@pytest.mark.integration
 class TestIntegrationErrorHandling:
     """Test error handling integration with actual routes."""
 

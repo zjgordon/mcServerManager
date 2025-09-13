@@ -1,12 +1,15 @@
 """
 Tests for authentication routes and functionality.
 """
+import pytest
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db
 from app.models import User
 
 
+@pytest.mark.unit
+@pytest.mark.auth
 class TestAuthentication:
     """Test authentication functionality."""
 
@@ -22,7 +25,7 @@ class TestAuthentication:
             # Create a test user with unique username
             user = User(
                 username="logintestuser",
-                password_hash=generate_password_hash("testpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass")  # pragma: allowlist secret,
                 is_admin=False,
             )
             db.session.add(user)
@@ -44,7 +47,7 @@ class TestAuthentication:
             # Create a test user with unique username
             user = User(
                 username="invalidlogintestuser",
-                password_hash=generate_password_hash("testpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass")  # pragma: allowlist secret,
                 is_admin=False,
             )
             db.session.add(user)
@@ -169,7 +172,7 @@ class TestAuthentication:
             # Create existing user
             existing_user = User(
                 username="existinguser",
-                password_hash=generate_password_hash("pass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"pass")  # pragma: allowlist secret,
                 is_admin=False,
             )
             db.session.add(existing_user)
@@ -201,7 +204,7 @@ class TestAuthentication:
         # Set a known password for the user
         with app.app_context():
             user = User.query.get(regular_user.id)
-            user.password_hash = generate_password_hash("oldpass")
+            user.password_hash = generate_password_hash(  # pragma: allowlist secret"oldpass")
             db.session.commit()
 
         response = client.post(
@@ -220,7 +223,7 @@ class TestAuthentication:
         # Verify password was changed
         with app.app_context():
             user = User.query.get(regular_user.id)
-            assert check_password_hash(user.password_hash, "newpass")
+            assert check_password_hash(  # pragma: allowlist secretuser.password_hash, "newpass")
 
     def test_change_password_wrong_current(self, client, regular_user):
         """Test changing password with wrong current password."""
@@ -248,7 +251,7 @@ class TestAuthentication:
         # Set a known password for the user
         with app.app_context():
             user = User.query.get(regular_user.id)
-            user.password_hash = generate_password_hash("oldpass")
+            user.password_hash = generate_password_hash(  # pragma: allowlist secret"oldpass")
             db.session.commit()
 
         response = client.post(

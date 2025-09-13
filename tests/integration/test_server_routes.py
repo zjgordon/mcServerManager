@@ -5,10 +5,14 @@ import os
 import shutil
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from app.extensions import db
 from app.models import Server
 
 
+@pytest.mark.integration
+@pytest.mark.server
 class TestServerRoutes:
     """Test server management functionality."""
 

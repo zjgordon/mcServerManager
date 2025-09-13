@@ -8,6 +8,8 @@ from app.extensions import db
 from app.models import Server, User
 
 
+@pytest.mark.unit
+@pytest.mark.user
 class TestUserModel:
     """Test User model functionality."""
 
@@ -16,7 +18,7 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash("testpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass"),
                 is_admin=False,
             )
             db.session.add(user)
@@ -27,7 +29,7 @@ class TestUserModel:
             assert created_user is not None
             assert created_user.username == "testuser"
             assert created_user.is_admin is False
-            assert check_password_hash(created_user.password_hash, "testpass")
+            assert check_password_hash(  # pragma: allowlist secretcreated_user.password_hash, "testpass")
 
     def test_user_unique_username(self, app):
         """Test that usernames must be unique."""
@@ -35,7 +37,7 @@ class TestUserModel:
             # Create first user
             user1 = User(
                 username="testuser",
-                password_hash=generate_password_hash("pass1"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"pass1"),
                 is_admin=False,
             )
             db.session.add(user1)
@@ -44,7 +46,7 @@ class TestUserModel:
             # Try to create second user with same username
             user2 = User(
                 username="testuser",
-                password_hash=generate_password_hash("pass2"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"pass2"),
                 is_admin=False,
             )
             db.session.add(user2)
@@ -58,7 +60,7 @@ class TestUserModel:
             # Create admin user
             admin = User(
                 username="admin_models",
-                password_hash=generate_password_hash("adminpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"adminpass"),
                 is_admin=True,
             )
             db.session.add(admin)
@@ -66,7 +68,7 @@ class TestUserModel:
             # Create regular user
             user = User(
                 username="user",
-                password_hash=generate_password_hash("userpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"userpass"),
                 is_admin=False,
             )
             db.session.add(user)
@@ -84,7 +86,7 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash("testpass")
+                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass")
                 # is_admin not specified
             )
             db.session.add(user)
@@ -108,7 +110,7 @@ class TestUserModel:
         with app.app_context():
             user = User(
                 username="testuser",
-                password_hash=generate_password_hash("testpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"testpass"),
                 is_admin=False,
             )
             db.session.add(user)
@@ -121,6 +123,8 @@ class TestUserModel:
             assert user.get_id() == str(user.id)
 
 
+@pytest.mark.unit
+@pytest.mark.server
 class TestServerModel:
     """Test Server model functionality."""
 

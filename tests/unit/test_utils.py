@@ -26,6 +26,8 @@ from app.utils import (
 )
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestUtilityFunctions:
     """Test utility functions."""
 
@@ -246,6 +248,8 @@ class TestUtilityFunctions:
             os.unlink(temp_file)
 
 
+@pytest.mark.unit
+@pytest.mark.utils
 class TestPortAllocation:
     """Test port allocation functionality in detail."""
 

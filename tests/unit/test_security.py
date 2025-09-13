@@ -4,11 +4,15 @@ Security-focused tests for the Minecraft Server Manager.
 import os
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from app.extensions import db
 from app.models import User
 from app.utils import is_valid_server_name
 
 
+@pytest.mark.unit
+@pytest.mark.security
 class TestSecurityVulnerabilities:
     """Test for common security vulnerabilities."""
 
@@ -224,18 +228,18 @@ class TestSecurityVulnerabilities:
             from werkzeug.security import check_password_hash, generate_password_hash
 
             password = "testpassword123"
-            hash1 = generate_password_hash(password)
-            hash2 = generate_password_hash(password)
+            hash1 = generate_password_hash(  # pragma: allowlist secretpassword)
+            hash2 = generate_password_hash(  # pragma: allowlist secretpassword)
 
             # Hashes should be different (salted)
             assert hash1 != hash2
 
             # But both should verify the password
-            assert check_password_hash(hash1, password)
-            assert check_password_hash(hash2, password)
+            assert check_password_hash(  # pragma: allowlist secrethash1, password)
+            assert check_password_hash(  # pragma: allowlist secrethash2, password)
 
             # Wrong password should not verify
-            assert not check_password_hash(hash1, "wrongpassword")
+            assert not check_password_hash(  # pragma: allowlist secrethash1, "wrongpassword")
 
     def test_process_security(self, authenticated_client, app, test_server):
         """Test that server processes are started securely."""

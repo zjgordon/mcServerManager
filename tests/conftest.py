@@ -47,7 +47,7 @@ def app():
 
         admin_user = User(
             username="admin",
-            password_hash=generate_password_hash("adminpass"),
+            password_hash=generate_password_hash(  # pragma: allowlist secret"adminpass"),
             is_admin=True,
             is_active=True,
         )
@@ -85,7 +85,7 @@ def admin_user(app):
 
             user = User(
                 username="admin",
-                password_hash=generate_password_hash("adminpass"),
+                password_hash=generate_password_hash(  # pragma: allowlist secret"adminpass"),
                 is_admin=True,
                 is_active=True,
             )

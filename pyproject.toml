@@ -54,6 +54,17 @@ exclude = [
     "tests/",
 ]
 
+# Coverage Configuration
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/node_modules/*",
+    "*/__pycache__/*",
+    "*/migrations/*"
+]
+
 [tool.pytest.ini_options]
 # Test Discovery
 testpaths = ["tests"]
@@ -82,7 +93,13 @@ markers = [
     "security: marks tests as security focused",
     "smoke: marks tests as smoke tests for basic functionality",
     "regression: marks tests as regression tests",
-    "performance: marks tests as performance tests"
+    "performance: marks tests as performance tests",
+    "e2e: marks tests as end-to-end tests",
+    "auth: marks tests as authentication related",
+    "server: marks tests as server management related",
+    "memory: marks tests as memory management related",
+    "user: marks tests as user management related",
+    "utils: marks tests as utility function related"
 ]
 
 # Warning Filters
@@ -94,15 +111,12 @@ filterwarnings = [
     "ignore::pytest.PytestUnraisableExceptionWarning"
 ]
 
-# Coverage Configuration
-[tool.coverage.run]
-source = ["app"]
-omit = [
-    "*/tests/*",
-    "*/venv/*",
-    "*/node_modules/*",
-    "*/__pycache__/*",
-    "*/migrations/*"
+# Test Environment Variables
+env = [
+    "SECRET_KEY = test-secret-key-for-testing-only",  # pragma: allowlist secret
+    "RATELIMIT_ENABLED = false",
+    "WTF_CSRF_ENABLED = false",
+    "TESTING = true"
 ]
 
 [tool.coverage.report]
