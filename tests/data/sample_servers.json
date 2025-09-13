@@ -1,0 +1,46 @@
+{
+  "servers": [
+    {
+      "server_name": "sample_server_1",
+      "version": "1.20.1",
+      "port": 25565,
+      "status": "Stopped",
+      "memory_mb": 1024,
+      "level_seed": "sample_seed_1",
+      "gamemode": "survival",
+      "difficulty": "normal",
+      "hardcore": false,
+      "pvp": true,
+      "spawn_monsters": true,
+      "motd": "Sample Server 1"
+    },
+    {
+      "server_name": "sample_server_2",
+      "version": "1.19.4",
+      "port": 25566,
+      "status": "Running",
+      "memory_mb": 2048,
+      "level_seed": "sample_seed_2",
+      "gamemode": "creative",
+      "difficulty": "hard",
+      "hardcore": false,
+      "pvp": false,
+      "spawn_monsters": false,
+      "motd": "Sample Server 2 - Creative"
+    },
+    {
+      "server_name": "hardcore_server",
+      "version": "1.20.1",
+      "port": 25567,
+      "status": "Stopped",
+      "memory_mb": 512,
+      "level_seed": "hardcore_seed",
+      "gamemode": "survival",
+      "difficulty": "hard",
+      "hardcore": true,
+      "pvp": true,
+      "spawn_monsters": true,
+      "motd": "Hardcore Server - Beware!"
+    }
+  ]
+}

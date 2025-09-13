@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "username": "sample_admin",
+      "password": "adminpass123",
+      "is_admin": true,
+      "is_active": true
+    },
+    {
+      "username": "sample_user1",
+      "password": "userpass123",
+      "is_admin": false,
+      "is_active": true
+    },
+    {
+      "username": "sample_user2",
+      "password": "userpass456",
+      "is_admin": false,
+      "is_active": true
+    },
+    {
+      "username": "inactive_user",
+      "password": "inactivepass",
+      "is_admin": false,
+      "is_active": false
+    }
+  ]
+}

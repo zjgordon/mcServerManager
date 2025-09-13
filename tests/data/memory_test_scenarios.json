@@ -1,0 +1,62 @@
+{
+  "scenarios": [
+    {
+      "name": "low_memory",
+      "total_memory_mb": 2048,
+      "servers": [
+        {
+          "memory_mb": 512,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 1024,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 1024,
+          "expected_result": "valid"
+        }
+      ]
+    },
+    {
+      "name": "high_memory",
+      "total_memory_mb": 8192,
+      "servers": [
+        {
+          "memory_mb": 2048,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 2048,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 2048,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 2048,
+          "expected_result": "valid"
+        }
+      ]
+    },
+    {
+      "name": "exceed_memory",
+      "total_memory_mb": 2048,
+      "servers": [
+        {
+          "memory_mb": 1024,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 1024,
+          "expected_result": "valid"
+        },
+        {
+          "memory_mb": 1024,
+          "expected_result": "invalid"
+        }
+      ]
+    }
+  ]
+}

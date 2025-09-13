@@ -1,0 +1,98 @@
+"""
+Utility test fixtures.
+
+This module provides fixtures for common test utilities and helper functions.
+"""
+import shutil
+import tempfile
+
+import pytest
+
+
+@pytest.fixture
+def temp_server_dir():
+    """Create a temporary directory for server files."""
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@pytest.fixture
+def temp_data_dir():
+    """Create a temporary directory for test data files."""
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@pytest.fixture
+def runner(app):
+    """A test runner for the app's Click commands."""
+    return app.test_cli_runner()
+
+
+@pytest.fixture
+def mock_file_system():
+    """Mock file system operations for testing."""
+    from unittest.mock import patch
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with patch("os.path.exists") as mock_exists, patch(
+            "os.path.getsize"
+        ) as mock_getsize, patch("os.makedirs") as mock_makedirs:
+            # Configure mocks
+            mock_exists.return_value = True
+            mock_getsize.return_value = 1024
+            mock_makedirs.return_value = None
+
+            yield {
+                "temp_dir": temp_dir,
+                "mock_exists": mock_exists,
+                "mock_getsize": mock_getsize,
+                "mock_makedirs": mock_makedirs,
+            }
+
+
+@pytest.fixture
+def mock_network_requests():
+    """Mock network requests for testing."""
+    from unittest.mock import patch
+
+    import requests
+
+    with patch("requests.get") as mock_get, patch("requests.post") as mock_post:
+        # Configure default successful responses
+        mock_response = requests.Response()
+        mock_response.status_code = 200
+        mock_response._content = b'{"versions": [{"id": "1.20.1"}]}'
+
+        mock_get.return_value = mock_response
+        mock_post.return_value = mock_response
+
+        yield {
+            "mock_get": mock_get,
+            "mock_post": mock_post,
+        }
+
+
+@pytest.fixture
+def mock_subprocess():
+    """Mock subprocess operations for testing."""
+    import subprocess
+    from unittest.mock import patch
+
+    with patch("subprocess.Popen") as mock_popen, patch("subprocess.run") as mock_run:
+        # Configure default successful subprocess behavior
+        mock_process = subprocess.Popen.__new__(subprocess.Popen)
+        mock_process.returncode = 0
+        mock_process.pid = 1234
+
+        mock_popen.return_value = mock_process
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"", stderr=b""
+        )
+
+        yield {
+            "mock_popen": mock_popen,
+            "mock_run": mock_run,
+        }
