@@ -5,6 +5,7 @@ from flask_login import current_user
 
 from config import get_config
 
+from .database import db_manager
 from .error_handlers import init_error_handlers
 from .extensions import csrf, db, login_manager
 from .health import health_bp
@@ -26,6 +27,7 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    db_manager.init_app(app)
 
     # Initialize error handlers
     init_error_handlers(app)

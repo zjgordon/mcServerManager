@@ -347,8 +347,8 @@ class TestServerModel:
                 port=25565,
                 status="Running",  # Max length for status is 10
                 level_seed="a" * 150,  # Max length for level_seed
-                gamemode="a" * 50,  # Max length for gamemode
-                difficulty="a" * 50,  # Max length for difficulty
+                gamemode="survival",  # Valid gamemode value
+                difficulty="normal",  # Valid difficulty value
                 motd="a" * 150,  # Max length for motd
                 owner_id=admin_user.id,
             )

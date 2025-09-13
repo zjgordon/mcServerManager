@@ -20,6 +20,7 @@ WTForms==3.1.2
 
 # Database & ORM
 SQLAlchemy==2.0.34
+Flask-Migrate==4.0.7
 
 # HTTP & Network
 certifi==2024.8.30
