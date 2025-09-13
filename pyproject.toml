@@ -53,3 +53,68 @@ exclude = [
     "dist/",
     "tests/",
 ]
+
+[tool.pytest.ini_options]
+# Test Discovery
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Test Execution Options
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--disable-warnings",
+    "--cov=app",
+    "--cov-report=html:htmlcov",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-fail-under=65"
+]
+
+# Test Markers
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "security: marks tests as security focused",
+    "smoke: marks tests as smoke tests for basic functionality",
+    "regression: marks tests as regression tests",
+    "performance: marks tests as performance tests"
+]
+
+# Warning Filters
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::RuntimeWarning",
+    "ignore::sqlalchemy.exc.SAWarning",
+    "ignore::pytest.PytestUnraisableExceptionWarning"
+]
+
+# Coverage Configuration
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/node_modules/*",
+    "*/__pycache__/*",
+    "*/migrations/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod"
+]

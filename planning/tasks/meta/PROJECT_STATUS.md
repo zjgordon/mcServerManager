@@ -84,3 +84,5 @@ RELEASE_NOTES.md)
   practical settings and essential type annotations
 - CARD-012: ✅ Completed - configured security scanning tools (bandit, safety,
   semgrep) with pre-commit integration and comprehensive documentation
+- CARD-013: ✅ Completed - enhanced pytest configuration with comprehensive
+  settings including coverage reporting, parallel testing, and HTML reports

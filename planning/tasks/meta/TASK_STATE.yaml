@@ -1,8 +1,8 @@
-active_card: CARD-013
+active_card: CARD-007D
 breadcrumb:
-  step: 'CARD-012 completed - configured security scanning tools (bandit, safety, semgrep) with pre-commit integration'
-  last_commit: 'feat: [CARD-012] Configure security scanning tools (bandit, safety, semgrep) with pre-commit integration'
-  next_action: 'Start at CARD-013 - Next development task'
+  step: 'CARD-013 completed - enhanced pytest configuration with comprehensive settings including coverage reporting, parallel testing, and HTML reports'
+  last_commit: 'feat: [CARD-013] Enhance pytest configuration with comprehensive settings'
+  next_action: 'Start at CARD-007D - Next development task'
 queue:
   - CARD-007D
   - CARD-007E
