@@ -17,16 +17,16 @@ class User(db.Model, UserMixin):
     last_login = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<User {self.username}>"
 
     @property
-    def server_count(self):
+    def server_count(self) -> int:
         """Get the number of servers owned by this user."""
         return len(self.servers)
 
     @property
-    def total_memory_allocated(self):
+    def total_memory_allocated(self) -> int:
         """Get the total memory allocated by this user's servers."""
         return sum(server.memory_mb for server in self.servers)
 
@@ -67,5 +67,5 @@ class Configuration(db.Model):
     )
     updated_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Configuration {self.key}={self.value}>"

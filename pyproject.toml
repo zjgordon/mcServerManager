@@ -27,3 +27,29 @@ ensure_newline_before_comments = true
 known_first_party = ["app"]
 known_third_party = ["flask", "sqlalchemy", "pytest"]
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+ignore_missing_imports = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_decorators = false
+no_implicit_optional = false
+exclude = [
+    "venv/",
+    "node_modules/",
+    ".venv/",
+    "__pycache__/",
+    ".mypy_cache/",
+    ".pytest_cache/",
+    "build/",
+    "dist/",
+    "tests/",
+]

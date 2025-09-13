@@ -18,7 +18,7 @@ class ProductionConfig(BaseConfig):
     TESTING = False
 
     # Production database (must be set via environment variable)
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI: str = os.environ.get("DATABASE_URL", "")
 
     # Enhanced security for production
     SESSION_COOKIE_SECURE = True  # HTTPS only

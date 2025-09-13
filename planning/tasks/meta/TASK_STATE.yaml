@@ -1,8 +1,8 @@
-active_card: CARD-011
+active_card: CARD-012
 breadcrumb:
-  step: 'CARD-010 completed - configured flake8 for Python linting with project-specific rules'
-  last_commit: 'feat: [CARD-010] Configure flake8 for Python linting with project-specific rules'
-  next_action: 'Start at CARD-011 - Next development task'
+  step: 'CARD-011 completed - configured mypy for static type checking with practical settings'
+  last_commit: 'feat: [CARD-011] Configure mypy for static type checking with practical settings'
+  next_action: 'Start at CARD-012 - Next development task'
 queue:
   - CARD-007D
   - CARD-007E
