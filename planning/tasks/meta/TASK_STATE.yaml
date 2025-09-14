@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-067 - Update configuration help sidebar with experimental features documentation'
-  last_commit: 'docs: [CARD-067] Update configuration help sidebar with experimental features documentation'
-  next_action: 'CARD-068 - Add experimental feature management tests'
+  step: 'CARD-068 - Add unit tests for experimental feature utilities'
+  last_commit: 'test: [CARD-068] Add comprehensive unit tests for experimental feature utilities'
+  next_action: 'CARD-069 - Add experimental feature integration tests'
 queue: 
-  - CARD-068
   - CARD-069
   - CARD-070
   

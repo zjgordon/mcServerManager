@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-068: Add unit tests for experimental feature utilities
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive unit tests for experimental feature utility functions in tests/unit/test_experimental_features.py. The test suite covers all four utility functions (get_experimental_features(), toggle_experimental_feature(), is_feature_enabled(), and add_experimental_feature()) with various scenarios including success cases, error conditions, edge cases, and database error handling. Tests include proper mocking of database operations, user context simulation, validation of return values and data structures, and comprehensive coverage of both positive and negative test paths. Added experimental_features marker to pytest configuration in pyproject.toml for proper test categorization. All 18 tests pass successfully, providing robust test coverage for the experimental feature management system and ensuring reliability of the feature gating functionality.
+
 ## 2025-01-27 - CARD-067: Update configuration help sidebar with experimental features documentation
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  
