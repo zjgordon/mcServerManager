@@ -1292,3 +1292,20 @@ loadBackupHistory, loadAvailableBackups, previewRestore, and executeRestore
 with consistent error handling patterns. The fix ensures graceful handling of
 server errors, CSRF token issues, and other HTML error responses without
 breaking the user interface or causing JavaScript console errors.
+
+## 2025-01-14 - CARD-043: Unify backup file naming convention between table/card and management interfaces
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully unified backup file naming convention between table/card backup
+buttons and backup management interface to ensure consistent backup file
+discovery and management. Updated backup_server() function in server_routes.py
+to use the same naming convention as the backup scheduler: changed from
+{server_name}_{timestamp}.tar.gz to {server_name}_backup_{timestamp}.tar.gz
+format. This surgical change ensures that backups created via table/card
+buttons are now discoverable by the backup management interface, resolving
+the issue where manually triggered backups were not appearing in backup
+history. The fix maintains backward compatibility while ensuring all backup
+interfaces use consistent file naming patterns for seamless backup management.

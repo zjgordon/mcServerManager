@@ -825,8 +825,8 @@ def backup_server(server_id):
             return redirect(url_for("server.home"))
 
     # Create the backup file with a timestamp
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    backup_filename = f"{server.server_name}_{timestamp}.tar.gz"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_filename = f"{server.server_name}_backup_{timestamp}.tar.gz"
     backup_filepath = os.path.join(backup_dir, backup_filename)
 
     try:
