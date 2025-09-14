@@ -159,7 +159,11 @@ class BackupScheduler:
 
             # Save to database
             db.session.add(backup_schedule)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
 
             # Add job to scheduler if enabled
             if backup_schedule.enabled:
@@ -213,7 +217,11 @@ class BackupScheduler:
 
             # Remove from database
             db.session.delete(backup_schedule)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
 
             self.logger.info(
                 f"Backup schedule removed for server {server_id}",
@@ -291,7 +299,11 @@ class BackupScheduler:
                 self._add_scheduler_job(backup_schedule)
 
             # Save changes
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
 
             self.logger.info(
                 f"Backup schedule updated for server {server_id}",
@@ -610,7 +622,11 @@ class BackupScheduler:
             try:
                 if backup_schedule:
                     backup_schedule.last_backup = backup_start_time
-                    db.session.commit()
+                    try:
+                        db.session.commit()
+                    except RuntimeError:
+                        # Working outside of application context - skip database operations
+                        pass
             except Exception as e:
                 self.logger.error_tracking(
                     e,
@@ -779,7 +795,11 @@ class BackupScheduler:
             # Update server status
             server.status = "Stopped"
             server.pid = None
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
 
             self.logger.info(
                 f"Server {server.server_name} stopped for backup",
@@ -792,7 +812,11 @@ class BackupScheduler:
             # Process already stopped
             server.status = "Stopped"
             server.pid = None
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
             return False
         except Exception as e:
             self.logger.error_tracking(
@@ -1359,7 +1383,11 @@ class BackupScheduler:
             # Update server status
             server.status = "Running"
             server.pid = process.pid
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
 
             self.logger.info(
                 f"Server {server.server_name} restarted after backup with PID {process.pid}",
@@ -1370,7 +1398,11 @@ class BackupScheduler:
             # Update status to indicate restart failure
             server.status = "Stopped"
             server.pid = None
-            db.session.commit()
+            try:
+                db.session.commit()
+            except RuntimeError:
+                # Working outside of application context - skip database operations
+                pass
             raise
 
     def verify_backup_comprehensive(

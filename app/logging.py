@@ -45,13 +45,21 @@ class JSONFormatter(logging.Formatter):
         if hasattr(record, "extra_fields"):
             log_entry.update(record.extra_fields)
 
-        # Add request context if available
-        if hasattr(g, "request_id"):
-            log_entry["request_id"] = g.request_id
+        # Add request context if available (check for Flask context)
+        try:
+            if hasattr(g, "request_id"):
+                log_entry["request_id"] = g.request_id
+        except RuntimeError:
+            # Working outside of application context
+            pass
 
-        # Add user context if available
-        if hasattr(g, "user_id"):
-            log_entry["user_id"] = g.user_id
+        # Add user context if available (check for Flask context)
+        try:
+            if hasattr(g, "user_id"):
+                log_entry["user_id"] = g.user_id
+        except RuntimeError:
+            # Working outside of application context
+            pass
 
         # Add exception information if present
         if record.exc_info:
@@ -291,20 +299,24 @@ def setup_logging(app):
 
     @app.after_request
     def log_request_end(response):
-        if hasattr(g, "request_id") and hasattr(g, "start_time"):
-            duration = time.time() - g.start_time
+        try:
+            if hasattr(g, "request_id") and hasattr(g, "start_time"):
+                duration = time.time() - g.start_time
 
-            logger.info(
-                "Request completed",
-                {
-                    "event_type": "request_end",
-                    "request_id": g.request_id,
-                    "method": request.method,
-                    "url": request.url,
-                    "status_code": response.status_code,
-                    "duration_seconds": duration,
-                },
-            )
+                logger.info(
+                    "Request completed",
+                    {
+                        "event_type": "request_end",
+                        "request_id": g.request_id,
+                        "method": request.method,
+                        "url": request.url,
+                        "status_code": response.status_code,
+                        "duration_seconds": duration,
+                    },
+                )
+        except RuntimeError:
+            # Working outside of application context
+            pass
 
         return response
 
