@@ -55,6 +55,17 @@ features.
 - **Persistent Configuration**: Database-backed configuration system
 - **Comprehensive Logging**: Detailed logging for debugging and monitoring
 
+### Automated Backup Management
+
+- **Scheduled Backups**: Daily, weekly, or monthly automated backup schedules
+- **Server Integration**: Automatic server stopping/starting during backups
+- **Verification & Integrity**: Multiple verification methods including checksums and corruption detection
+- **Compression & Encryption**: Support for gzip, bzip2, lzma compression and AES-256 encryption
+- **Retention Policies**: Configurable backup retention with disk space monitoring
+- **Restore Capabilities**: Full backup restoration with preview and confirmation
+- **API Integration**: RESTful API for programmatic backup management
+- **Monitoring & Alerting**: Comprehensive metrics and failure alerting
+
 ## 🛠️ Installation
 
 ### Prerequisites
@@ -130,7 +141,11 @@ PASSWORD_MIN_LENGTH=8
 ### Managing Servers
 
 - **Start/Stop**: Control server lifecycle
-- **Backup**: Create server backups with compression
+- **Backup Management**: Create, schedule, and restore server backups
+  - Manual backups with compression and verification
+  - Automated backup scheduling (daily/weekly/monthly)
+  - Backup history and status monitoring
+  - Full restore capabilities with preview
 - **Monitor**: Real-time status and resource usage
 - **Configure**: Modify server properties and settings
 
