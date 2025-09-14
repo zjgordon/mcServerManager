@@ -122,6 +122,7 @@ RELEASE_NOTES.md)
 
 - CARD-093: ✅ Completed - Fixed backup API and E2E workflow test failures by correcting error message expectations in tests to match actual API behavior, ensuring consistent error handling across backup endpoints
 - CARD-094: ✅ Completed - Fixed server management page integration test failures by correcting route accessibility and feature flag integration, resolving 2 out of 3 failing tests with proper home route access and feature flag functionality
+- CARD-095: ✅ Completed - Updated test fixtures and improved test data management by fixing experimental feature database seeding issues, enhancing mock configuration for process verification, and adding comprehensive test helper functions for better test isolation and reliability
 - CARD-092: ✅ Completed - Fixed console API endpoint functionality and response handling by resolving test isolation issues, correcting mock patching strategies, and ensuring proper process verification mocking for all console API tests
 - CARD-091: ✅ Completed - Fixed console API error handling and rate limiting issues by updating error responses to include consistent success field, adding proper JSON parsing error handling, and enabling rate limiting in test environment
 - CARD-090: ✅ Completed - Fixed mock configuration and process verification issues by properly mocking psutil.Process.cmdline() method to return list instead of Mock object, resolving "argument of type 'Mock' is not iterable" errors

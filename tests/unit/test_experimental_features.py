@@ -25,7 +25,7 @@ class TestExperimentalFeatures:
     def test_get_experimental_features_success(self, app, client):
         """Test getting all experimental features successfully."""
         with app.app_context():
-            # Create test features
+            # Create test features with unique keys
             feature1 = ExperimentalFeature(
                 feature_key="test_feature_1",
                 feature_name="Test Feature 1",
@@ -48,10 +48,11 @@ class TestExperimentalFeatures:
             # Test the function
             features = get_experimental_features()
 
-            # Verify results
-            assert len(features) == 2
+            # Verify results - should include the default server_management_page feature plus our 2 test features
+            assert len(features) == 3
             assert any(f["feature_key"] == "test_feature_1" for f in features)
             assert any(f["feature_key"] == "test_feature_2" for f in features)
+            assert any(f["feature_key"] == "server_management_page" for f in features)
 
             # Verify structure
             feature1_data = next(f for f in features if f["feature_key"] == "test_feature_1")
@@ -63,10 +64,12 @@ class TestExperimentalFeatures:
             assert "updated_at" in feature1_data
 
     def test_get_experimental_features_empty(self, app, client):
-        """Test getting experimental features when none exist."""
+        """Test getting experimental features when only default features exist."""
         with app.app_context():
             features = get_experimental_features()
-            assert features == []
+            # Should have the default server_management_page feature
+            assert len(features) == 1
+            assert features[0]["feature_key"] == "server_management_page"
 
     def test_get_experimental_features_database_error(self, app, client):
         """Test getting experimental features with database error."""
@@ -80,32 +83,38 @@ class TestExperimentalFeatures:
     def test_toggle_experimental_feature_success(self, app, client):
         """Test toggling experimental feature successfully."""
         with app.app_context():
-            # Create test feature
+            # Create test feature with unique key
             feature = ExperimentalFeature(
-                feature_key="test_toggle",
-                feature_name="Test Toggle",
-                description="Test toggle feature",
+                feature_key="test_toggle_success",
+                feature_name="Test Toggle Success",
+                description="Test toggle feature for success test",
                 enabled=False,
                 is_stable=False,
             )
             db.session.add(feature)
             db.session.commit()
 
+            # Verify feature exists before testing
+            existing_feature = ExperimentalFeature.query.filter_by(
+                feature_key="test_toggle_success"
+            ).first()
+            assert existing_feature is not None, "Feature should exist before toggle test"
+
             # Test enabling feature
-            result = toggle_experimental_feature("test_toggle", True)
+            result = toggle_experimental_feature("test_toggle_success", True)
             assert result is True
 
             # Verify feature was enabled
-            updated_feature = ExperimentalFeature.query.filter_by(feature_key="test_toggle").first()
-            assert updated_feature.enabled is True
+            db.session.refresh(feature)  # Refresh from database
+            assert feature.enabled is True
 
             # Test disabling feature
-            result = toggle_experimental_feature("test_toggle", False)
+            result = toggle_experimental_feature("test_toggle_success", False)
             assert result is True
 
             # Verify feature was disabled
-            updated_feature = ExperimentalFeature.query.filter_by(feature_key="test_toggle").first()
-            assert updated_feature.enabled is False
+            db.session.refresh(feature)  # Refresh from database
+            assert feature.enabled is False
 
     def test_toggle_experimental_feature_not_found(self, app, client):
         """Test toggling non-existent experimental feature."""

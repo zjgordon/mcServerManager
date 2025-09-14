@@ -44,18 +44,15 @@ class TestFeatureFlagFunctionality:
     def test_is_feature_enabled_existing_feature(self, app):
         """Test checking if an existing feature is enabled."""
         with app.app_context():
-            # Create a test feature
-            feature = ExperimentalFeature(
-                feature_key="server_management_page",
-                feature_name="Server Management Page",
-                description="Test feature for server management",
-                enabled=True,
-                is_stable=False,
-            )
-            db.session.add(feature)
-            db.session.commit()
+            # Use the existing server_management_page feature from the app fixture
+            feature = ExperimentalFeature.query.filter_by(
+                feature_key="server_management_page"
+            ).first()
+            assert (
+                feature is not None
+            ), "server_management_page feature should exist from app fixture"
 
-            # Test enabled feature
+            # Test enabled feature (should be True by default from app fixture)
             assert is_feature_enabled("server_management_page") is True
 
             # Test disabled feature
@@ -504,9 +501,10 @@ class TestErrorHandlingScenarios:
             feature = ExperimentalFeature.query.filter_by(
                 feature_key="server_management_page"
             ).first()
-            if feature:
-                feature.enabled = False
-                db.session.commit()
+            assert feature is not None, "server_management_page feature should exist"
+
+            feature.enabled = False
+            db.session.commit()
 
             # Test logs endpoint
             response = client.get(f"/api/console/{test_server.id}/logs")

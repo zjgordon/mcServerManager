@@ -1,10 +1,9 @@
-active_card: CARD-095
+active_card: CARD-096
 breadcrumb:
-  step: 'CARD-094 - Fix server management page integration test failures'
-  last_commit: 'fix: [CARD-094] Fix server management page integration test failures'
-  next_action: 'CARD-095 - Ready to start next task'
+  step: 'CARD-095 - Update test fixtures and improve test data management'
+  last_commit: 'feat: [CARD-095] Update test fixtures and improve test data management'
+  next_action: 'CARD-096 - Ready to start next task'
 queue:
-  - CARD-095
   - CARD-096
   - CARD-097
   - CARD-098

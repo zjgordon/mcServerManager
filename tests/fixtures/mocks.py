@@ -346,6 +346,33 @@ def mock_psutil_process():
 
 
 @pytest.fixture
+def mock_psutil_process_running():
+    """Mock psutil.Process for a running server process."""
+    with patch("psutil.Process") as mock_process_class:
+        mock_process = MagicMock()
+        mock_process.pid = 12345
+        mock_process.is_running.return_value = True
+        mock_process.name.return_value = "java"
+        mock_process.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
+        mock_process.cwd.return_value = "/path/to/server"
+        mock_process.create_time.return_value = 1640995200.0
+
+        # Memory info
+        mock_memory_info = MagicMock()
+        mock_memory_info.rss = 1024 * 1024 * 100  # 100MB
+        mock_memory_info.vms = 1024 * 1024 * 200  # 200MB
+        mock_process.memory_info.return_value = mock_memory_info
+        mock_process.cpu_percent.return_value = 5.0
+
+        mock_process_class.return_value = mock_process
+
+        yield {
+            "mock_process_class": mock_process_class,
+            "mock_process": mock_process,
+        }
+
+
+@pytest.fixture
 def mock_psutil_process_not_running():
     """Mock psutil.Process for a non-running process."""
     with patch("psutil.Process") as mock_process_class:

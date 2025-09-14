@@ -71,13 +71,14 @@ class TestServerManagementPageIntegration:
     def test_console_api_feature_flag_integration(self, authenticated_client, test_server):
         """Test console API integration with feature flags."""
         with authenticated_client.application.app_context():
-            # Test with feature disabled
+            # Ensure feature exists and disable it
             feature = ExperimentalFeature.query.filter_by(
                 feature_key="server_management_page"
             ).first()
-            if feature:
-                feature.enabled = False
-                db.session.commit()
+            assert feature is not None, "server_management_page feature should exist"
+
+            feature.enabled = False
+            db.session.commit()
 
             # Test console endpoints with feature disabled
             response = authenticated_client.get(f"/api/console/{test_server.id}/logs")
@@ -643,9 +644,10 @@ class TestFeatureFlagAdminIntegration:
                 feature = ExperimentalFeature.query.filter_by(
                     feature_key="server_management_page"
                 ).first()
-                if feature:
-                    feature.enabled = False
-                    db.session.commit()
+                assert feature is not None, "server_management_page feature should exist"
+
+                feature.enabled = False
+                db.session.commit()
 
                 # All console endpoints should return 403
                 response = authenticated_client.get(f"/api/console/{running_server.id}/logs")

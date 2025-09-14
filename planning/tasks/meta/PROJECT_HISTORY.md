@@ -1,5 +1,22 @@
 # Project History
 
+## 2025-09-14 - CARD-095: Update test fixtures and improve test data management
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+**Summary:** Enhanced test fixtures and improved test data management to support all the fixes made in previous cards and ensure consistent test execution. The main focus was on fixing database integrity issues with experimental features and improving mock configuration for process verification. This work significantly improved test reliability and reduced test failures from database constraint violations.
+
+**Changes Made:**
+- Fixed experimental feature database seeding issues by adding existence checks before creating features to prevent UNIQUE constraint failures
+- Enhanced mock configuration for process verification with improved psutil.Process mocking strategies
+- Added comprehensive test helper functions for experimental feature management including `create_experimental_feature()` and `ensure_experimental_feature_state()`
+- Improved test isolation by adding proper database state management and cleanup utilities
+- Updated test fixtures to use unique feature keys and account for existing features from app fixtures
+- Added `clean_test_environment` fixture for complete test isolation with proper setup and teardown
+- Enhanced mock fixtures with better process simulation and consistent return types
+
 ## 2025-09-14 - CARD-092: Fix console API endpoint functionality and response handling
 
 **Epic:** Epic 3 – Test Suite Stabilization  
