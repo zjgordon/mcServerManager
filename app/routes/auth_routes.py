@@ -14,7 +14,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from ..extensions import db, login_manager
+from ..extensions import csrf, db, login_manager
 from ..models import User
 from ..security import (
     PasswordPolicyError,
@@ -466,9 +466,25 @@ def admin_config():
     )
 
 
-@auth_bp.route("/admin_config/experimental", methods=["POST"])
+@auth_bp.route("/admin_config/experimental", methods=["GET", "POST"])
 @login_required
 @admin_required
+@csrf.exempt
+def experimental_features():
+    """Handle experimental feature requests (admin only)."""
+    if request.method == "GET":
+        # Return current experimental features
+        try:
+            features = get_experimental_features()
+            return jsonify({"features": features}), 200
+        except Exception as e:
+            current_app.logger.error(f"Error fetching experimental features: {str(e)}")
+            return jsonify({"success": False, "error": "Internal server error"}), 500
+
+    # Handle POST requests (toggle feature)
+    return experimental_features_toggle()
+
+
 def experimental_features_toggle():
     """Handle experimental feature toggle requests (admin only)."""
     try:
