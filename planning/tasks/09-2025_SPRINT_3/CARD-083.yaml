@@ -1,0 +1,21 @@
+id: CARD-083
+title: Add real-time status updates to server management page
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Enhance app/static/js/server_management.js to include:
+  - Server status polling (every 5 seconds) to update running/stopped status
+  - Memory usage updates from server status API
+  - Player count updates if available
+  - Visual status indicators that update in real-time
+  - Loading states and error handling for status updates

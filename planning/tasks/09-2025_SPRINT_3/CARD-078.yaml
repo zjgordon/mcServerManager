@@ -1,0 +1,21 @@
+id: CARD-078
+title: Implement server log parsing utility
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Add parse_server_logs(log_file_path) function to app/utils.py. Function should:
+  - Extract timestamp, level (INFO/WARN/ERROR), and message from log lines
+  - Handle different Minecraft server log formats
+  - Return structured data with error handling for missing/corrupted logs
+  - Support pagination for large log files
+  - Include proper error handling and logging

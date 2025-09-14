@@ -1,7 +1,23 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-070 - Add feature gating implementation examples'
-  last_commit: 'docs: [CARD-070] Add comprehensive feature gating implementation examples and documentation'
-  next_action: 'CARD-071 - Next task in queue'
-queue: []
+  step: 'CARD-071 - Remove dummy experimental features from admin config'
+  last_commit: 'feat: [CARD-071] Remove dummy experimental features and replace with Server Management Page feature card'
+  next_action: 'CARD-072 - Next card in queue'
+queue: 
+  - CARD-071
+  - CARD-072
+  - CARD-073
+  - CARD-074
+  - CARD-075
+  - CARD-076
+  - CARD-077
+  - CARD-078
+  - CARD-079
+  - CARD-080
+  - CARD-081
+  - CARD-082
+  - CARD-083
+  - CARD-084
+  - CARD-085
+  - CARD-086
   

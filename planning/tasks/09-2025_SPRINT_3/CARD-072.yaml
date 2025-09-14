@@ -1,0 +1,20 @@
+id: CARD-072
+title: Create database migration to update experimental features
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Create a new migration file in migrations/versions/ to remove dummy experimental features and add 
+  the server_management_page feature. Remove: advanced_monitoring, auto_backup, multi_user, plugin_manager.
+  Add: server_management_page with feature_key='server_management_page', feature_name='Server Management Page',
+  description='Enhanced server management interface with real-time console and advanced controls',
+  enabled=false, is_stable=false.

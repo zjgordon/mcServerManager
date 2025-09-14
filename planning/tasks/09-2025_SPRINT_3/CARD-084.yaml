@@ -1,0 +1,22 @@
+id: CARD-084
+title: Create unit tests for server management functionality
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Create tests/unit/test_server_management.py with comprehensive unit tests for:
+  - Feature flag functionality (is_feature_enabled, toggle_experimental_feature)
+  - Server management route access control
+  - Console API endpoints (logs, command, status)
+  - Command execution system
+  - Log parsing utility functions
+  - Error handling scenarios

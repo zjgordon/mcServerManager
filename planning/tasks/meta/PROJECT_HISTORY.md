@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-071: Remove dummy experimental features from admin config
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Removed dummy experimental feature cards (advanced_monitoring, auto_backup, multi_user, plugin_manager) from app/templates/admin_config.html lines 151-239 and replaced with a single "Server Management Page" feature card that is experimental and disabled by default. This surgical change prepares the system for the real server management page feature flag by removing placeholder features and implementing a clean, focused experimental feature interface. The new feature card uses the cogs icon, includes comprehensive description text, and maintains the existing experimental features styling and toggle functionality. Updated the corresponding integration test to validate the new feature card display instead of the removed dummy features. All tests pass with the new experimental feature structure, providing a clean foundation for future server management page development.
+
 ## 2025-01-27 - CARD-070: Add feature gating implementation examples
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  

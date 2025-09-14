@@ -1,0 +1,19 @@
+id: CARD-074
+title: Create server management route with feature flag check
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Add a new route @server_bp.route("/manage/<int:server_id>") to app/routes/server_routes.py. 
+  Use existing check_server_access() function for access control. Add feature flag check using 
+  is_feature_enabled('server_management_page'). If feature disabled, redirect to home with flash message.
+  Route should be GET only and render server_management.html template.

@@ -1,0 +1,21 @@
+id: CARD-077
+title: Create console API routes for log streaming and commands
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Create app/routes/api/console_routes.py with three API endpoints:
+  1) GET /api/console/<server_id>/logs - Stream server logs with pagination
+  2) POST /api/console/<server_id>/command - Execute console command
+  3) GET /api/console/<server_id>/status - Get server status and metadata
+  Include proper access control using check_server_access() and feature flag validation.
+  Add error handling and JSON responses.

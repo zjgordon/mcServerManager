@@ -1,0 +1,19 @@
+id: CARD-076
+title: Add conditional console/manage button to home template
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Update app/templates/home.html to conditionally show "Manage Server" button instead of "Console" 
+  button when server_management_page feature is enabled. Use is_feature_enabled('server_management_page') 
+  check. Keep existing console button as fallback when feature is disabled. Update both table view 
+  (line 230) and card view (line 341) console buttons.

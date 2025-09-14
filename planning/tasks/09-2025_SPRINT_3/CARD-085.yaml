@@ -1,0 +1,22 @@
+id: CARD-085
+title: Create integration tests for server management page
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Create tests/integration/test_server_management.py with end-to-end integration tests for:
+  - Complete server management page flow (feature enabled/disabled)
+  - Console functionality with real server logs
+  - Command execution and response handling
+  - Feature flag integration with admin config
+  - User access control scenarios (admin vs regular user)
+  - Error handling and fallback behavior

@@ -78,35 +78,26 @@ class TestAdminConfigEnhancements:
             sess["_user_id"] = str(admin_user.id)
             sess["_fresh"] = True
 
-        # Create test experimental features
+        # Create test experimental feature
         with app.app_context():
-            feature1 = ExperimentalFeature(
-                feature_key="advanced_monitoring",
-                feature_name="Advanced Monitoring",
-                description="Enhanced server monitoring",
+            feature = ExperimentalFeature(
+                feature_key="server_management_page",
+                feature_name="Server Management Page",
+                description="Comprehensive server management interface with advanced controls and monitoring",
                 enabled=False,
                 is_stable=False,
             )
-            feature2 = ExperimentalFeature(
-                feature_key="auto_backup",
-                feature_name="Auto-Backup",
-                description="Automatic server backups",
-                enabled=True,
-                is_stable=True,
-            )
             from app.extensions import db
 
-            db.session.add(feature1)
-            db.session.add(feature2)
+            db.session.add(feature)
             db.session.commit()
 
         response = client.get("/admin_config")
 
         assert response.status_code == 200
-        assert b"Advanced Monitoring" in response.data
-        assert b"Auto-Backup" in response.data
+        assert b"Server Management Page" in response.data
+        assert b"Comprehensive server management interface" in response.data
         assert b"Experimental" in response.data
-        assert b"Stable" in response.data
 
     def test_experimental_features_toggle_success(self, app, client, admin_user):
         """Test successful experimental feature toggle via API."""
