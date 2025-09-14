@@ -1,10 +1,9 @@
-active_card: CARD-096
+active_card: CARD-097
 breadcrumb:
-  step: 'CARD-095 - Update test fixtures and improve test data management'
-  last_commit: 'feat: [CARD-095] Update test fixtures and improve test data management'
-  next_action: 'CARD-096 - Ready to start next task'
+  step: 'CARD-096 - Add individual test file execution capability to dev.sh'
+  last_commit: 'feat: [CARD-096] Add individual test file execution capability to dev.sh'
+  next_action: 'CARD-097 - Ready to start next task'
 queue:
-  - CARD-096
   - CARD-097
   - CARD-098
   - CARD-099

@@ -162,6 +162,7 @@ show_usage() {
     echo "  --integration       Run only integration tests (tests/integration/)"
     echo "  --e2e               Run only end-to-end tests (tests/e2e/)"
     echo "  --performance       Run only performance tests (tests/performance/)"
+    echo "  --file FILE         Run specific test file (relative or absolute path)"
     echo ""
     echo "EXAMPLES:"
     echo "  $0                                    # Run with default settings"
@@ -174,6 +175,8 @@ show_usage() {
     echo "  $0 test --integration                # Run only integration tests"
     echo "  $0 test --e2e                        # Run only e2e tests"
     echo "  $0 test --performance                # Run only performance tests"
+    echo "  $0 test --file tests/unit/test_server_management.py  # Run specific test file"
+    echo "  $0 test --file test_server_management.py             # Run test file (relative path)"
     echo "  $0 setup                             # Setup environment without running"
     echo ""
     echo "PROCESS MANAGEMENT:"
@@ -243,6 +246,7 @@ setup_demo_mode() {
 run_tests() {
     local test_type="all"
     local test_path="tests/"
+    local test_file=""
 
     # Parse test arguments
     while [[ $# -gt 0 ]]; do
@@ -267,11 +271,43 @@ run_tests() {
                 test_path="tests/performance/"
                 shift
                 ;;
+            --file)
+                test_file="$2"
+                shift 2
+                ;;
             *)
                 shift
                 ;;
         esac
     done
+
+    # Handle file-specific test execution
+    if [ -n "$test_file" ]; then
+        # Validate file exists
+        if [ ! -f "$test_file" ]; then
+            # Try relative path from tests directory
+            if [ -f "tests/$test_file" ]; then
+                test_file="tests/$test_file"
+            else
+                print_error "Test file not found: $test_file"
+                print_info "Please provide a valid test file path (relative or absolute)"
+                exit 1
+            fi
+        fi
+
+        print_info "Running specific test file: $test_file"
+
+        # Check if pytest is available
+        if ! command -v pytest &> /dev/null; then
+            print_error "pytest not found. Installing..."
+            pip install pytest >/dev/null 2>&1
+        fi
+
+        # Run the specific test file
+        pytest "$test_file" -v
+        print_success "Test file execution completed"
+        return
+    fi
 
     print_info "Running $test_type tests..."
 
@@ -344,6 +380,7 @@ main() {
     local demo_mode=false
     local background_mode=false
     local kill_mode=false
+    local test_file=""
 
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -395,6 +432,17 @@ main() {
                 fi
                 shift
                 ;;
+            --file)
+                # This is a test-specific option, only valid after 'test' command
+                if [ "$command" != "test" ]; then
+                    print_error "Option $1 is only valid with 'test' command"
+                    show_usage
+                    exit 1
+                fi
+                # Capture the file argument
+                test_file="$2"
+                shift 2
+                ;;
             *)
                 print_error "Unknown option: $1"
                 show_usage
@@ -436,8 +484,12 @@ main() {
             fi
             ;;
         test)
-            # Pass all remaining arguments to run_tests
-            run_tests "$@"
+            # Pass all remaining arguments to run_tests, plus the file if specified
+            if [ -n "$test_file" ]; then
+                run_tests --file "$test_file" "$@"
+            else
+                run_tests "$@"
+            fi
             ;;
         setup)
             print_success "Development environment setup complete"
