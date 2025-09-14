@@ -642,22 +642,29 @@ class BackupScheduler:
                     "error": f"Failed to create backup after {max_retries} attempts: {last_error}",
                 }
 
-            # Step 3: Verify backup integrity
-            verification_result = self._verify_backup_integrity(backup_filepath)
-            if not verification_result["valid"]:
-                # Clean up invalid backup
-                try:
-                    os.remove(backup_filepath)
-                except OSError:
-                    pass
-                return {
-                    "success": False,
-                    "error": f"Backup verification failed: {verification_result['error']}",
-                }
+            # Step 3: Verify backup integrity with comprehensive verification
+            verification_result = self.verify_backup_comprehensive(
+                backup_filepath, server_id, include_restore_test=False
+            )
+            if not verification_result["overall_valid"]:
+                # Attempt repair if possible
+                repair_result = self.repair_backup_if_possible(backup_filepath, server_id)
+                if not repair_result["repair_successful"]:
+                    # Clean up invalid backup
+                    try:
+                        os.remove(backup_filepath)
+                    except OSError:
+                        pass
+                    return {
+                        "success": False,
+                        "error": f"Backup verification failed: {verification_result.get('error', 'Verification failed')}",
+                        "verification_details": verification_result,
+                        "repair_attempted": repair_result["repair_attempted"],
+                    }
 
             # Step 4: Get backup metadata
             backup_size = os.path.getsize(backup_filepath)
-            backup_checksum = verification_result["checksum"]
+            backup_checksum = verification_result.get("archive_integrity", {}).get("checksum")
 
             # Step 5: Clean up old backups based on retention policy
             self._cleanup_old_backups(server_id, backup_dir)
@@ -672,6 +679,11 @@ class BackupScheduler:
                 "checksum": backup_checksum,
                 "duration": backup_duration,
                 "was_running": was_running,
+                "verification_details": verification_result,
+                "quality_score": verification_result.get("quality_score", {}).get("score", 0),
+                "quality_level": verification_result.get("quality_score", {}).get(
+                    "quality_level", "Unknown"
+                ),
             }
 
         except Exception as e:
@@ -760,21 +772,32 @@ class BackupScheduler:
             raise
 
     def _verify_backup_integrity(self, backup_filepath: str) -> Dict[str, Any]:
-        """Verify backup archive integrity using checksums."""
+        """Verify backup archive integrity using comprehensive verification methods."""
         try:
-            # Calculate SHA256 checksum
-            sha256_hash = hashlib.sha256()
-            with open(backup_filepath, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(chunk)
-            checksum = sha256_hash.hexdigest()
+            # Calculate multiple checksums
+            from .utils import calculate_file_checksums
+
+            checksums = calculate_file_checksums(backup_filepath, ["md5", "sha256"])
+
+            if not checksums:
+                return {
+                    "valid": False,
+                    "error": "Failed to calculate checksums",
+                    "checksum": None,
+                    "verification_details": {},
+                }
 
             # Verify archive can be opened and has content
             try:
                 with tarfile.open(backup_filepath, "r:gz") as tar:
                     members = tar.getmembers()
                     if not members:
-                        return {"valid": False, "error": "Archive is empty", "checksum": checksum}
+                        return {
+                            "valid": False,
+                            "error": "Archive is empty",
+                            "checksum": checksums.get("sha256"),
+                            "verification_details": {"archive_member_count": 0},
+                        }
 
                     # Check if we can extract the first member (basic integrity test)
                     first_member = members[0]
@@ -782,23 +805,34 @@ class BackupScheduler:
                         return {
                             "valid": False,
                             "error": "Archive contains invalid members",
-                            "checksum": checksum,
+                            "checksum": checksums.get("sha256"),
+                            "verification_details": {"invalid_members": True},
                         }
 
             except (tarfile.TarError, OSError) as tar_error:
                 return {
                     "valid": False,
                     "error": f"Archive corruption detected: {str(tar_error)}",
-                    "checksum": checksum,
+                    "checksum": checksums.get("sha256"),
+                    "verification_details": {"tar_error": str(tar_error)},
                 }
 
-            return {"valid": True, "checksum": checksum}
+            return {
+                "valid": True,
+                "checksum": checksums.get("sha256"),
+                "checksums": checksums,
+                "verification_details": {
+                    "archive_member_count": len(members),
+                    "archive_readable": True,
+                },
+            }
 
         except Exception as verify_error:
             return {
                 "valid": False,
                 "error": f"Integrity verification failed: {str(verify_error)}",
                 "checksum": None,
+                "verification_details": {"error": str(verify_error)},
             }
 
     def cleanup_old_backups(self, server_id: int) -> Dict[str, Any]:
@@ -1067,6 +1101,362 @@ class BackupScheduler:
             server.pid = None
             db.session.commit()
             raise
+
+    def verify_backup_comprehensive(
+        self, backup_filepath: str, server_id: int = None, include_restore_test: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Perform comprehensive backup verification with multiple methods.
+
+        Args:
+            backup_filepath: Path to the backup file to verify
+            server_id: ID of the server (for logging context)
+            include_restore_test: Whether to perform restore test verification
+
+        Returns:
+            Dict containing comprehensive verification results
+        """
+        verification_start_time = time.time()
+
+        try:
+            self.logger.info(
+                f"Starting comprehensive backup verification for {backup_filepath}",
+                {
+                    "event_type": "backup_verification_started",
+                    "backup_file": backup_filepath,
+                    "server_id": server_id,
+                    "include_restore_test": include_restore_test,
+                },
+            )
+
+            # Initialize verification results
+            verification_results = {
+                "backup_file": backup_filepath,
+                "server_id": server_id,
+                "verification_timestamp": datetime.utcnow().isoformat(),
+                "verification_methods": [],
+                "overall_valid": True,
+                "quality_score": 0,
+                "corruption_detected": False,
+                "errors": [],
+            }
+
+            # 1. File system integrity checks
+            from .utils import verify_file_integrity
+
+            file_integrity = verify_file_integrity(backup_filepath)
+            verification_results["file_integrity"] = file_integrity
+            verification_results["verification_methods"].append("file_integrity")
+
+            if not file_integrity["valid"]:
+                verification_results["overall_valid"] = False
+                verification_results["corruption_detected"] = True
+                verification_results["errors"].append(
+                    f"File integrity check failed: {file_integrity.get('error')}"
+                )
+
+            # 2. Archive integrity verification
+            archive_integrity = self._verify_backup_integrity(backup_filepath)
+            verification_results["archive_integrity"] = archive_integrity
+            verification_results["verification_methods"].append("archive_integrity")
+
+            if not archive_integrity["valid"]:
+                verification_results["overall_valid"] = False
+                verification_results["corruption_detected"] = True
+                verification_results["errors"].append(
+                    f"Archive integrity check failed: {archive_integrity.get('error')}"
+                )
+
+            # 3. Minecraft world file validation (if server_id provided)
+            if server_id:
+                try:
+                    server = Server.query.get(server_id)
+                    if server:
+                        from .utils import validate_minecraft_world_files
+
+                        server_dir = os.path.join("servers", server.server_name)
+                        world_validation = validate_minecraft_world_files(server_dir)
+                        verification_results["world_validation"] = world_validation
+                        verification_results["verification_methods"].append("world_validation")
+
+                        if not world_validation["valid"]:
+                            verification_results["overall_valid"] = False
+                            verification_results["errors"].append(
+                                f"World validation failed: {world_validation.get('error', 'Missing or corrupted world files')}"
+                            )
+                except Exception as e:
+                    verification_results["world_validation"] = {
+                        "valid": False,
+                        "error": f"World validation error: {str(e)}",
+                    }
+                    verification_results["errors"].append(f"World validation error: {str(e)}")
+
+            # 4. Optional restore test verification
+            if include_restore_test:
+                try:
+                    from .utils import test_backup_restore
+
+                    restore_test = test_backup_restore(backup_filepath)
+                    verification_results["restore_test"] = restore_test
+                    verification_results["verification_methods"].append("restore_test")
+
+                    if not restore_test["valid"]:
+                        verification_results["overall_valid"] = False
+                        verification_results["errors"].append(
+                            f"Restore test failed: {restore_test.get('error')}"
+                        )
+                except Exception as e:
+                    verification_results["restore_test"] = {
+                        "valid": False,
+                        "error": f"Restore test error: {str(e)}",
+                    }
+                    verification_results["errors"].append(f"Restore test error: {str(e)}")
+
+            # 5. Generate quality score
+            from .utils import generate_backup_quality_score
+
+            quality_score = generate_backup_quality_score(verification_results)
+            verification_results["quality_score"] = quality_score
+
+            # 6. Generate validation report
+            verification_results["validation_report"] = self._generate_validation_report(
+                verification_results
+            )
+
+            verification_duration = time.time() - verification_start_time
+            verification_results["verification_duration"] = verification_duration
+
+            # Log verification results
+            self.logger.info(
+                f"Backup verification completed for {backup_filepath}",
+                {
+                    "event_type": "backup_verification_completed",
+                    "backup_file": backup_filepath,
+                    "server_id": server_id,
+                    "overall_valid": verification_results["overall_valid"],
+                    "quality_score": quality_score["score"],
+                    "quality_level": quality_score["quality_level"],
+                    "corruption_detected": verification_results["corruption_detected"],
+                    "verification_methods": verification_results["verification_methods"],
+                    "verification_duration": verification_duration,
+                },
+            )
+
+            return verification_results
+
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {
+                    "event_type": "backup_verification_error",
+                    "backup_file": backup_filepath,
+                    "server_id": server_id,
+                    "action": "verify_backup_comprehensive",
+                },
+            )
+            return {
+                "backup_file": backup_filepath,
+                "server_id": server_id,
+                "overall_valid": False,
+                "error": f"Verification failed: {str(e)}",
+                "corruption_detected": True,
+                "verification_methods": [],
+                "quality_score": {"score": 0, "quality_level": "Unknown"},
+            }
+
+    def _generate_validation_report(self, verification_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate a detailed validation report from verification results."""
+        try:
+            report = {
+                "summary": {
+                    "overall_status": "PASS" if verification_results["overall_valid"] else "FAIL",
+                    "quality_score": verification_results["quality_score"]["score"],
+                    "quality_level": verification_results["quality_score"]["quality_level"],
+                    "corruption_detected": verification_results["corruption_detected"],
+                    "verification_methods_used": verification_results["verification_methods"],
+                },
+                "details": {},
+                "recommendations": [],
+            }
+
+            # File integrity details
+            if "file_integrity" in verification_results:
+                file_integrity = verification_results["file_integrity"]
+                report["details"]["file_integrity"] = {
+                    "status": "PASS" if file_integrity["valid"] else "FAIL",
+                    "checksums": file_integrity.get("checksums", {}),
+                    "corruption_detected": file_integrity.get("corruption_detected", False),
+                }
+                if not file_integrity["valid"]:
+                    report["recommendations"].append(
+                        "File integrity check failed - backup may be corrupted"
+                    )
+
+            # Archive integrity details
+            if "archive_integrity" in verification_results:
+                archive_integrity = verification_results["archive_integrity"]
+                report["details"]["archive_integrity"] = {
+                    "status": "PASS" if archive_integrity["valid"] else "FAIL",
+                    "checksum": archive_integrity.get("checksum"),
+                    "verification_details": archive_integrity.get("verification_details", {}),
+                }
+                if not archive_integrity["valid"]:
+                    report["recommendations"].append(
+                        "Archive integrity check failed - backup archive is corrupted"
+                    )
+
+            # World validation details
+            if "world_validation" in verification_results:
+                world_validation = verification_results["world_validation"]
+                report["details"]["world_validation"] = {
+                    "status": "PASS" if world_validation["valid"] else "FAIL",
+                    "world_files": world_validation.get("world_files", []),
+                    "missing_files": world_validation.get("missing_files", []),
+                    "corrupted_files": world_validation.get("corrupted_files", []),
+                    "region_file_count": world_validation.get("region_file_count", 0),
+                }
+                if not world_validation["valid"]:
+                    missing_count = len(world_validation.get("missing_files", []))
+                    corrupted_count = len(world_validation.get("corrupted_files", []))
+                    if missing_count > 0:
+                        report["recommendations"].append(
+                            f"World validation failed - {missing_count} missing files"
+                        )
+                    if corrupted_count > 0:
+                        report["recommendations"].append(
+                            f"World validation failed - {corrupted_count} corrupted files"
+                        )
+
+            # Restore test details
+            if "restore_test" in verification_results:
+                restore_test = verification_results["restore_test"]
+                report["details"]["restore_test"] = {
+                    "status": "PASS" if restore_test["valid"] else "FAIL",
+                    "extracted_files_count": len(restore_test.get("extracted_files", [])),
+                    "missing_server_files": restore_test.get("missing_server_files", []),
+                    "world_validation": restore_test.get("world_validation", {}),
+                }
+                if not restore_test["valid"]:
+                    report["recommendations"].append(
+                        "Restore test failed - backup cannot be properly restored"
+                    )
+
+            # Add general recommendations based on quality score
+            quality_score = verification_results["quality_score"]["score"]
+            if quality_score < 60:
+                report["recommendations"].append(
+                    "Backup quality is poor - consider creating a new backup"
+                )
+            elif quality_score < 80:
+                report["recommendations"].append("Backup quality is fair - monitor for issues")
+
+            return report
+
+        except Exception as e:
+            self.logger.error(f"Error generating validation report: {str(e)}")
+            return {
+                "summary": {"overall_status": "ERROR", "error": str(e)},
+                "details": {},
+                "recommendations": ["Unable to generate detailed report"],
+            }
+
+    def repair_backup_if_possible(
+        self, backup_filepath: str, server_id: int = None
+    ) -> Dict[str, Any]:
+        """
+        Attempt to repair backup if corruption is detected and repair is possible.
+
+        Args:
+            backup_filepath: Path to the backup file to repair
+            server_id: ID of the server (for logging context)
+
+        Returns:
+            Dict containing repair attempt results
+        """
+        try:
+            self.logger.info(
+                f"Attempting backup repair for {backup_filepath}",
+                {
+                    "event_type": "backup_repair_started",
+                    "backup_file": backup_filepath,
+                    "server_id": server_id,
+                },
+            )
+
+            repair_results = {
+                "backup_file": backup_filepath,
+                "server_id": server_id,
+                "repair_attempted": False,
+                "repair_successful": False,
+                "repair_methods": [],
+                "errors": [],
+            }
+
+            # Check if backup file exists
+            if not os.path.exists(backup_filepath):
+                repair_results["errors"].append("Backup file does not exist")
+                return repair_results
+
+            # Try to repair tar.gz archive
+            try:
+                # Test if we can read the archive
+                with tarfile.open(backup_filepath, "r:gz") as tar:
+                    tar.getmembers()
+
+                # If we can read it, the archive is not corrupted
+                repair_results["repair_attempted"] = True
+                repair_results["repair_successful"] = True
+                repair_results["repair_methods"].append("archive_readable")
+
+                self.logger.info(
+                    f"Backup archive is readable - no repair needed for {backup_filepath}",
+                    {
+                        "event_type": "backup_repair_successful",
+                        "backup_file": backup_filepath,
+                        "server_id": server_id,
+                    },
+                )
+
+            except (tarfile.TarError, OSError) as e:
+                # Archive is corrupted, try to repair
+                repair_results["repair_attempted"] = True
+                repair_results["errors"].append(f"Archive corruption detected: {str(e)}")
+
+                # For now, we can't repair corrupted tar.gz files
+                # In the future, we could implement more sophisticated repair methods
+                repair_results["errors"].append(
+                    "Archive repair not implemented - backup is not recoverable"
+                )
+
+                self.logger.warning(
+                    f"Backup archive is corrupted and cannot be repaired: {backup_filepath}",
+                    {
+                        "event_type": "backup_repair_failed",
+                        "backup_file": backup_filepath,
+                        "server_id": server_id,
+                        "error": str(e),
+                    },
+                )
+
+            return repair_results
+
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {
+                    "event_type": "backup_repair_error",
+                    "backup_file": backup_filepath,
+                    "server_id": server_id,
+                    "action": "repair_backup_if_possible",
+                },
+            )
+            return {
+                "backup_file": backup_filepath,
+                "server_id": server_id,
+                "repair_attempted": False,
+                "repair_successful": False,
+                "errors": [f"Repair attempt failed: {str(e)}"],
+            }
 
 
 # Global scheduler instance

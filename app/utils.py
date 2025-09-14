@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import re
@@ -926,3 +927,359 @@ def get_server_process_info(server):
         return None
 
     return None
+
+
+def calculate_file_checksums(filepath, algorithms=None):
+    """
+    Calculate multiple checksums for a file.
+
+    Args:
+        filepath: Path to the file to calculate checksums for
+        algorithms: List of hash algorithms to use (default: ['md5', 'sha256'])
+
+    Returns:
+        dict: Dictionary containing checksums for each algorithm
+    """
+    if algorithms is None:
+        algorithms = ["md5", "sha256"]
+
+    checksums = {}
+
+    try:
+        # Initialize hash objects for each algorithm
+        hash_objects = {}
+        for algo in algorithms:
+            if algo == "md5":
+                hash_objects[algo] = hashlib.md5()
+            elif algo == "sha256":
+                hash_objects[algo] = hashlib.sha256()
+            elif algo == "sha1":
+                hash_objects[algo] = hashlib.sha1()
+            else:
+                logger.warning(f"Unsupported hash algorithm: {algo}")
+                continue
+
+        # Read file and update all hash objects
+        with open(filepath, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                for hash_obj in hash_objects.values():
+                    hash_obj.update(chunk)
+
+        # Get hexdigest for each algorithm
+        for algo, hash_obj in hash_objects.items():
+            checksums[algo] = hash_obj.hexdigest()
+
+        return checksums
+
+    except Exception as e:
+        logger.error(f"Error calculating checksums for {filepath}: {str(e)}")
+        return {}
+
+
+def verify_file_integrity(filepath, expected_checksums=None):
+    """
+    Verify file integrity using checksums.
+
+    Args:
+        filepath: Path to the file to verify
+        expected_checksums: Dict of expected checksums (algorithm: checksum)
+
+    Returns:
+        dict: Verification result with valid status and details
+    """
+    try:
+        if not os.path.exists(filepath):
+            return {
+                "valid": False,
+                "error": "File does not exist",
+                "checksums": {},
+                "corruption_detected": True,
+            }
+
+        # Calculate current checksums
+        current_checksums = calculate_file_checksums(filepath)
+
+        if not current_checksums:
+            return {
+                "valid": False,
+                "error": "Failed to calculate checksums",
+                "checksums": {},
+                "corruption_detected": True,
+            }
+
+        # If no expected checksums provided, just return current checksums
+        if not expected_checksums:
+            return {"valid": True, "checksums": current_checksums, "corruption_detected": False}
+
+        # Verify against expected checksums
+        mismatches = []
+        for algo, expected_checksum in expected_checksums.items():
+            if algo in current_checksums:
+                if current_checksums[algo] != expected_checksum:
+                    mismatches.append(
+                        f"{algo}: expected {expected_checksum}, got {current_checksums[algo]}"
+                    )
+
+        if mismatches:
+            return {
+                "valid": False,
+                "error": f"Checksum mismatches: {'; '.join(mismatches)}",
+                "checksums": current_checksums,
+                "expected_checksums": expected_checksums,
+                "corruption_detected": True,
+            }
+
+        return {"valid": True, "checksums": current_checksums, "corruption_detected": False}
+
+    except Exception as e:
+        logger.error(f"Error verifying file integrity for {filepath}: {str(e)}")
+        return {
+            "valid": False,
+            "error": f"Verification failed: {str(e)}",
+            "checksums": {},
+            "corruption_detected": True,
+        }
+
+
+def validate_minecraft_world_files(server_dir):
+    """
+    Validate Minecraft world files for completeness and integrity.
+
+    Args:
+        server_dir: Path to the server directory
+
+    Returns:
+        dict: Validation result with world file status
+    """
+    try:
+        world_dir = os.path.join(server_dir, "world")
+
+        if not os.path.exists(world_dir):
+            return {
+                "valid": False,
+                "error": "World directory not found",
+                "world_files": [],
+                "missing_files": ["world/"],
+            }
+
+        # Essential Minecraft world files
+        essential_files = ["level.dat", "region", "data", "datapacks"]
+
+        world_files = []
+        missing_files = []
+        corrupted_files = []
+
+        for essential_file in essential_files:
+            file_path = os.path.join(world_dir, essential_file)
+
+            if os.path.exists(file_path):
+                # Check if it's a directory or file
+                if os.path.isdir(file_path):
+                    # For directories, check if they're not empty
+                    if not os.listdir(file_path):
+                        missing_files.append(f"world/{essential_file}/ (empty)")
+                    else:
+                        world_files.append(f"world/{essential_file}/")
+                else:
+                    # For files, check if they have content
+                    if os.path.getsize(file_path) == 0:
+                        corrupted_files.append(f"world/{essential_file} (empty)")
+                    else:
+                        world_files.append(f"world/{essential_file}")
+            else:
+                missing_files.append(f"world/{essential_file}")
+
+        # Check for region files (critical for world data)
+        region_dir = os.path.join(world_dir, "region")
+        if os.path.exists(region_dir):
+            region_files = [f for f in os.listdir(region_dir) if f.endswith(".mca")]
+            if not region_files:
+                missing_files.append("world/region/ (no .mca files)")
+
+        # Determine overall validity
+        is_valid = len(missing_files) == 0 and len(corrupted_files) == 0
+
+        return {
+            "valid": is_valid,
+            "world_files": world_files,
+            "missing_files": missing_files,
+            "corrupted_files": corrupted_files,
+            "region_file_count": len(region_files) if "region_files" in locals() else 0,
+        }
+
+    except Exception as e:
+        logger.error(f"Error validating Minecraft world files in {server_dir}: {str(e)}")
+        return {
+            "valid": False,
+            "error": f"World validation failed: {str(e)}",
+            "world_files": [],
+            "missing_files": [],
+            "corrupted_files": [],
+        }
+
+
+def test_backup_restore(backup_filepath, test_extract_dir=None):
+    """
+    Test backup by attempting to extract and validate contents.
+
+    Args:
+        backup_filepath: Path to the backup file to test
+        test_extract_dir: Directory to extract to (default: temp directory)
+
+    Returns:
+        dict: Restore test result with validation details
+    """
+    import shutil
+    import tarfile
+    import tempfile
+
+    try:
+        # Create temporary extraction directory
+        if test_extract_dir is None:
+            test_extract_dir = tempfile.mkdtemp(prefix="backup_test_")
+            cleanup_temp = True
+        else:
+            cleanup_temp = False
+
+        try:
+            # Extract backup
+            with tarfile.open(backup_filepath, "r:gz") as tar:
+                tar.extractall(test_extract_dir)
+
+            # Find the extracted server directory
+            extracted_items = os.listdir(test_extract_dir)
+            if not extracted_items:
+                return {
+                    "valid": False,
+                    "error": "Backup archive is empty",
+                    "extracted_files": [],
+                    "world_validation": None,
+                }
+
+            # Assume the first directory is the server directory
+            server_dir = os.path.join(test_extract_dir, extracted_items[0])
+
+            if not os.path.isdir(server_dir):
+                return {
+                    "valid": False,
+                    "error": "Backup does not contain a server directory",
+                    "extracted_files": extracted_items,
+                    "world_validation": None,
+                }
+
+            # Validate world files
+            world_validation = validate_minecraft_world_files(server_dir)
+
+            # Check for essential server files
+            essential_server_files = ["server.jar", "server.properties", "eula.txt"]
+
+            missing_server_files = []
+            for file_name in essential_server_files:
+                if not os.path.exists(os.path.join(server_dir, file_name)):
+                    missing_server_files.append(file_name)
+
+            # Get list of all extracted files
+            extracted_files = []
+            for root, dirs, files in os.walk(test_extract_dir):
+                for file in files:
+                    rel_path = os.path.relpath(os.path.join(root, file), test_extract_dir)
+                    extracted_files.append(rel_path)
+
+            is_valid = (
+                len(missing_server_files) == 0
+                and world_validation["valid"]
+                and len(extracted_files) > 0
+            )
+
+            return {
+                "valid": is_valid,
+                "extracted_files": extracted_files,
+                "missing_server_files": missing_server_files,
+                "world_validation": world_validation,
+                "server_directory": server_dir,
+            }
+
+        finally:
+            # Clean up temporary directory
+            if cleanup_temp and os.path.exists(test_extract_dir):
+                shutil.rmtree(test_extract_dir)
+
+    except Exception as e:
+        logger.error(f"Error testing backup restore for {backup_filepath}: {str(e)}")
+        return {
+            "valid": False,
+            "error": f"Restore test failed: {str(e)}",
+            "extracted_files": [],
+            "world_validation": None,
+        }
+
+
+def generate_backup_quality_score(verification_results):
+    """
+    Generate a quality score for backup verification results.
+
+    Args:
+        verification_results: Dict containing verification results
+
+    Returns:
+        dict: Quality score and breakdown
+    """
+    try:
+        score = 100  # Start with perfect score
+        deductions = []
+
+        # File integrity checks
+        if not verification_results.get("file_integrity", {}).get("valid", False):
+            score -= 30
+            deductions.append("File integrity check failed (-30)")
+
+        # World validation
+        world_validation = verification_results.get("world_validation", {})
+        if not world_validation.get("valid", False):
+            missing_count = len(world_validation.get("missing_files", []))
+            corrupted_count = len(world_validation.get("corrupted_files", []))
+            deduction = min(40, (missing_count + corrupted_count) * 10)
+            score -= deduction
+            deductions.append(f"World validation issues (-{deduction})")
+
+        # Restore test
+        restore_test = verification_results.get("restore_test", {})
+        if not restore_test.get("valid", False):
+            score -= 20
+            deductions.append("Restore test failed (-20)")
+
+        # Archive integrity
+        if not verification_results.get("archive_integrity", {}).get("valid", False):
+            score -= 25
+            deductions.append("Archive integrity check failed (-25)")
+
+        # Ensure score doesn't go below 0
+        score = max(0, score)
+
+        # Determine quality level
+        if score >= 90:
+            quality_level = "Excellent"
+        elif score >= 75:
+            quality_level = "Good"
+        elif score >= 60:
+            quality_level = "Fair"
+        elif score >= 40:
+            quality_level = "Poor"
+        else:
+            quality_level = "Critical"
+
+        return {
+            "score": score,
+            "quality_level": quality_level,
+            "deductions": deductions,
+            "max_possible_score": 100,
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating backup quality score: {str(e)}")
+        return {
+            "score": 0,
+            "quality_level": "Unknown",
+            "deductions": [f"Score calculation error: {str(e)}"],
+            "max_possible_score": 100,
+        }
