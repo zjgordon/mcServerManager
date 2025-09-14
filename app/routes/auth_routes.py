@@ -1,7 +1,16 @@
 import os
 from datetime import datetime
 
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -55,10 +64,17 @@ def login():
         password = request.form.get("password", "")
 
         # Check rate limiting for this specific username
-        remaining_attempts = rate_limiter.get_remaining_attempts(f"login_{username}", 5, 300)
+        max_attempts = current_app.config.get("RATELIMIT_LOGIN_ATTEMPTS", 20)
+        window_seconds = current_app.config.get("RATELIMIT_LOGIN_WINDOW", 300)
+        remaining_attempts = rate_limiter.get_remaining_attempts(
+            f"login_{username}", max_attempts, window_seconds
+        )
 
         if remaining_attempts == 0:
-            flash("Too many login attempts. Please try again in 5 minutes.", "danger")
+            flash(
+                f"Too many login attempts. Please try again in {window_seconds // 60} minutes.",
+                "danger",
+            )
             return render_template("login.html")
 
         user = User.query.filter_by(username=username).first()

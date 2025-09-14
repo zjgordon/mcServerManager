@@ -26,7 +26,9 @@ class DevelopmentConfig(BaseConfig):
 
     # More permissive rate limiting for development
     RATELIMIT_DEFAULT = "1000 per day;200 per hour;50 per minute"
-    RATELIMIT_LOGIN = "20 per minute"
+    RATELIMIT_LOGIN = "50 per minute"
+    RATELIMIT_LOGIN_ATTEMPTS = 50
+    RATELIMIT_LOGIN_WINDOW = 300  # 5 minutes
 
     # Development-specific memory settings (smaller for local testing)
     MAX_TOTAL_MEMORY_MB = int(os.environ.get("MAX_TOTAL_MEMORY_MB", "2048"))  # 2GB for dev

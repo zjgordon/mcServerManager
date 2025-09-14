@@ -319,7 +319,7 @@ def create_schedule():
 
 @backup_api_bp.route("/schedules/<int:server_id>", methods=["GET"])
 @csrf.exempt
-@admin_required_api
+@user_or_admin_required_api
 @rate_limit(max_attempts=30, window_seconds=60)
 def get_schedule(server_id):
     """

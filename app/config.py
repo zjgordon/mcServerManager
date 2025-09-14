@@ -23,7 +23,9 @@ class Config:
     RATELIMIT_ENABLED = True
     RATELIMIT_STORAGE_URL = "memory://"
     RATELIMIT_DEFAULT = "200 per day;50 per hour;10 per minute"
-    RATELIMIT_LOGIN = "5 per minute"
+    RATELIMIT_LOGIN = "20 per minute"
+    RATELIMIT_LOGIN_ATTEMPTS = 20
+    RATELIMIT_LOGIN_WINDOW = 300  # 5 minutes
 
     # Security Headers
     SECURITY_HEADERS = {
