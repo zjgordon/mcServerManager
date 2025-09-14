@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-069: Add integration tests for admin configuration enhancements
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive integration tests for admin configuration enhancements in tests/integration/test_admin_config_enhancements.py. The test suite covers the complete admin configuration flow including memory bar gauge data display, experimental features toggling, admin authentication, CSRF protection, and error handling scenarios. Tests include authentication and authorization checks for admin-only access, memory bar gauge display with mocked system memory data, experimental features display and toggling via API endpoints, CSRF protection validation, form validation error handling, and edge cases for memory validation. All 15 integration tests pass successfully, providing comprehensive coverage of the admin configuration system and ensuring reliability of the admin interface functionality.
+
 ## 2025-01-27 - CARD-068: Add unit tests for experimental feature utilities
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  

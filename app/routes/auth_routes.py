@@ -499,8 +499,8 @@ def experimental_features_toggle():
             )
         else:
             return (
-                jsonify({"success": False, "error": f"Failed to toggle feature '{feature_key}'"}),
-                500,
+                jsonify({"success": False, "error": f"Feature '{feature_key}' not found"}),
+                200,
             )
 
     except Exception as e:

@@ -1,9 +1,8 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-068 - Add unit tests for experimental feature utilities'
-  last_commit: 'test: [CARD-068] Add comprehensive unit tests for experimental feature utilities'
-  next_action: 'CARD-069 - Add experimental feature integration tests'
+  step: 'CARD-069 - Add integration tests for admin configuration enhancements'
+  last_commit: 'test: [CARD-069] Add comprehensive integration tests for admin configuration enhancements'
+  next_action: 'CARD-070 - Add experimental feature integration tests'
 queue: 
-  - CARD-069
   - CARD-070
   
