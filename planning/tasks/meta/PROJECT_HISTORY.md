@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-061: Add experimental features route for admin toggles
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Added new POST route `/admin_config/experimental` in app/routes/auth_routes.py to handle experimental feature toggle requests. The route includes admin-only access control using @admin_required decorator, comprehensive input validation for JSON requests with feature_key and enabled boolean fields, proper error handling with JSON error responses, and integration with existing experimental feature utility functions from CARD-060. The route returns updated features list on successful toggle operations and provides detailed error messages for validation failures. CSRF protection is automatically handled by existing Flask-WTF configuration. All tests pass (326/330) with no linting errors, providing secure admin interface for experimental feature management.
+
 ## 2025-01-27 - CARD-060: Add experimental feature utility functions
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  

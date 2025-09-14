@@ -24,6 +24,13 @@ from ..security import (
     rate_limiter,
     validate_password_policy,
 )
+from ..utils import (
+    get_app_config,
+    get_experimental_features,
+    get_system_memory_for_admin,
+    toggle_experimental_feature,
+    update_app_config,
+)
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -371,7 +378,6 @@ def reset_user_password(user_id):
 @admin_required
 def admin_config():
     """Admin configuration page for system settings."""
-    from ..utils import get_app_config, get_system_memory_for_admin, update_app_config
 
     if request.method == "POST":
         try:
@@ -442,6 +448,60 @@ def admin_config():
         max_per_server_mb=config["max_server_mb"],
         system_memory=system_memory,
     )
+
+
+@auth_bp.route("/admin_config/experimental", methods=["POST"])
+@login_required
+@admin_required
+def experimental_features_toggle():
+    """Handle experimental feature toggle requests (admin only)."""
+    try:
+        # Get JSON data from request
+        if not request.is_json:
+            return jsonify({"success": False, "error": "Request must be JSON"}), 400
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+
+        feature_key = data.get("feature_key")
+        enabled = data.get("enabled")
+
+        # Validate input
+        if not feature_key:
+            return jsonify({"success": False, "error": "feature_key is required"}), 400
+
+        if enabled is None:
+            return jsonify({"success": False, "error": "enabled field is required"}), 400
+
+        if not isinstance(enabled, bool):
+            return jsonify({"success": False, "error": "enabled must be a boolean"}), 400
+
+        # Toggle the experimental feature
+        success = toggle_experimental_feature(feature_key, enabled)
+
+        if success:
+            # Get updated features list for response
+            features = get_experimental_features()
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": f"Feature '{feature_key}' {'enabled' if enabled else 'disabled'} successfully",
+                        "features": features,
+                    }
+                ),
+                200,
+            )
+        else:
+            return (
+                jsonify({"success": False, "error": f"Failed to toggle feature '{feature_key}'"}),
+                500,
+            )
+
+    except Exception as e:
+        current_app.logger.error(f"Error in experimental features toggle: {str(e)}")
+        return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
 @auth_bp.route("/admin/process_management", methods=["GET", "POST"])
