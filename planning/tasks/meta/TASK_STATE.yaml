@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-075 - Create server management page template'
-  last_commit: 'feat: [CARD-075] Create server management page template'
-  next_action: 'CARD-076 - Next card in queue'
+  step: 'CARD-076 - Add conditional console/manage button to home template'
+  last_commit: 'feat: [CARD-076] Add conditional console/manage button to home template'
+  next_action: 'CARD-077 - Next card in queue'
 queue: 
-  - CARD-076
   - CARD-077
   - CARD-078
   - CARD-079

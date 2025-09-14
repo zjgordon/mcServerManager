@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-076: Add conditional console/manage button to home template
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Updated app/templates/home.html to conditionally display "Manage Server" button instead of "Console" button when server_management_page feature is enabled. Added is_feature_enabled('server_management_page') check to template context processor in app/__init__.py to make feature flag function available in templates. Modified both table view (line 230) and card view (line 341) console buttons to show "Manage Server" with cogs icon and proper tooltip when feature enabled, falling back to original console functionality when disabled. The implementation maintains existing styling and functionality while providing seamless feature gating for the server management page. All tests pass with no linting errors, providing clean conditional UI based on feature flag status.
+
 ## 2025-09-14 - CARD-075: Create server management page template
 
 **Epic:** Epic 1 – Server Management Page Implementation  

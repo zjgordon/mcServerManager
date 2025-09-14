@@ -226,11 +226,17 @@
                                     data-tooltip="Copy server connection link to clipboard">
                                 <i class="fas fa-share"></i> Share
                             </button>
-                            <form style="display:inline;">
-                                <button type="button" class="btn btn-mc btn-mc-info btn-sm" onclick="showConsole({{ server.id }}, '{{ server.server_name }}')" data-tooltip="View server console logs">
-                                    <i class="fas fa-terminal"></i> Console
-                                </button>
-                            </form>
+                            {% if is_feature_enabled('server_management_page') %}
+                                <a href="{{ url_for('server.manage_server', server_id=server.id) }}" class="btn btn-mc btn-mc-info btn-sm" data-tooltip="Manage server settings and console">
+                                    <i class="fas fa-cogs"></i> Manage Server
+                                </a>
+                            {% else %}
+                                <form style="display:inline;">
+                                    <button type="button" class="btn btn-mc btn-mc-info btn-sm" onclick="showConsole({{ server.id }}, '{{ server.server_name }}')" data-tooltip="View server console logs">
+                                        <i class="fas fa-terminal"></i> Console
+                                    </button>
+                                </form>
+                            {% endif %}
                             <form action="{{ url_for('server.backup_server', server_id=server.id) }}" method="post" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <button type="submit" class="btn btn-mc btn-mc-warning btn-sm" data-tooltip="Create a backup of server files">
@@ -337,12 +343,18 @@
                     📤
                 </button>
 
-                <!-- Console Button -->
-                <button class="control-btn console-btn"
-                        onclick="showConsole({{ server.id }}, '{{ server.server_name }}')"
-                        data-tooltip="View console">
-                    ⬜
-                </button>
+                <!-- Console/Manage Button -->
+                {% if is_feature_enabled('server_management_page') %}
+                    <a href="{{ url_for('server.manage_server', server_id=server.id) }}" class="control-btn manage-btn" data-tooltip="Manage server">
+                        ⚙
+                    </a>
+                {% else %}
+                    <button class="control-btn console-btn"
+                            onclick="showConsole({{ server.id }}, '{{ server.server_name }}')"
+                            data-tooltip="View console">
+                        ⬜
+                    </button>
+                {% endif %}
 
                 <!-- Backup Button -->
                 <form action="{{ url_for('server.backup_server', server_id=server.id) }}" method="post" style="display:inline;">

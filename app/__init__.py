@@ -41,12 +41,13 @@ def create_app():
     # Template context processor for global variables
     @app.context_processor
     def inject_app_config():
-        from .utils import get_app_config
+        from .utils import get_app_config, is_feature_enabled
 
         config = get_app_config()
         return {
             "app_title": config["app_title"],
             "server_hostname": config["server_hostname"],
+            "is_feature_enabled": is_feature_enabled,
         }
 
     # Custom Jinja filters
