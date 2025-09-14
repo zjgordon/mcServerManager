@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-063: Add experimental features section HTML to admin template
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Added comprehensive experimental features section HTML structure to app/templates/admin_config.html after line 131, including section header with flask icon, warning alert for experimental features, and four feature toggle cards with Bootstrap custom switches. Each card displays feature names (Advanced Monitoring, Auto-Backup, Multi-User Support, Plugin Manager), descriptions, status indicators (Experimental/Stable badges), and toggle switches for enabling/disabling features. The implementation uses existing Minecraft-inspired styling with card-mc classes, proper responsive design with Bootstrap grid system, and maintains consistency with the existing admin configuration interface. All tests pass (326/330) with no linting errors, providing seamless experimental feature management interface within the admin configuration page.
+
 ## 2025-01-27 - CARD-062: Enhance admin_config route with experimental features data
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  

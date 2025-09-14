@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-062 - Enhance admin_config route with experimental features data'
-  last_commit: 'feat: [CARD-062] Enhance admin_config route with experimental features data'
-  next_action: 'CARD-063 - Add experimental feature management interface'
+  step: 'CARD-063 - Add experimental features section HTML to admin template'
+  last_commit: 'feat: [CARD-063] Add experimental features section HTML to admin template'
+  next_action: 'CARD-064 - Add experimental feature management JavaScript functionality'
 queue: 
-  - CARD-063
   - CARD-064
   - CARD-065
   - CARD-066
