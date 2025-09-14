@@ -278,6 +278,13 @@ class TestConsoleFunctionalityIntegration:
             with patch("psutil.Process") as mock_process:
                 mock_proc = Mock()
                 mock_proc.is_running.return_value = True
+                mock_proc.pid = running_server.pid
+                mock_proc.name.return_value = "java"
+                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
+                mock_proc.cwd.return_value = "/path/to/server"
+                mock_proc.create_time.return_value = 1234567890
+                mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
+                mock_proc.cpu_percent.return_value = 5.0
                 mock_proc.stdin = Mock()
                 mock_process.return_value = mock_proc
 
@@ -337,7 +344,7 @@ class TestConsoleFunctionalityIntegration:
                 mock_proc.is_running.return_value = True
                 mock_proc.pid = running_server.pid
                 mock_proc.name.return_value = "java"
-                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar"]
+                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
                 mock_proc.cwd.return_value = "/test/server"
                 mock_proc.create_time.return_value = 1234567890
                 mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
@@ -549,7 +556,7 @@ class TestErrorHandlingIntegration:
                 mock_proc.is_running.return_value = True
                 mock_proc.pid = running_server.pid
                 mock_proc.name.return_value = "java"
-                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar"]
+                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
                 mock_proc.cwd.return_value = "/path/to/server"
                 mock_proc.create_time.return_value = 1234567890
                 mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)

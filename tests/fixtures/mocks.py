@@ -305,6 +305,75 @@ def mock_config_operations():
 
 
 @pytest.fixture
+def mock_psutil_process():
+    """Mock psutil.Process for process verification testing."""
+    with patch("psutil.Process") as mock_process_class:
+        # Create a comprehensive mock process
+        mock_process = MagicMock()
+
+        # Basic process attributes
+        mock_process.pid = 12345
+        mock_process.is_running.return_value = True
+
+        # Process information methods that return proper data types
+        mock_process.name.return_value = "java"
+        mock_process.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
+        mock_process.cwd.return_value = "/path/to/server"
+        mock_process.create_time.return_value = 1640995200.0
+
+        # Memory and CPU info
+        mock_memory_info = MagicMock()
+        mock_memory_info.rss = 1024 * 1024 * 100  # 100MB
+        mock_memory_info.vms = 1024 * 1024 * 200  # 200MB
+        mock_process.memory_info.return_value = mock_memory_info
+        mock_process.cpu_percent.return_value = 5.0
+
+        # Process control methods
+        mock_process.stdin = MagicMock()
+        mock_process.stdin.write.return_value = None
+        mock_process.stdin.flush.return_value = None
+        mock_process.terminate.return_value = None
+        mock_process.kill.return_value = None
+        mock_process.wait.return_value = 0
+
+        # Configure the class to return our mock
+        mock_process_class.return_value = mock_process
+
+        yield {
+            "mock_process_class": mock_process_class,
+            "mock_process": mock_process,
+        }
+
+
+@pytest.fixture
+def mock_psutil_process_not_running():
+    """Mock psutil.Process for a non-running process."""
+    with patch("psutil.Process") as mock_process_class:
+        mock_process = MagicMock()
+        mock_process.pid = 12345
+        mock_process.is_running.return_value = False
+        mock_process_class.return_value = mock_process
+
+        yield {
+            "mock_process_class": mock_process_class,
+            "mock_process": mock_process,
+        }
+
+
+@pytest.fixture
+def mock_psutil_process_error():
+    """Mock psutil.Process that raises NoSuchProcess error."""
+    with patch("psutil.Process") as mock_process_class:
+        from psutil import NoSuchProcess
+
+        mock_process_class.side_effect = NoSuchProcess(12345)
+
+        yield {
+            "mock_process_class": mock_process_class,
+        }
+
+
+@pytest.fixture
 def comprehensive_mock_setup():
     """Provide all mock fixtures in one comprehensive setup."""
     # This fixture combines multiple mocks for complex test scenarios

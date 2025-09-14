@@ -1,10 +1,9 @@
-active_card: CARD-090
+active_card: CARD-091
 breadcrumb:
-  step: 'CARD-089 - Fix error message inconsistencies in command execution'
-  last_commit: 'fix: [CARD-089] Fix error message inconsistencies in command execution'
-  next_action: 'CARD-090 - Ready to start next task'
+  step: 'CARD-090 - Fix mock configuration and process verification issues'
+  last_commit: 'fix: [CARD-090] Fix mock configuration and process verification issues'
+  next_action: 'CARD-091 - Ready to start next task'
 queue:
-  - CARD-090
   - CARD-091
   - CARD-092
   - CARD-093

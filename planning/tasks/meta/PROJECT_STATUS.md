@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-090: ✅ Completed - Fixed mock configuration and process verification issues by properly mocking psutil.Process.cmdline() method to return list instead of Mock object, resolving "argument of type 'Mock' is not iterable" errors
 - CARD-089: ✅ Completed - Fixed error message inconsistencies in command execution by properly mocking psutil.Process attributes in test fixtures to ensure consistent error message flow
 - CARD-088: ✅ Completed - Fixed feature flag management and NoneType errors by seeding ExperimentalFeature objects in test database, adding admin authorization checks, and resolving fixture availability issues
 - CARD-085: ✅ Completed - Created comprehensive integration tests for server management page with 17 test methods covering complete server management flow, console functionality with real server logs, command execution, feature flag integration, user access control, and error handling scenarios

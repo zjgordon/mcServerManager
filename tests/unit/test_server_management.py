@@ -233,30 +233,16 @@ class TestConsoleAPIEndpoints:
                 assert result["message"] == "Command executed"
                 mock_execute.assert_called_once_with(test_server.id, "test command")
 
-    def test_get_server_status_running_server(self, app, running_server):
+    def test_get_server_status_running_server(self, app, running_server, mock_psutil_process):
         """Test getting status of a running server."""
         with app.app_context():
-            with patch("psutil.Process") as mock_process:
-                mock_proc = Mock()
-                mock_proc.is_running.return_value = True
-                mock_proc.pid = running_server.pid
-                mock_proc.name.return_value = "java"
-                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar"]
-                mock_proc.cwd.return_value = "/test/server"
-                mock_proc.create_time.return_value = 1234567890
-                mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
-                mock_proc.cpu_percent.return_value = 5.0
-                mock_proc.status.return_value = "running"
+            status = get_server_status(running_server)
 
-                mock_process.return_value = mock_proc
-
-                status = get_server_status(running_server)
-
-                assert status["server_id"] == running_server.id
-                assert status["server_name"] == running_server.server_name
-                assert status["status"] == running_server.status
-                assert status["is_actually_running"] is True
-                assert "process_info" in status
+            assert status["server_id"] == running_server.id
+            assert status["server_name"] == running_server.server_name
+            assert status["status"] == running_server.status
+            assert status["is_actually_running"] is True
+            assert "process_info" in status
 
     def test_get_server_status_stopped_server(self, app, test_server):
         """Test getting status of a stopped server."""
@@ -285,6 +271,13 @@ class TestCommandExecutionSystem:
             with patch("psutil.Process") as mock_process:
                 mock_proc = Mock()
                 mock_proc.is_running.return_value = True
+                mock_proc.pid = running_server.pid
+                mock_proc.name.return_value = "java"
+                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
+                mock_proc.cwd.return_value = "/path/to/server"
+                mock_proc.create_time.return_value = 1234567890
+                mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
+                mock_proc.cpu_percent.return_value = 5.0
                 mock_proc.stdin = Mock()
                 mock_process.return_value = mock_proc
 
@@ -346,7 +339,7 @@ class TestCommandExecutionSystem:
                 mock_proc.is_running.return_value = True
                 mock_proc.pid = running_server.pid
                 mock_proc.name.return_value = "java"
-                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar"]
+                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
                 mock_proc.cwd.return_value = "/path/to/server"
                 mock_proc.create_time.return_value = 1234567890
                 mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)

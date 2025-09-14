@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-090: Fix mock configuration and process verification issues
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed mock configuration issues causing "argument of type 'Mock' is not iterable" errors in process verification tests. The root cause was improper mocking of psutil.Process.cmdline() method which returns a list but was being mocked as a Mock object, causing iteration failures in verify_process_status() function. Updated test fixtures in tests/fixtures/mocks.py to include comprehensive psutil.Process mocking with proper data types: cmdline() returns list, name() returns string, memory_info() returns proper memory object, and all other process attributes return appropriate types. Updated all affected test files (tests/unit/test_server_management.py and tests/integration/test_server_management.py) to use proper mock configuration ensuring process verification functions work correctly. The fix resolves the core mock iteration error while maintaining test functionality and ensuring all command execution and process verification tests pass successfully.
+
 ## 2025-09-14 - CARD-089: Fix error message inconsistencies in command execution
 
 **Epic:** Epic 3 – Test Suite Stabilization  
