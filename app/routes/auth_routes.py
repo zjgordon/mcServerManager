@@ -371,7 +371,7 @@ def reset_user_password(user_id):
 @admin_required
 def admin_config():
     """Admin configuration page for system settings."""
-    from ..utils import get_app_config, update_app_config
+    from ..utils import get_app_config, get_system_memory_for_admin, update_app_config
 
     if request.method == "POST":
         try:
@@ -428,6 +428,9 @@ def admin_config():
     # Get current configuration
     config = get_app_config()
 
+    # Get system memory data for admin display
+    system_memory = get_system_memory_for_admin()
+
     # Debug logging
     print(f"DEBUG: Current config: {config}")
 
@@ -437,6 +440,7 @@ def admin_config():
         server_hostname=config["server_hostname"],
         max_total_mb=config["max_total_mb"],
         max_per_server_mb=config["max_server_mb"],
+        system_memory=system_memory,
     )
 
 

@@ -1,5 +1,21 @@
 # Project History
 
+## 2025-01-14 - CARD-055: Enhance admin_config route with system memory data
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Enhanced the admin_config() function in app/routes/auth_routes.py to import and
+call get_system_memory_for_admin() and include the system memory data in the
+template context. This enables the frontend to display real-time system memory
+information in the memory bar gauge. The modification adds a single import
+statement for get_system_memory_for_admin and calls the function to retrieve
+system memory data, then passes the data to the admin_config.html template via
+the system_memory context variable. This surgical change provides the necessary
+data for the frontend to display current system memory usage alongside the
+configured memory limits.
+
 ## 2025-01-14 - CARD-054: Add system memory utility function for admin configuration
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  
