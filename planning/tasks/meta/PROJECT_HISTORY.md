@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-072: Create database migration to update experimental features
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created database migration d4e5f6a7b8c9 to remove dummy experimental features (advanced_monitoring, auto_backup, multi_user, plugin_manager) from the experimental_feature table and add the server_management_page feature. The migration includes proper upgrade and downgrade functions with SQL commands to delete the dummy features and insert the new server management page feature with feature_key='server_management_page', feature_name='Server Management Page', description='Enhanced server management interface with real-time console and advanced controls', enabled=false, is_stable=false. This surgical database change completes the cleanup of placeholder experimental features and establishes the foundation for the real server management page feature flag system.
+
 ## 2025-01-27 - CARD-071: Remove dummy experimental features from admin config
 
 **Epic:** Epic 1 – Server Management Page Implementation  

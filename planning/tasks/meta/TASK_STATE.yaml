@@ -1,8 +1,8 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-071 - Remove dummy experimental features from admin config'
-  last_commit: 'feat: [CARD-071] Remove dummy experimental features and replace with Server Management Page feature card'
-  next_action: 'CARD-072 - Next card in queue'
+  step: 'CARD-072 - Create database migration to update experimental features'
+  last_commit: 'feat: [CARD-072] Create database migration to remove dummy experimental features and add server management page'
+  next_action: 'CARD-073 - Next card in queue'
 queue: 
   - CARD-071
   - CARD-072
