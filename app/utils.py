@@ -1118,7 +1118,7 @@ def validate_minecraft_world_files(server_dir):
         }
 
 
-def test_backup_restore(backup_filepath, test_extract_dir=None):
+def verify_backup_restore(backup_filepath, test_extract_dir=None):
     """
     Test backup by attempting to extract and validate contents.
 
@@ -1205,7 +1205,7 @@ def test_backup_restore(backup_filepath, test_extract_dir=None):
                 shutil.rmtree(test_extract_dir)
 
     except Exception as e:
-        logger.error(f"Error testing backup restore for {backup_filepath}: {str(e)}")
+        logger.error(f"Error verifying backup restore for {backup_filepath}: {str(e)}")
         return {
             "valid": False,
             "error": f"Restore test failed: {str(e)}",

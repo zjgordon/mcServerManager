@@ -1,7 +1,7 @@
-active_card: CARD-052
+active_card: CARD-053
 breadcrumb:
-  step: 'CARD-051 - Fix backup monitoring test failures and calculation errors'
-  last_commit: 'fix: [CARD-051] Fix backup monitoring test failures and calculation errors'
-  next_action: 'CARD-052 - Next task in queue'
-queue: [CARD-052, CARD-053]
+  step: 'CARD-052 - Fix backup verification test failures and quality scoring'
+  last_commit: 'fix: [CARD-052] Fix backup verification test failures and quality scoring'
+  next_action: 'CARD-053 - Next task in queue'
+queue: [CARD-053]
   

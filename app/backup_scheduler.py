@@ -1497,9 +1497,9 @@ class BackupScheduler:
             # 4. Optional restore test verification
             if include_restore_test:
                 try:
-                    from .utils import test_backup_restore
+                    from .utils import verify_backup_restore
 
-                    restore_test = test_backup_restore(backup_filepath)
+                    restore_test = verify_backup_restore(backup_filepath)
                     verification_results["restore_test"] = restore_test
                     verification_results["verification_methods"].append("restore_test")
 

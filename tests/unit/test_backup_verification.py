@@ -19,8 +19,8 @@ from app.backup_scheduler import BackupScheduler
 from app.utils import (
     calculate_file_checksums,
     generate_backup_quality_score,
-    test_backup_restore,
     validate_minecraft_world_files,
+    verify_backup_restore,
     verify_file_integrity,
 )
 
@@ -207,12 +207,31 @@ class TestBackupVerificationUtils:
             with open(os.path.join(server_dir, "eula.txt"), "w") as f:
                 f.write("eula=true")
 
-            # Create world directory
+            # Create complete world directory structure
             world_dir = os.path.join(server_dir, "world")
             os.makedirs(world_dir)
+
+            # Create level.dat
             with open(os.path.join(world_dir, "level.dat"), "w") as f:
                 f.write("mock level data")
-            os.makedirs(os.path.join(world_dir, "region"))
+
+            # Create region directory with some region files
+            region_dir = os.path.join(world_dir, "region")
+            os.makedirs(region_dir)
+            with open(os.path.join(region_dir, "r.0.0.mca"), "w") as f:
+                f.write("mock region data")
+
+            # Create data directory with some content
+            data_dir = os.path.join(world_dir, "data")
+            os.makedirs(data_dir)
+            with open(os.path.join(data_dir, "test_data.dat"), "w") as f:
+                f.write("test data")
+
+            # Create datapacks directory with some content
+            datapacks_dir = os.path.join(world_dir, "datapacks")
+            os.makedirs(datapacks_dir)
+            with open(os.path.join(datapacks_dir, "test_pack.mcmeta"), "w") as f:
+                f.write("test pack")
 
             # Create backup
             backup_file = os.path.join(temp_dir, "test_backup.tar.gz")
@@ -220,13 +239,10 @@ class TestBackupVerificationUtils:
                 tar.add(server_dir, arcname="test_server")
 
             # Test restore
-            result = test_backup_restore(backup_file)
-            # The test might fail due to world validation issues
-            if not result["valid"]:
-                print(f"Restore test failed: {result}")
-            # For now, just check that we get a result
-            assert "valid" in result
+            result = verify_backup_restore(backup_file)
+            assert result["valid"] is True
             assert "extracted_files" in result
+            assert len(result["extracted_files"]) > 0
 
     def test_test_backup_restore_corrupted_backup(self):
         """Test restore test with corrupted backup."""
@@ -235,7 +251,7 @@ class TestBackupVerificationUtils:
             backup_file = f.name
 
         try:
-            result = test_backup_restore(backup_file)
+            result = verify_backup_restore(backup_file)
             assert result["valid"] is False
             assert "error" in result
 
@@ -250,7 +266,7 @@ class TestBackupVerificationUtils:
             with tarfile.open(backup_file, "w:gz"):
                 pass  # Empty archive
 
-            result = test_backup_restore(backup_file)
+            result = verify_backup_restore(backup_file)
             assert result["valid"] is False
             assert "empty" in result["error"].lower()
 
@@ -287,7 +303,10 @@ class TestBackupVerificationUtils:
         verification_results = {
             "file_integrity": {"valid": True},
             "archive_integrity": {"valid": True},
-            "world_validation": {"valid": False, "missing_files": ["level.dat"]},
+            "world_validation": {
+                "valid": False,
+                "missing_files": ["level.dat", "region/", "data/"],
+            },
             "restore_test": {"valid": True},
         }
 
@@ -343,6 +362,32 @@ class TestBackupSchedulerVerification:
                 f.write("mock properties")
             with open(os.path.join(server_dir, "eula.txt"), "w") as f:
                 f.write("eula=true")
+
+            # Create complete world directory structure
+            world_dir = os.path.join(server_dir, "world")
+            os.makedirs(world_dir)
+
+            # Create level.dat
+            with open(os.path.join(world_dir, "level.dat"), "w") as f:
+                f.write("mock level data")
+
+            # Create region directory with some region files
+            region_dir = os.path.join(world_dir, "region")
+            os.makedirs(region_dir)
+            with open(os.path.join(region_dir, "r.0.0.mca"), "w") as f:
+                f.write("mock region data")
+
+            # Create data directory with some content
+            data_dir = os.path.join(world_dir, "data")
+            os.makedirs(data_dir)
+            with open(os.path.join(data_dir, "test_data.dat"), "w") as f:
+                f.write("test data")
+
+            # Create datapacks directory with some content
+            datapacks_dir = os.path.join(world_dir, "datapacks")
+            os.makedirs(datapacks_dir)
+            with open(os.path.join(datapacks_dir, "test_pack.mcmeta"), "w") as f:
+                f.write("test pack")
 
             # Create backup
             backup_file = os.path.join(temp_dir, "test_backup.tar.gz")
