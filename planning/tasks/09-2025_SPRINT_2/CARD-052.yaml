@@ -1,0 +1,25 @@
+id: CARD-052
+title: Fix backup verification test failures and quality scoring
+epic: Epic 2 – Test Suite Remediation
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix backup verification test failures:
+  - test_generate_backup_quality_score_fair: assert 'Excellent' in ['Fair', 'Good']
+  - test_verify_backup_comprehensive_with_restore_test: assert False is True
+  - test_backup_restore: ERROR (not detailed in output)
+  
+  Root causes:
+  1. Quality score calculation returning wrong quality level
+  2. Comprehensive backup verification failing
+  3. Backup restore functionality not working in tests
+  4. Quality scoring thresholds may be incorrect

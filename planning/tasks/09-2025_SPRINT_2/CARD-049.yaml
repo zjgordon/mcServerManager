@@ -1,0 +1,23 @@
+id: CARD-049
+title: Fix backup API access control test expectations
+epic: Epic 2 – Test Suite Remediation
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix test failures in:
+  - tests/integration/test_backup_api.py::TestBackupAPI::test_server_access_control
+  - tests/e2e/test_backup_workflows.py::TestBackupWorkflows::test_backup_workflow_with_user_permissions
+  
+  Issue: Tests expect 403 (Forbidden) but getting 404 (Not Found)
+  Root cause: Recent fix changed @admin_required_api to @user_or_admin_required_api
+  but tests still expect admin-only behavior. Need to update test expectations
+  to match new access control model where regular users can access their own servers.

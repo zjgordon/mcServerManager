@@ -1,0 +1,28 @@
+id: CARD-051
+title: Fix backup monitoring test failures and calculation errors
+epic: Epic 2 – Test Suite Remediation
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix backup monitoring test failures:
+  - test_update_average_duration: assert 30.0 == 25.0 (calculation error)
+  - test_get_backup_metrics: assert 'unhealthy' == 'healthy'
+  - test_get_backup_alert_status: AttributeError in monitoring module
+  - test_calculate_backup_health_score_healthy: assert 79 >= 80
+  - test_get_recent_backup_history: assert 0 == 2
+  
+  Root causes:
+  1. Average duration calculation logic incorrect
+  2. Health score calculation thresholds wrong
+  3. Missing attributes in monitoring module
+  4. Backup history retrieval not working properly
+  5. Type error in monitoring.py line 530: os.path.isdir(server_path) where server_path is integer

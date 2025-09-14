@@ -1,0 +1,25 @@
+id: CARD-048
+title: Fix Flask application context issues in logging and database operations
+epic: Epic 2 – Test Suite Remediation
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix RuntimeError: Working outside of application context errors in:
+  - app/logging.py line 49: hasattr(g, "request_id") access outside Flask context
+  - app/backup_scheduler.py: db.session.commit() calls outside Flask context
+  - app/monitoring.py: logger.error() calls outside Flask context
+  
+  Root cause: Tests are calling application code that expects Flask application context
+  but tests don't always provide it. Need to either:
+  1. Ensure all test calls are wrapped in app.app_context()
+  2. Make logging/database operations context-aware
+  3. Use test-specific implementations that don't require Flask context

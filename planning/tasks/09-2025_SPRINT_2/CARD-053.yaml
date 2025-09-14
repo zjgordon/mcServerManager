@@ -1,0 +1,25 @@
+id: CARD-053
+title: Improve test fixtures and setup for comprehensive test coverage
+epic: Epic 2 – Test Suite Remediation
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Enhance test infrastructure to support all test scenarios:
+  - Create proper server file fixtures (server.jar, world files, etc.)
+  - Improve temporary directory management in tests
+  - Add proper Flask application context setup for all tests
+  - Create mock objects for external dependencies
+  - Ensure test isolation and cleanup
+  
+  This card addresses the underlying infrastructure issues that cause
+  many test failures due to missing files, improper context, and
+  inadequate test setup.

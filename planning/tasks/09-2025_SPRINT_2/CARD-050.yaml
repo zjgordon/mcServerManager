@@ -1,0 +1,31 @@
+id: CARD-050
+title: Fix backup execution test failures and file handling issues
+epic: Epic 2 – Test Suite Remediation
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Fix multiple backup execution test failures:
+  - test_execute_backup_job_success: assert False is True
+  - test_execute_backup_job_with_running_server: assert False is True
+  - test_create_backup_archive_empty_result: FileNotFoundError
+  - test_verify_backup_integrity_file_not_found: Wrong error message
+  - test_cleanup_old_backups: File not deleted
+  - test_restart_server_after_backup_success: Server JAR not found
+  - test_execute_backup_job_with_retry_logic: assert False is True
+  - test_backup_filename_generation: assert False is True
+  - test_backup_metadata_tracking: assert False is True
+  
+  Root causes:
+  1. Missing test fixtures for server files (server.jar)
+  2. Incorrect error message expectations
+  3. File cleanup not working properly
+  4. Backup job execution returning False instead of True
