@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-061 - Add experimental features route for admin toggles'
-  last_commit: 'feat: [CARD-061] Add experimental features route for admin toggles'
-  next_action: 'CARD-062 - Add experimental feature management interface'
+  step: 'CARD-062 - Enhance admin_config route with experimental features data'
+  last_commit: 'feat: [CARD-062] Enhance admin_config route with experimental features data'
+  next_action: 'CARD-063 - Add experimental feature management interface'
 queue: 
-  - CARD-062
   - CARD-063
   - CARD-064
   - CARD-065

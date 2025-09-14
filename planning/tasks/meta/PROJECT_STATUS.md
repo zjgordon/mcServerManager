@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-062: ✅ Completed - Enhanced admin_config route with experimental features data by calling get_experimental_features() and including experimental_features in template context for frontend display
 - CARD-061: ✅ Completed - Added experimental features route for admin toggles with POST /admin_config/experimental endpoint including admin access control, JSON validation, error handling, and integration with experimental feature utility functions
 - CARD-060: ✅ Completed - Added experimental feature utility functions to app/utils.py with get_experimental_features(), toggle_experimental_feature(), is_feature_enabled(), and add_experimental_feature() for complete feature gating system management
 - CARD-059: ✅ Completed - Created database migration for ExperimentalFeature model with table creation, constraints, indexes, and default feature data insertion

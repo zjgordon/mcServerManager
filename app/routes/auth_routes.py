@@ -437,6 +437,9 @@ def admin_config():
     # Get system memory data for admin display
     system_memory = get_system_memory_for_admin()
 
+    # Get experimental features data for admin display
+    experimental_features = get_experimental_features()
+
     # Debug logging
     print(f"DEBUG: Current config: {config}")
 
@@ -447,6 +450,7 @@ def admin_config():
         max_total_mb=config["max_total_mb"],
         max_per_server_mb=config["max_server_mb"],
         system_memory=system_memory,
+        experimental_features=experimental_features,
     )
 
 
