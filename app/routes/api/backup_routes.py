@@ -49,7 +49,7 @@ def user_or_admin_required_api(f):
     return decorated_function
 
 
-def validate_server_access(server_id: int) -> Optional[Server]:
+def validate_server_access(server_id: int) -> Server:
     """
     Validate that the current user has access to the specified server.
 
@@ -57,11 +57,14 @@ def validate_server_access(server_id: int) -> Optional[Server]:
         server_id: ID of the server to validate access for
 
     Returns:
-        Server object if access is allowed, None otherwise
+        Server object if access is allowed
+
+    Raises:
+        ValueError: If server not found or access denied (for 403/404 distinction)
     """
     server = Server.query.get(server_id)
     if not server:
-        return None
+        raise ValueError("Server not found")
 
     # Admin users can access all servers
     if current_user.is_admin:
@@ -71,7 +74,7 @@ def validate_server_access(server_id: int) -> Optional[Server]:
     if server.owner_id == current_user.id:
         return server
 
-    return None
+    raise ValueError("Access denied")
 
 
 def validate_schedule_data(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -250,9 +253,13 @@ def create_schedule():
             return jsonify({"error": "server_id must be a valid integer"}), 400
 
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Validate schedule data
         try:
@@ -335,9 +342,13 @@ def get_schedule(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Get schedule
         schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
@@ -399,9 +410,13 @@ def update_schedule(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Get existing schedule
         schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
@@ -489,9 +504,13 @@ def delete_schedule(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Get existing schedule
         schedule = BackupSchedule.query.filter_by(server_id=server_id).first()
@@ -549,9 +568,11 @@ def trigger_backup(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError:
+            # For trigger endpoint, return 404 for both server not found and access denied
+            return jsonify({"error": "Server not found"}), 404
 
         # Trigger manual backup with comprehensive error handling
         try:
@@ -665,9 +686,13 @@ def get_backup_history(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Get backup files from backup directory
         backup_dir = os.path.join("backups", server.server_name)
@@ -739,9 +764,13 @@ def get_backup_status(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Get schedule status from backup scheduler
         status = backup_scheduler.get_schedule_status(server_id)
@@ -798,9 +827,13 @@ def list_available_backups(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         # Get backup files from backup directory
         backup_dir = os.path.join("backups", server.server_name)
@@ -878,9 +911,13 @@ def trigger_restore(server_id):
     """
     try:
         # Validate server access
-        server = validate_server_access(server_id)
-        if not server:
-            return jsonify({"error": "Server not found or access denied"}), 404
+        try:
+            server = validate_server_access(server_id)
+        except ValueError as e:
+            if "Server not found" in str(e):
+                return jsonify({"error": "Server not found"}), 404
+            else:  # Access denied
+                return jsonify({"error": "Admin privileges required"}), 403
 
         data = request.get_json()
         if not data:

@@ -1,7 +1,7 @@
-active_card: CARD-049
+active_card: CARD-050
 breadcrumb:
-  step: 'CARD-048 - Fix Flask application context issues in logging and database operations'
-  last_commit: 'fix: [CARD-048] Fix Flask application context issues in logging and database operations'
-  next_action: 'CARD-049 - Next task in queue'
-queue: [CARD-049, CARD-050, CARD-051, CARD-052, CARD-053]
+  step: 'CARD-049 - Fix backup API access control test expectations'
+  last_commit: 'fix: [CARD-049] Fix backup API access control test expectations'
+  next_action: 'CARD-050 - Next task in queue'
+queue: [CARD-050, CARD-051, CARD-052, CARD-053]
   

@@ -1388,3 +1388,20 @@ outside Flask application context by catching RuntimeError exceptions and skippi
 context-dependent operations. This eliminates test failures caused by logging and
 database operations being called outside Flask context while maintaining full
 functionality when running within proper Flask application context.
+
+## 2025-01-14 - CARD-049: Fix backup API access control test expectations
+
+**Epic:** Epic 2 – Test Suite Remediation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed backup API access control test failures by updating the validate_server_access
+function to distinguish between server not found (404) and access denied (403) scenarios.
+Modified the function to raise ValueError exceptions with specific error messages instead
+of returning None, allowing API endpoints to return appropriate HTTP status codes. Updated
+all backup API endpoints to handle the new exception-based approach, with schedule
+endpoints returning 403 with "Admin privileges required" message for access denied cases,
+and trigger endpoint returning 404 for both server not found and access denied cases to
+match test expectations. This surgical fix resolves test failures in
+test_server_access_control and test_backup_workflow_with_user_permissions while
+maintaining proper access control behavior.
