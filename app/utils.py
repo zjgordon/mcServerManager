@@ -1251,18 +1251,20 @@ def get_system_memory_for_admin():
         total_bytes = memory_data.get("total_bytes", 0)
         used_bytes = memory_data.get("used_bytes", 0)
         available_bytes = memory_data.get("available_bytes", 0)
-        usage_percent = memory_data.get("usage_percent", 0.0)
 
         # Convert to GB (1 GB = 1024^3 bytes)
         total_gb = round(total_bytes / (1024**3), 2)
         used_gb = round(used_bytes / (1024**3), 2)
         available_gb = round(available_bytes / (1024**3), 2)
 
+        # Recalculate percentage from GB values for consistency
+        calculated_percentage = round((used_gb / total_gb) * 100, 1) if total_gb > 0 else 0.0
+
         return {
             "total_memory_gb": total_gb,
             "used_memory_gb": used_gb,
             "available_memory_gb": available_gb,
-            "usage_percentage": round(usage_percent, 1),
+            "usage_percentage": calculated_percentage,
             "status": "healthy",
             "error": None,
         }
