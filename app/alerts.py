@@ -111,6 +111,24 @@ class AlertManager:
         # Error rate alerts
         self.add_rule(ThresholdAlert("high_error_rate", 10, 300))  # 10 errors in 5 minutes
 
+        # Backup-specific alerts
+        self.add_rule(ThresholdAlert("backup_failure_rate", 3, 3600))  # 3 failures in 1 hour
+        self.add_rule(
+            ThresholdAlert("backup_corruption_detected", 1, 0)
+        )  # Any corruption immediately
+        self.add_rule(
+            ThresholdAlert("backup_schedule_execution_failure", 2, 1800)
+        )  # 2 failures in 30 minutes
+        self.add_rule(
+            ThresholdAlert("backup_verification_failure", 2, 1800)
+        )  # 2 verification failures in 30 minutes
+        self.add_rule(
+            ThresholdAlert("backup_disk_space_warning", 85.0, 0)
+        )  # 85% backup disk usage immediately
+        self.add_rule(
+            ThresholdAlert("backup_disk_space_critical", 95.0, 0)
+        )  # 95% backup disk usage immediately
+
     def add_rule(self, rule: AlertRule):
         """Add an alert rule."""
         self.alert_rules[rule.name] = rule
@@ -371,3 +389,94 @@ def trigger_manual_alert(rule_name: str, message: str, context: Dict[str, Any] =
 
     alert_manager.alert_history.append(alert_data)
     alert_manager._send_alert_notifications(alert_data)
+
+
+def check_backup_alerts(backup_metrics: Dict[str, Any]):
+    """Check backup-specific metrics against alert rules."""
+    # Backup failure rate alerts
+    if "failure_count" in backup_metrics and "time_window" in backup_metrics:
+        alert_manager.check_alert(
+            "backup_failure_rate", backup_metrics["failure_count"], backup_metrics
+        )
+
+    # Backup corruption alerts
+    if "corruption_detected" in backup_metrics and backup_metrics["corruption_detected"]:
+        alert_manager.check_alert("backup_corruption_detected", 1, backup_metrics)
+
+    # Schedule execution failure alerts
+    if "schedule_failure_count" in backup_metrics and "time_window" in backup_metrics:
+        alert_manager.check_alert(
+            "backup_schedule_execution_failure",
+            backup_metrics["schedule_failure_count"],
+            backup_metrics,
+        )
+
+    # Verification failure alerts
+    if "verification_failure_count" in backup_metrics and "time_window" in backup_metrics:
+        alert_manager.check_alert(
+            "backup_verification_failure",
+            backup_metrics["verification_failure_count"],
+            backup_metrics,
+        )
+
+    # Backup disk space alerts
+    if "backup_disk_usage_percent" in backup_metrics:
+        alert_manager.check_alert(
+            "backup_disk_space_warning", backup_metrics["backup_disk_usage_percent"], backup_metrics
+        )
+        alert_manager.check_alert(
+            "backup_disk_space_critical",
+            backup_metrics["backup_disk_usage_percent"],
+            backup_metrics,
+        )
+
+
+def trigger_backup_failure_alert(
+    server_id: int, error_message: str, context: Dict[str, Any] = None
+):
+    """Trigger an alert for backup failure."""
+    alert_context = {
+        "server_id": server_id,
+        "error_message": error_message,
+        "backup_type": "scheduled" if context and context.get("scheduled") else "manual",
+        **(context or {}),
+    }
+
+    trigger_manual_alert(
+        "backup_failure", f"Backup failed for server {server_id}: {error_message}", alert_context
+    )
+
+
+def trigger_backup_corruption_alert(
+    server_id: int, backup_file: str, corruption_details: Dict[str, Any] = None
+):
+    """Trigger an alert for backup corruption."""
+    alert_context = {
+        "server_id": server_id,
+        "backup_file": backup_file,
+        "corruption_details": corruption_details or {},
+    }
+
+    trigger_manual_alert(
+        "backup_corruption_detected",
+        f"Backup corruption detected for server {server_id}: {backup_file}",
+        alert_context,
+    )
+
+
+def trigger_backup_verification_failure_alert(
+    server_id: int, backup_file: str, verification_error: str, context: Dict[str, Any] = None
+):
+    """Trigger an alert for backup verification failure."""
+    alert_context = {
+        "server_id": server_id,
+        "backup_file": backup_file,
+        "verification_error": verification_error,
+        **(context or {}),
+    }
+
+    trigger_manual_alert(
+        "backup_verification_failure",
+        f"Backup verification failed for server {server_id}: {verification_error}",
+        alert_context,
+    )

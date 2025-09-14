@@ -34,6 +34,12 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from flask import current_app
 
+from .alerts import (
+    check_backup_alerts,
+    trigger_backup_corruption_alert,
+    trigger_backup_failure_alert,
+    trigger_backup_verification_failure_alert,
+)
 from .extensions import db
 from .logging import StructuredLogger
 from .models import BackupSchedule, Server
@@ -53,6 +59,26 @@ class BackupScheduler:
         self.encryption_enabled = False
         self.encryption_key = None
         self.encryption_password = None
+
+        # Monitoring metrics
+        self.metrics = {
+            "total_backups": 0,
+            "successful_backups": 0,
+            "failed_backups": 0,
+            "corrupted_backups": 0,
+            "verification_failures": 0,
+            "schedule_execution_failures": 0,
+            "total_backup_size_bytes": 0,
+            "average_backup_duration": 0.0,
+            "last_backup_time": None,
+            "backup_trends": {
+                "daily_success_rate": 0.0,
+                "weekly_success_rate": 0.0,
+                "monthly_success_rate": 0.0,
+            },
+            "disk_usage_percent": 0.0,
+            "alert_history": [],
+        }
 
         if app is not None:
             self.init_app(app)
@@ -542,6 +568,9 @@ class BackupScheduler:
             # Execute the backup
             backup_result = self.execute_backup_job(server_id)
 
+            # Update metrics and check for alerts
+            self.update_backup_metrics(backup_result, server_id)
+
             if backup_result["success"]:
                 backup_size = backup_result.get("size", 0)
                 backup_checksum = backup_result.get("checksum")
@@ -568,6 +597,9 @@ class BackupScheduler:
                 )
 
         except Exception as e:
+            # Record schedule execution failure
+            self.record_schedule_execution_failure(server_id, str(e))
+
             self.logger.error_tracking(
                 e,
                 {"event_type": "backup_error", "server_id": server_id, "action": "execute_backup"},
@@ -1856,6 +1888,158 @@ class BackupScheduler:
         """Generate a new encryption key for backup encryption."""
         key = Fernet.generate_key()
         return key.decode()
+
+    def update_backup_metrics(self, backup_result: Dict[str, Any], server_id: int = None):
+        """Update backup metrics based on backup result."""
+        try:
+            self.metrics["total_backups"] += 1
+            self.metrics["last_backup_time"] = datetime.utcnow().isoformat()
+
+            if backup_result.get("success", False):
+                self.metrics["successful_backups"] += 1
+
+                # Update size metrics
+                if "size" in backup_result:
+                    self.metrics["total_backup_size_bytes"] += backup_result["size"]
+
+                # Update duration metrics
+                if "duration" in backup_result:
+                    self._update_average_duration(backup_result["duration"])
+
+                # Check for corruption
+                if backup_result.get("verification_details", {}).get("corruption_detected", False):
+                    self.metrics["corrupted_backups"] += 1
+                    if server_id:
+                        trigger_backup_corruption_alert(
+                            server_id,
+                            backup_result.get("backup_file", "unknown"),
+                            backup_result.get("verification_details", {}),
+                        )
+            else:
+                self.metrics["failed_backups"] += 1
+                if server_id:
+                    trigger_backup_failure_alert(
+                        server_id, backup_result.get("error", "Unknown error"), {"scheduled": True}
+                    )
+
+            # Update verification failure metrics
+            if backup_result.get("verification_details", {}).get("overall_valid", False) is False:
+                self.metrics["verification_failures"] += 1
+                if server_id:
+                    trigger_backup_verification_failure_alert(
+                        server_id,
+                        backup_result.get("backup_file", "unknown"),
+                        backup_result.get("verification_details", {}).get(
+                            "error", "Verification failed"
+                        ),
+                    )
+
+            # Update success rates
+            self._update_success_rates()
+
+            # Update disk usage
+            self._update_disk_usage_metrics()
+
+            # Check for alerts
+            self._check_backup_alerts()
+
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {
+                    "event_type": "metrics_update_error",
+                    "server_id": server_id,
+                    "action": "update_backup_metrics",
+                },
+            )
+
+    def _update_average_duration(self, duration: float):
+        """Update average backup duration."""
+        if self.metrics["successful_backups"] > 0:
+            current_avg = self.metrics["average_backup_duration"]
+            new_avg = (
+                (current_avg * (self.metrics["successful_backups"] - 1)) + duration
+            ) / self.metrics["successful_backups"]
+            self.metrics["average_backup_duration"] = round(new_avg, 2)
+
+    def _update_success_rates(self):
+        """Update backup success rate trends."""
+        if self.metrics["total_backups"] > 0:
+            success_rate = (
+                self.metrics["successful_backups"] / self.metrics["total_backups"]
+            ) * 100
+            self.metrics["backup_trends"]["daily_success_rate"] = round(success_rate, 2)
+            # TODO: Implement weekly and monthly calculations based on historical data
+
+    def _update_disk_usage_metrics(self):
+        """Update backup disk usage metrics."""
+        try:
+            import psutil
+
+            backup_dir = "backups"
+            if os.path.exists(backup_dir):
+                disk_usage = psutil.disk_usage(backup_dir)
+                self.metrics["disk_usage_percent"] = round(
+                    (disk_usage.used / disk_usage.total) * 100, 2
+                )
+        except Exception as e:
+            self.logger.debug(f"Could not update disk usage metrics: {e}")
+
+    def _check_backup_alerts(self):
+        """Check backup metrics against alert rules."""
+        try:
+            backup_metrics = {
+                "failure_count": self.metrics["failed_backups"],
+                "time_window": 3600,  # 1 hour window
+                "corruption_detected": self.metrics["corrupted_backups"] > 0,
+                "schedule_failure_count": self.metrics["schedule_execution_failures"],
+                "verification_failure_count": self.metrics["verification_failures"],
+                "backup_disk_usage_percent": self.metrics["disk_usage_percent"],
+            }
+            check_backup_alerts(backup_metrics)
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {"event_type": "alert_check_error", "action": "check_backup_alerts"},
+            )
+
+    def get_backup_metrics(self) -> Dict[str, Any]:
+        """Get current backup monitoring metrics."""
+        return {
+            "status": "healthy" if self.metrics["failed_backups"] < 3 else "warning",
+            "timestamp": datetime.utcnow().isoformat(),
+            "metrics": self.metrics.copy(),
+            "health_summary": {
+                "success_rate": round(
+                    (self.metrics["successful_backups"] / max(self.metrics["total_backups"], 1))
+                    * 100,
+                    2,
+                ),
+                "corruption_rate": round(
+                    (self.metrics["corrupted_backups"] / max(self.metrics["total_backups"], 1))
+                    * 100,
+                    2,
+                ),
+                "verification_failure_rate": round(
+                    (self.metrics["verification_failures"] / max(self.metrics["total_backups"], 1))
+                    * 100,
+                    2,
+                ),
+            },
+        }
+
+    def record_schedule_execution_failure(self, server_id: int, error_message: str):
+        """Record a schedule execution failure."""
+        self.metrics["schedule_execution_failures"] += 1
+        trigger_backup_failure_alert(server_id, error_message, {"scheduled": True})
+        self.logger.error(
+            f"Schedule execution failure for server {server_id}: {error_message}",
+            {
+                "event_type": "schedule_execution_failure",
+                "server_id": server_id,
+                "error": error_message,
+            },
+        )
 
 
 # Global scheduler instance

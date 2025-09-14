@@ -16,6 +16,7 @@ from typing import Any, Dict
 import psutil
 
 from .alerts import check_database_alerts, check_system_alerts
+from .backup_scheduler import backup_scheduler
 from .logging import logger
 
 
@@ -276,3 +277,334 @@ def get_network_metrics() -> Dict[str, Any]:
             "message": f"Network metrics collection failed: {str(e)}",
             "timestamp": time.time(),
         }
+
+
+def get_backup_metrics() -> Dict[str, Any]:
+    """
+    Get comprehensive backup monitoring metrics.
+
+    Returns:
+        Dictionary containing backup-specific metrics and health status
+    """
+    try:
+        # Get backup scheduler metrics
+        backup_metrics = backup_scheduler.get_backup_metrics()
+
+        # Get backup disk space metrics
+        backup_disk_metrics = check_disk_space("backups", threshold_percent=85.0)
+
+        # Get backup schedule status
+        schedule_status = get_backup_schedule_status()
+
+        # Combine all backup metrics
+        combined_metrics = {
+            "status": backup_metrics["status"],
+            "timestamp": backup_metrics["timestamp"],
+            "backup_operations": backup_metrics["metrics"],
+            "health_summary": backup_metrics["health_summary"],
+            "disk_usage": {
+                "backup_directory": backup_disk_metrics,
+                "usage_percent": backup_metrics["metrics"]["disk_usage_percent"],
+            },
+            "schedule_status": schedule_status,
+            "alert_status": get_backup_alert_status(),
+        }
+
+        return combined_metrics
+
+    except Exception as e:
+        logger.error(f"Failed to collect backup metrics: {e}")
+        return {
+            "status": "unhealthy",
+            "message": f"Backup metrics collection failed: {str(e)}",
+            "timestamp": time.time(),
+        }
+
+
+def get_backup_schedule_status() -> Dict[str, Any]:
+    """
+    Get status of all backup schedules.
+
+    Returns:
+        Dictionary containing schedule status information
+    """
+    try:
+        from .models import BackupSchedule, Server
+
+        schedules = BackupSchedule.query.all()
+        schedule_status = {
+            "total_schedules": len(schedules),
+            "enabled_schedules": len([s for s in schedules if s.enabled]),
+            "disabled_schedules": len([s for s in schedules if not s.enabled]),
+            "schedules": [],
+        }
+
+        for schedule in schedules:
+            server = Server.query.get(schedule.server_id)
+            if server:
+                schedule_info = {
+                    "server_id": schedule.server_id,
+                    "server_name": server.server_name,
+                    "schedule_type": schedule.schedule_type,
+                    "schedule_time": str(schedule.schedule_time),
+                    "retention_days": schedule.retention_days,
+                    "enabled": schedule.enabled,
+                    "last_backup": schedule.last_backup.isoformat()
+                    if schedule.last_backup
+                    else None,
+                    "created_at": schedule.created_at.isoformat(),
+                }
+                schedule_status["schedules"].append(schedule_info)
+
+        return schedule_status
+
+    except Exception as e:
+        logger.error(f"Failed to get backup schedule status: {e}")
+        return {
+            "error": f"Schedule status collection failed: {str(e)}",
+            "total_schedules": 0,
+            "enabled_schedules": 0,
+            "disabled_schedules": 0,
+            "schedules": [],
+        }
+
+
+def get_backup_alert_status() -> Dict[str, Any]:
+    """
+    Get current backup alert status.
+
+    Returns:
+        Dictionary containing active backup alerts
+    """
+    try:
+        from .alerts import alert_manager
+
+        active_alerts = alert_manager.get_active_alerts()
+        backup_alerts = [alert for alert in active_alerts if "backup" in alert["rule_name"]]
+
+        return {
+            "active_backup_alerts": len(backup_alerts),
+            "alerts": backup_alerts,
+            "alert_rules": {
+                "backup_failure_rate": "backup_failure_rate" in alert_manager.alert_rules,
+                "backup_corruption_detected": "backup_corruption_detected"
+                in alert_manager.alert_rules,
+                "backup_schedule_execution_failure": "backup_schedule_execution_failure"
+                in alert_manager.alert_rules,
+                "backup_verification_failure": "backup_verification_failure"
+                in alert_manager.alert_rules,
+                "backup_disk_space_warning": "backup_disk_space_warning"
+                in alert_manager.alert_rules,
+                "backup_disk_space_critical": "backup_disk_space_critical"
+                in alert_manager.alert_rules,
+            },
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to get backup alert status: {e}")
+        return {
+            "error": f"Alert status collection failed: {str(e)}",
+            "active_backup_alerts": 0,
+            "alerts": [],
+            "alert_rules": {},
+        }
+
+
+def get_backup_health_dashboard() -> Dict[str, Any]:
+    """
+    Get comprehensive backup health dashboard data.
+
+    Returns:
+        Dictionary containing all backup health information for dashboard display
+    """
+    try:
+        # Get all backup-related metrics
+        backup_metrics = get_backup_metrics()
+        system_metrics = get_system_metrics()
+
+        # Calculate health score
+        health_score = calculate_backup_health_score(backup_metrics)
+
+        # Get recent backup history
+        recent_backups = get_recent_backup_history()
+
+        dashboard_data = {
+            "status": "healthy"
+            if health_score >= 80
+            else "warning"
+            if health_score >= 60
+            else "critical",
+            "timestamp": time.time(),
+            "health_score": health_score,
+            "backup_metrics": backup_metrics,
+            "system_metrics": system_metrics,
+            "recent_backups": recent_backups,
+            "recommendations": generate_backup_recommendations(backup_metrics),
+        }
+
+        return dashboard_data
+
+    except Exception as e:
+        logger.error(f"Failed to generate backup health dashboard: {e}")
+        return {
+            "status": "unhealthy",
+            "message": f"Dashboard generation failed: {str(e)}",
+            "timestamp": time.time(),
+        }
+
+
+def calculate_backup_health_score(backup_metrics: Dict[str, Any]) -> int:
+    """
+    Calculate overall backup health score (0-100).
+
+    Args:
+        backup_metrics: Backup metrics dictionary
+
+    Returns:
+        Health score as integer (0-100)
+    """
+    try:
+        score = 100
+
+        # Deduct points for failures
+        if "backup_operations" in backup_metrics:
+            ops = backup_metrics["backup_operations"]
+            total_backups = ops.get("total_backups", 0)
+
+            if total_backups > 0:
+                failure_rate = (ops.get("failed_backups", 0) / total_backups) * 100
+                corruption_rate = (ops.get("corrupted_backups", 0) / total_backups) * 100
+                verification_failure_rate = (
+                    ops.get("verification_failures", 0) / total_backups
+                ) * 100
+
+                # Deduct points based on failure rates
+                score -= min(failure_rate * 2, 40)  # Up to 40 points for failures
+                score -= min(corruption_rate * 5, 30)  # Up to 30 points for corruption
+                score -= min(
+                    verification_failure_rate * 3, 20
+                )  # Up to 20 points for verification failures
+
+        # Deduct points for disk usage
+        if "disk_usage" in backup_metrics:
+            usage_percent = backup_metrics["disk_usage"].get("usage_percent", 0)
+            if usage_percent > 90:
+                score -= 20
+            elif usage_percent > 80:
+                score -= 10
+
+        # Deduct points for active alerts
+        if "alert_status" in backup_metrics:
+            active_alerts = backup_metrics["alert_status"].get("active_backup_alerts", 0)
+            score -= min(active_alerts * 5, 25)  # Up to 25 points for alerts
+
+        return max(int(score), 0)
+
+    except Exception as e:
+        logger.error(f"Failed to calculate backup health score: {e}")
+        return 0
+
+
+def get_recent_backup_history(limit: int = 10) -> list:
+    """
+    Get recent backup history.
+
+    Args:
+        limit: Maximum number of recent backups to return
+
+    Returns:
+        List of recent backup information
+    """
+    try:
+        import glob
+        import os
+        from datetime import datetime
+
+        backup_files = []
+        backup_dir = "backups"
+
+        if os.path.exists(backup_dir):
+            # Find all backup files
+            for server_dir in os.listdir(backup_dir):
+                server_path = os.path.join(backup_dir, server_dir)
+                if os.path.isdir(server_path):
+                    for backup_file in glob.glob(os.path.join(server_path, "*.tar.gz")):
+                        try:
+                            stat = os.stat(backup_file)
+                            backup_files.append(
+                                {
+                                    "server_name": server_dir,
+                                    "backup_file": os.path.basename(backup_file),
+                                    "file_path": backup_file,
+                                    "size_bytes": stat.st_size,
+                                    "created_time": datetime.fromtimestamp(
+                                        stat.st_mtime
+                                    ).isoformat(),
+                                    "age_hours": (time.time() - stat.st_mtime) / 3600,
+                                }
+                            )
+                        except OSError:
+                            continue
+
+        # Sort by creation time (newest first) and limit results
+        backup_files.sort(key=lambda x: x["created_time"], reverse=True)
+        return backup_files[:limit]
+
+    except Exception as e:
+        logger.error(f"Failed to get recent backup history: {e}")
+        return []
+
+
+def generate_backup_recommendations(backup_metrics: Dict[str, Any]) -> list:
+    """
+    Generate backup health recommendations.
+
+    Args:
+        backup_metrics: Backup metrics dictionary
+
+    Returns:
+        List of recommendation strings
+    """
+    recommendations = []
+
+    try:
+        if "backup_operations" in backup_metrics:
+            ops = backup_metrics["backup_operations"]
+            total_backups = ops.get("total_backups", 0)
+
+            if total_backups > 0:
+                failure_rate = (ops.get("failed_backups", 0) / total_backups) * 100
+                corruption_rate = (ops.get("corrupted_backups", 0) / total_backups) * 100
+
+                if failure_rate > 20:
+                    recommendations.append(
+                        f"High backup failure rate ({failure_rate:.1f}%) - investigate backup process"
+                    )
+
+                if corruption_rate > 5:
+                    recommendations.append(
+                        f"Backup corruption detected ({corruption_rate:.1f}%) - check storage integrity"
+                    )
+
+        if "disk_usage" in backup_metrics:
+            usage_percent = backup_metrics["disk_usage"].get("usage_percent", 0)
+            if usage_percent > 90:
+                recommendations.append("Critical disk usage - clean up old backups immediately")
+            elif usage_percent > 80:
+                recommendations.append("High disk usage - consider cleaning up old backups")
+
+        if "alert_status" in backup_metrics:
+            active_alerts = backup_metrics["alert_status"].get("active_backup_alerts", 0)
+            if active_alerts > 0:
+                recommendations.append(
+                    f"{active_alerts} active backup alerts - review alert status"
+                )
+
+        if not recommendations:
+            recommendations.append("Backup system is healthy - no immediate action required")
+
+        return recommendations
+
+    except Exception as e:
+        logger.error(f"Failed to generate backup recommendations: {e}")
+        return ["Unable to generate recommendations - check system logs"]

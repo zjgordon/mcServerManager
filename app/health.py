@@ -19,7 +19,12 @@ from flask import Blueprint, jsonify
 from sqlalchemy import text
 
 from .extensions import db
-from .monitoring import get_application_metrics, get_system_metrics
+from .monitoring import (
+    get_application_metrics,
+    get_backup_health_dashboard,
+    get_backup_metrics,
+    get_system_metrics,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -241,3 +246,83 @@ def liveness_check():
         ),
         200,
     )
+
+
+@health_bp.route("/backup", methods=["GET"])
+def backup_health_check():
+    """
+    Backup health check endpoint.
+
+    Returns:
+        JSON response with backup system health status
+    """
+    start_time = time.time()
+
+    try:
+        # Get backup metrics
+        backup_metrics = get_backup_metrics()
+
+        # Determine overall backup health status
+        overall_status = backup_metrics.get("status", "unhealthy")
+
+        total_response_time = (time.time() - start_time) * 1000
+
+        response = {
+            "status": overall_status,
+            "timestamp": datetime.utcnow().isoformat(),
+            "service": "mcServerManager-backup",
+            "response_time_ms": round(total_response_time, 2),
+            "backup_health": backup_metrics,
+        }
+
+        status_code = 200 if overall_status == "healthy" else 503
+        return jsonify(response), status_code
+
+    except Exception as e:
+        logger.error(f"Backup health check failed: {e}")
+        return (
+            jsonify(
+                {
+                    "status": "unhealthy",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "service": "mcServerManager-backup",
+                    "error": f"Backup health check failed: {str(e)}",
+                }
+            ),
+            503,
+        )
+
+
+@health_bp.route("/backup/dashboard", methods=["GET"])
+def backup_health_dashboard():
+    """
+    Backup health dashboard endpoint with comprehensive monitoring.
+
+    Returns:
+        JSON response with detailed backup health dashboard data
+    """
+    start_time = time.time()
+
+    try:
+        # Get comprehensive backup health dashboard
+        dashboard_data = get_backup_health_dashboard()
+
+        total_response_time = (time.time() - start_time) * 1000
+        dashboard_data["response_time_ms"] = round(total_response_time, 2)
+
+        status_code = 200 if dashboard_data.get("status") == "healthy" else 503
+        return jsonify(dashboard_data), status_code
+
+    except Exception as e:
+        logger.error(f"Backup health dashboard failed: {e}")
+        return (
+            jsonify(
+                {
+                    "status": "unhealthy",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "service": "mcServerManager-backup-dashboard",
+                    "error": f"Backup health dashboard failed: {str(e)}",
+                }
+            ),
+            503,
+        )
