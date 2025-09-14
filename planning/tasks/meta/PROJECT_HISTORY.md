@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-067: Update configuration help sidebar with experimental features documentation
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Added comprehensive experimental features documentation to the Configuration Help sidebar in app/templates/admin_config.html. The documentation includes explanation of the toggle system, warnings about experimental features, clear distinction between experimental and stable features, and guidance on when to enable experimental features. Implemented with proper HTML structure using flask icon, detailed bullet points explaining feature types and toggle functionality, and comprehensive guidance section recommending backup before enabling experimental features. The documentation integrates seamlessly with existing help section styling and provides clear guidance for administrators on safely using experimental features. All tests pass (326/330) with no linting errors, completing the experimental features documentation enhancement.
+
 ## 2025-01-27 - CARD-066: Update configuration help sidebar with memory bar gauge documentation
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  

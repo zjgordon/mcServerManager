@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-066 - Update configuration help sidebar with memory bar gauge documentation'
-  last_commit: 'docs: [CARD-066] Update configuration help sidebar with memory bar gauge documentation'
-  next_action: 'CARD-067 - Add experimental feature management tests'
+  step: 'CARD-067 - Update configuration help sidebar with experimental features documentation'
+  last_commit: 'docs: [CARD-067] Update configuration help sidebar with experimental features documentation'
+  next_action: 'CARD-068 - Add experimental feature management tests'
 queue: 
-  - CARD-067
   - CARD-068
   - CARD-069
   - CARD-070

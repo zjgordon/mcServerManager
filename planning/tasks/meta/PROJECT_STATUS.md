@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-067: ✅ Completed - Updated configuration help sidebar with experimental features documentation including toggle system explanation, warnings about experimental features, feature type distinctions, and guidance on when to enable experimental features
 - CARD-066: ✅ Completed - Updated configuration help sidebar with memory bar gauge documentation including visual representation explanation, color-coded indicators, usage guidance, and best practices for memory management
 - CARD-065: ✅ Completed - Added CSS styling for experimental features section with modern card-based layout, enhanced toggle switches, status indicators, warning text styling, and responsive design for polished UI
 - CARD-064: ✅ Completed - Added JavaScript for experimental features toggles with AJAX calls, real-time UI updates, confirmation dialogs, error handling, and debouncing for complete frontend functionality
