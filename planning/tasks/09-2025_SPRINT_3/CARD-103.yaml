@@ -1,0 +1,44 @@
+id: CARD-103
+title: Fix experimental feature database integrity constraint violations
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: The `test_admin_config_experimental_features_display` test is failing with SQLAlchemy IntegrityError due to UNIQUE constraint violation on experimental_feature.feature_key.
+  
+  **Root Cause**: The test is trying to create an experimental feature with feature_key 'server_management_page' that already exists in the database, violating the unique constraint.
+  
+  **Affected Test**:
+  - `tests/integration/test_admin_config_enhancements.py::TestAdminConfigEnhancements::test_admin_config_experimental_features_display`
+  
+  **Error Details**:
+  - `sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: experimental_feature.feature_key`
+  - Attempting to insert: `('server_management_page', 'Server Management Page', 'Comprehensive server management interface with advanced controls and monitoring', 0, 0, None)`
+  
+  **Actions Required**:
+  1. Review test setup to ensure proper database cleanup between tests
+  2. Fix test to either use existing feature or clean up before creating
+  3. Implement proper test isolation for experimental features
+  4. Add database cleanup in test teardown
+  5. Consider using test fixtures for consistent experimental feature setup
+  
+  **Files to Examine**:
+  - tests/integration/test_admin_config_enhancements.py (test setup and teardown)
+  - tests/conftest.py (global test configuration)
+  - tests/fixtures/ (experimental feature fixtures)
+  - app/models.py (ExperimentalFeature model constraints)
+  
+  **Technical Requirements**:
+  - Ensure test database is properly cleaned between tests
+  - Implement proper test isolation for experimental features
+  - Fix duplicate feature creation issue
+  - Add proper teardown for experimental features

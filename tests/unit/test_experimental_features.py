@@ -83,6 +83,11 @@ class TestExperimentalFeatures:
     def test_toggle_experimental_feature_success(self, app, client):
         """Test toggling experimental feature successfully."""
         with app.app_context():
+            # Create test admin user
+            admin_user = User(username="testadmin", password_hash="hash", is_admin=True)
+            db.session.add(admin_user)
+            db.session.commit()
+
             # Create test feature with unique key
             feature = ExperimentalFeature(
                 feature_key="test_toggle_success",
@@ -100,21 +105,27 @@ class TestExperimentalFeatures:
             ).first()
             assert existing_feature is not None, "Feature should exist before toggle test"
 
-            # Test enabling feature
-            result = toggle_experimental_feature("test_toggle_success", True)
-            assert result is True
+            # Mock current_user as authenticated admin
+            with patch("app.utils.current_user") as mock_user:
+                mock_user.is_authenticated = True
+                mock_user.is_admin = True
+                mock_user.id = admin_user.id
 
-            # Verify feature was enabled
-            db.session.refresh(feature)  # Refresh from database
-            assert feature.enabled is True
+                # Test enabling feature
+                result = toggle_experimental_feature("test_toggle_success", True)
+                assert result is True
 
-            # Test disabling feature
-            result = toggle_experimental_feature("test_toggle_success", False)
-            assert result is True
+                # Verify feature was enabled
+                db.session.refresh(feature)  # Refresh from database
+                assert feature.enabled is True
 
-            # Verify feature was disabled
-            db.session.refresh(feature)  # Refresh from database
-            assert feature.enabled is False
+                # Test disabling feature
+                result = toggle_experimental_feature("test_toggle_success", False)
+                assert result is True
+
+                # Verify feature was disabled
+                db.session.refresh(feature)  # Refresh from database
+                assert feature.enabled is False
 
     def test_toggle_experimental_feature_not_found(self, app, client):
         """Test toggling non-existent experimental feature."""
