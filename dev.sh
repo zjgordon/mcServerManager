@@ -165,6 +165,7 @@ show_usage() {
     echo "  --file FILE         Run specific test file (relative or absolute path)"
     echo "  --class CLASS       Run specific test class (use with --file)"
     echo "  --function FUNCTION Run specific test function (use with --file and --class)"
+    echo "  --pattern PATTERN   Run tests matching pattern using pytest -k syntax"
     echo ""
     echo "EXAMPLES:"
     echo "  $0                                    # Run with default settings"
@@ -181,6 +182,10 @@ show_usage() {
     echo "  $0 test --file test_server_management.py             # Run test file (relative path)"
     echo "  $0 test --file tests/unit/test_server_management.py --class TestServerManagementRouteAccessControl  # Run specific test class"
     echo "  $0 test --file tests/unit/test_server_management.py --class TestServerManagementRouteAccessControl --function test_validate_server_access_owner_user  # Run specific test function"
+    echo "  $0 test --pattern \"authentication\"                  # Run tests matching 'authentication'"
+    echo "  $0 test --pattern \"server_management and not integration\"  # Run server_management tests excluding integration"
+    echo "  $0 test --unit --pattern \"test_execute_server_command\"  # Run unit tests matching pattern"
+    echo "  $0 test --pattern \"backup or restore\"               # Run tests matching 'backup' or 'restore'"
     echo "  $0 setup                             # Setup environment without running"
     echo ""
     echo "PROCESS MANAGEMENT:"
@@ -253,6 +258,7 @@ run_tests() {
     local test_file=""
     local test_class=""
     local test_function=""
+    local test_pattern=""
 
     # Parse test arguments
     while [[ $# -gt 0 ]]; do
@@ -289,6 +295,10 @@ run_tests() {
                 test_function="$2"
                 shift 2
                 ;;
+            --pattern)
+                test_pattern="$2"
+                shift 2
+                ;;
             *)
                 shift
                 ;;
@@ -306,6 +316,29 @@ run_tests() {
         print_error "--function option requires --file option"
         print_info "Usage: $0 test --file FILE --class CLASS --function FUNCTION"
         exit 1
+    fi
+
+    # Validate pattern syntax
+    if [ -n "$test_pattern" ]; then
+        # Basic validation for common pytest -k syntax issues
+        if [[ "$test_pattern" =~ ^[[:space:]]*$ ]]; then
+            print_error "Pattern cannot be empty or whitespace only"
+            print_info "Usage: $0 test --pattern 'PATTERN'"
+            exit 1
+        fi
+
+        # Check for balanced parentheses (basic check)
+        local open_parens
+        local close_parens
+        open_parens=$(echo "$test_pattern" | tr -cd '(' | wc -c)
+        close_parens=$(echo "$test_pattern" | tr -cd ')' | wc -c)
+        if [ "$open_parens" -ne "$close_parens" ]; then
+            print_error "Unbalanced parentheses in pattern: $test_pattern"
+            print_info "Please ensure all parentheses are balanced"
+            exit 1
+        fi
+
+        print_info "Pattern validation passed: $test_pattern"
     fi
 
     # Handle file-specific test execution
@@ -367,7 +400,12 @@ run_tests() {
         fi
 
         # Run the specific test
-        pytest "$pytest_path" -v
+        if [ -n "$test_pattern" ]; then
+            print_info "Running tests with pattern: $test_pattern"
+            pytest "$pytest_path" -v -k "$test_pattern"
+        else
+            pytest "$pytest_path" -v
+        fi
         print_success "Test execution completed"
         return
     fi
@@ -392,7 +430,12 @@ run_tests() {
     # Run tests
     if [ -d "$test_path" ]; then
         print_info "Running tests from: $test_path"
-        pytest "$test_path" -v
+        if [ -n "$test_pattern" ]; then
+            print_info "Running tests with pattern: $test_pattern"
+            pytest "$test_path" -v -k "$test_pattern"
+        else
+            pytest "$test_path" -v
+        fi
         print_success "Tests completed"
     else
         print_warning "No tests directory found"
@@ -485,7 +528,7 @@ main() {
                     break
                 fi
                 ;;
-            --unit|--integration|--e2e|--performance|--file|--class|--function)
+            --unit|--integration|--e2e|--performance|--file|--class|--function|--pattern)
                 # These are test-specific options, only valid after 'test' command
                 if [ "$command" != "test" ]; then
                     print_error "Option $1 is only valid with 'test' command"

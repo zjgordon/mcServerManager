@@ -1,5 +1,21 @@
 # Project History
 
+## 2025-09-14 - CARD-098: Add pattern-based test filtering to dev.sh
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+**Summary:** Added pattern-based test filtering capability to dev.sh using pytest's `-k` option. This enhancement allows developers to run tests matching specific patterns or keywords without knowing exact file/class/function names, significantly improving development workflow efficiency. The implementation includes comprehensive validation, error handling, and usage documentation with practical examples.
+
+**Changes Made:**
+- Added `--pattern` option to dev.sh test command argument parsing with support for pytest pattern syntax (AND, OR, NOT operators)
+- Extended `run_tests()` function to use pytest `-k` flag with pattern matching for both specific file execution and general test suite execution
+- Added comprehensive pattern validation including empty pattern detection and balanced parentheses checking with helpful error messages
+- Updated `show_usage()` function with pattern examples including authentication, server_management, backup/restore patterns, and complex operator combinations
+- Enhanced argument parsing to recognize `--pattern` as a test-specific option with proper validation
+- Added pattern validation feedback to provide user confirmation when patterns are successfully parsed
+
 ## 2025-09-14 - CARD-095: Update test fixtures and improve test data management
 
 **Epic:** Epic 3 – Test Suite Stabilization  
