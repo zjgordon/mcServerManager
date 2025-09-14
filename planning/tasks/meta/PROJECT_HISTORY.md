@@ -1822,6 +1822,14 @@ Fixed authentication and authorization test failures across multiple test files 
 
 Fixed backup API and end-to-end workflow test failures by correcting error message expectations in tests to match actual API behavior. Updated tests/e2e/test_backup_workflows.py test_backup_workflow_error_handling method to expect "Server not found" instead of "Server not found or access denied" for non-existent server scenarios, aligning test expectations with the actual backup API error handling logic. The backup API correctly distinguishes between server not found (404) and access denied (403) scenarios, but the test was expecting a combined error message. All backup API tests now pass including test_backup_workflow_with_user_permissions, test_backup_workflow_error_handling, test_list_schedules_user_access, and test_server_access_control. The fix ensures consistent error message handling across backup-related endpoints and proper user permission validation in backup workflows. All 145 backup-related tests pass with no authentication or authorization issues.
 
+## 2025-01-14 - CARD-097: Add test class and function execution capability to dev.sh
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+Added test class and function execution capability to dev.sh development script to allow agents to run specific test classes or individual test functions within files. Implemented --class and --function options for test command with support for pytest syntax (file::Class and file::Class::function), comprehensive validation using pytest --collect-only, and clear error messages for invalid classes/functions. Modified argument parsing in main() function to handle --class and --function options by breaking out of parsing early and passing all remaining arguments to run_tests() function. Updated run_tests() function to build proper pytest paths from file/class/function parameters with validation logic that checks class and function existence before execution. Enhanced show_usage() function with comprehensive documentation including --class and --function option descriptions and usage examples. The implementation supports all existing test suite options and maintains backward compatibility. New usage examples include "./dev.sh test --file tests/unit/test_models.py --class TestUserModel" and "./dev.sh test --file tests/unit/test_models.py --class TestUserModel --function test_user_creation" for granular test execution. All functionality tested with existing classes/functions and non-existent ones, confirming proper error handling and test execution.
+
 ## 2025-01-14 - CARD-096: Add individual test file execution capability to dev.sh
 
 **Epic:** Epic 3 – Test Suite Stabilization  

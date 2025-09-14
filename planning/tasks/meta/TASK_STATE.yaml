@@ -1,10 +1,9 @@
-active_card: CARD-097
+active_card: CARD-098
 breadcrumb:
-  step: 'CARD-096 - Add individual test file execution capability to dev.sh'
-  last_commit: 'feat: [CARD-096] Add individual test file execution capability to dev.sh'
-  next_action: 'CARD-097 - Ready to start next task'
+  step: 'CARD-097 - Add test class and function execution capability to dev.sh'
+  last_commit: 'feat: [CARD-097] Add test class and function execution capability to dev.sh'
+  next_action: 'CARD-098 - Ready to start next task'
 queue:
-  - CARD-097
   - CARD-098
   - CARD-099
   - CARD-100

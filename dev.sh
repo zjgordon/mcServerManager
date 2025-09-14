@@ -163,6 +163,8 @@ show_usage() {
     echo "  --e2e               Run only end-to-end tests (tests/e2e/)"
     echo "  --performance       Run only performance tests (tests/performance/)"
     echo "  --file FILE         Run specific test file (relative or absolute path)"
+    echo "  --class CLASS       Run specific test class (use with --file)"
+    echo "  --function FUNCTION Run specific test function (use with --file and --class)"
     echo ""
     echo "EXAMPLES:"
     echo "  $0                                    # Run with default settings"
@@ -177,6 +179,8 @@ show_usage() {
     echo "  $0 test --performance                # Run only performance tests"
     echo "  $0 test --file tests/unit/test_server_management.py  # Run specific test file"
     echo "  $0 test --file test_server_management.py             # Run test file (relative path)"
+    echo "  $0 test --file tests/unit/test_server_management.py --class TestServerManagementRouteAccessControl  # Run specific test class"
+    echo "  $0 test --file tests/unit/test_server_management.py --class TestServerManagementRouteAccessControl --function test_validate_server_access_owner_user  # Run specific test function"
     echo "  $0 setup                             # Setup environment without running"
     echo ""
     echo "PROCESS MANAGEMENT:"
@@ -247,6 +251,8 @@ run_tests() {
     local test_type="all"
     local test_path="tests/"
     local test_file=""
+    local test_class=""
+    local test_function=""
 
     # Parse test arguments
     while [[ $# -gt 0 ]]; do
@@ -275,11 +281,32 @@ run_tests() {
                 test_file="$2"
                 shift 2
                 ;;
+            --class)
+                test_class="$2"
+                shift 2
+                ;;
+            --function)
+                test_function="$2"
+                shift 2
+                ;;
             *)
                 shift
                 ;;
         esac
     done
+
+    # Validate that class/function options are used with file option
+    if [ -n "$test_class" ] && [ -z "$test_file" ]; then
+        print_error "--class option requires --file option"
+        print_info "Usage: $0 test --file FILE --class CLASS"
+        exit 1
+    fi
+
+    if [ -n "$test_function" ] && [ -z "$test_file" ]; then
+        print_error "--function option requires --file option"
+        print_info "Usage: $0 test --file FILE --class CLASS --function FUNCTION"
+        exit 1
+    fi
 
     # Handle file-specific test execution
     if [ -n "$test_file" ]; then
@@ -295,17 +322,53 @@ run_tests() {
             fi
         fi
 
-        print_info "Running specific test file: $test_file"
-
         # Check if pytest is available
         if ! command -v pytest &> /dev/null; then
             print_error "pytest not found. Installing..."
             pip install pytest >/dev/null 2>&1
         fi
 
-        # Run the specific test file
-        pytest "$test_file" -v
-        print_success "Test file execution completed"
+        # Build pytest path based on provided options
+        local pytest_path="$test_file"
+
+        if [ -n "$test_class" ]; then
+            pytest_path="$test_file::$test_class"
+            print_info "Running specific test class: $test_class in $test_file"
+
+            # Validate class exists
+            if ! pytest --collect-only "$pytest_path" >/dev/null 2>&1; then
+                print_error "Test class '$test_class' not found in $test_file"
+                print_info "Available classes in $test_file:"
+                pytest --collect-only "$test_file" 2>/dev/null | grep "Class" | head -10
+                exit 1
+            fi
+        fi
+
+        if [ -n "$test_function" ]; then
+            if [ -z "$test_class" ]; then
+                print_error "--function option requires --class option"
+                print_info "Usage: $0 test --file FILE --class CLASS --function FUNCTION"
+                exit 1
+            fi
+            pytest_path="$test_file::$test_class::$test_function"
+            print_info "Running specific test function: $test_function in $test_class"
+
+            # Validate function exists
+            if ! pytest --collect-only "$pytest_path" >/dev/null 2>&1; then
+                print_error "Test function '$test_function' not found in class '$test_class'"
+                print_info "Available functions in $test_class:"
+                pytest --collect-only "$test_file::$test_class" 2>/dev/null | grep "Function" | head -10
+                exit 1
+            fi
+        fi
+
+        if [ -z "$test_class" ] && [ -z "$test_function" ]; then
+            print_info "Running specific test file: $test_file"
+        fi
+
+        # Run the specific test
+        pytest "$pytest_path" -v
+        print_success "Test execution completed"
         return
     fi
 
@@ -380,7 +443,6 @@ main() {
     local demo_mode=false
     local background_mode=false
     local kill_mode=false
-    local test_file=""
 
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -418,30 +480,20 @@ main() {
             run|test|setup)
                 command="$1"
                 shift
-                # For test command, continue parsing test-specific options
+                # For test command, break out of parsing and let run_tests handle remaining args
                 if [ "$command" = "test" ]; then
-                    continue
+                    break
                 fi
                 ;;
-            --unit|--integration|--e2e|--performance)
+            --unit|--integration|--e2e|--performance|--file|--class|--function)
                 # These are test-specific options, only valid after 'test' command
                 if [ "$command" != "test" ]; then
                     print_error "Option $1 is only valid with 'test' command"
                     show_usage
                     exit 1
                 fi
-                shift
-                ;;
-            --file)
-                # This is a test-specific option, only valid after 'test' command
-                if [ "$command" != "test" ]; then
-                    print_error "Option $1 is only valid with 'test' command"
-                    show_usage
-                    exit 1
-                fi
-                # Capture the file argument
-                test_file="$2"
-                shift 2
+                # For test command, break out of parsing and let run_tests handle remaining args
+                break
                 ;;
             *)
                 print_error "Unknown option: $1"
@@ -484,12 +536,8 @@ main() {
             fi
             ;;
         test)
-            # Pass all remaining arguments to run_tests, plus the file if specified
-            if [ -n "$test_file" ]; then
-                run_tests --file "$test_file" "$@"
-            else
-                run_tests "$@"
-            fi
+            # Pass all remaining arguments to run_tests
+            run_tests "$@"
             ;;
         setup)
             print_success "Development environment setup complete"
