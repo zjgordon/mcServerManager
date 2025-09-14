@@ -1,8 +1,8 @@
 active_card: CARD-101
 breadcrumb:
-  step: 'CARD-100 - Add pytest options passthrough and advanced test execution features'
-  last_commit: 'feat: [CARD-100] Add pytest options passthrough and advanced test execution features'
-  next_action: 'CARD-101 - Ready to start next task'
+  step: 'CARD-101 - Update help documentation and examples for enhanced test functionality'
+  last_commit: 'feat: [CARD-101] Update help documentation and examples for enhanced test functionality'
+  next_action: 'CARD-101 - Completed successfully'
 queue:
   - CARD-101
   

@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-14 - CARD-101: Update help documentation and examples for enhanced test functionality
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+Updated help documentation and examples in dev.sh development script to provide comprehensive guidance for all enhanced test functionality added in previous cards. Enhanced show_usage() function with organized test options sections including Test Suite Selection, Individual Test Execution, Test Discovery and Listing, and Advanced Pytest Options. Added comprehensive troubleshooting section with common issues and solutions for test file not found, class/function not found, pattern syntax errors, port conflicts, permission errors, import errors, and test failures. Updated examples section with additional comprehensive examples including updated class/function examples (TestConsoleAPIEndpoints), pattern filtering examples, test listing examples, and advanced pytest options examples as specified in card requirements. The documentation now provides clear, actionable guidance for all test execution capabilities including individual test file execution, test class and function execution, pattern-based test filtering, test discovery and listing, and advanced pytest options passthrough. All examples are copy-pasteable and work correctly, maintaining existing help structure and formatting while significantly improving developer experience and test workflow efficiency.
+
 ## 2025-09-14 - CARD-100: Add pytest options passthrough and advanced test execution features
 
 **Epic:** Epic 3 – Test Suite Stabilization  
