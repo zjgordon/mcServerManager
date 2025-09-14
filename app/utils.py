@@ -3,6 +3,8 @@ import json
 import os
 import re
 import socket
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
 
 import psutil
 import requests
@@ -1493,3 +1495,345 @@ def add_experimental_feature(
         logger.error(f"Error adding experimental feature '{feature_key}': {str(e)}")
         db.session.rollback()
         return False
+
+
+def parse_server_logs(log_file_path: str, page: int = 1, page_size: int = 100) -> Dict:
+    """
+    Parse Minecraft server log files and extract structured log data.
+
+    Args:
+        log_file_path: Path to the log file to parse
+        page: Page number for pagination (1-based)
+        page_size: Number of log entries per page
+
+    Returns:
+        dict: Parsed log data with entries, pagination info, and metadata
+    """
+    try:
+        # Validate input parameters
+        if not log_file_path or not isinstance(log_file_path, str):
+            raise ValidationError("Invalid log file path provided")
+
+        if page < 1:
+            raise ValidationError("Page number must be >= 1")
+
+        if page_size < 1 or page_size > 1000:
+            raise ValidationError("Page size must be between 1 and 1000")
+
+        # Check if file exists and is readable
+        if not os.path.exists(log_file_path):
+            logger.warning(f"Log file not found: {log_file_path}")
+            return {
+                "success": False,
+                "error": "Log file not found",
+                "entries": [],
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0,
+                    "total_entries": 0,
+                },
+            }
+
+        if not os.access(log_file_path, os.R_OK):
+            logger.warning(f"Log file not readable: {log_file_path}")
+            return {
+                "success": False,
+                "error": "Log file not readable",
+                "entries": [],
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0,
+                    "total_entries": 0,
+                },
+            }
+
+        logger.info(f"Parsing server logs from: {log_file_path}, page: {page}, size: {page_size}")
+
+        # Read log file with safe file operation
+        with SafeFileOperation(log_file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        if not lines:
+            return {
+                "success": True,
+                "entries": [],
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0,
+                    "total_entries": 0,
+                },
+                "metadata": {"file_size": os.path.getsize(log_file_path), "total_lines": 0},
+            }
+
+        # Parse log entries
+        parsed_entries = []
+        total_entries = 0
+
+        for line_num, line in enumerate(lines, 1):
+            line = line.strip()
+            if not line:
+                continue
+
+            # Try to parse different Minecraft log formats
+            parsed_entry = _parse_log_line(line, line_num)
+            if parsed_entry:
+                parsed_entries.append(parsed_entry)
+                total_entries += 1
+
+        # Calculate pagination
+        total_pages = (total_entries + page_size - 1) // page_size
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+
+        # Get page entries
+        page_entries = parsed_entries[start_idx:end_idx]
+
+        # Calculate file metadata
+        file_size = os.path.getsize(log_file_path)
+
+        result = {
+            "success": True,
+            "entries": page_entries,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "total_entries": total_entries,
+                "has_next": page < total_pages,
+                "has_prev": page > 1,
+            },
+            "metadata": {
+                "file_size": file_size,
+                "total_lines": len(lines),
+                "parsed_lines": total_entries,
+                "parse_rate": round((total_entries / len(lines)) * 100, 2) if lines else 0,
+            },
+        }
+
+        logger.info(
+            f"Successfully parsed {total_entries} log entries from {len(lines)} total lines"
+        )
+        return result
+
+    except ValidationError as e:
+        logger.error(f"Validation error parsing logs: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "entries": [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "total_entries": 0,
+            },
+        }
+    except FileOperationError as e:
+        logger.error(f"File operation error parsing logs: {str(e)}")
+        return {
+            "success": False,
+            "error": f"File operation failed: {str(e)}",
+            "entries": [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "total_entries": 0,
+            },
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error parsing server logs: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Log parsing failed: {str(e)}",
+            "entries": [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "total_entries": 0,
+            },
+        }
+
+
+def _parse_log_line(line: str, line_number: int) -> Optional[Dict]:
+    """
+    Parse a single log line and extract structured data.
+
+    Args:
+        line: Raw log line to parse
+        line_number: Line number in the file
+
+    Returns:
+        dict: Parsed log entry or None if parsing failed
+    """
+    try:
+        # Common Minecraft server log patterns
+        patterns = [
+            # Standard format: [HH:MM:SS] [Thread/Level] message
+            r"^\[(\d{2}:\d{2}:\d{2})\] \[([^/]+)/(\w+)\]: (.+)$",
+            # Alternative format: [YYYY-MM-DD HH:MM:SS] [Thread/Level] message
+            r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] \[([^/]+)/(\w+)\]: (.+)$",
+            # Simple format: [HH:MM:SS] message
+            r"^\[(\d{2}:\d{2}:\d{2})\] (.+)$",
+            # Timestamp with milliseconds: [HH:MM:SS.mmm] [Thread/Level] message
+            r"^\[(\d{2}:\d{2}:\d{2}\.\d{3})\] \[([^/]+)/(\w+)\]: (.+)$",
+            # Paper/Spigot format: [HH:MM:SS INFO]: message
+            r"^\[(\d{2}:\d{2}:\d{2}) (\w+)\]: (.+)$",
+        ]
+
+        for pattern in patterns:
+            match = re.match(pattern, line)
+            if match:
+                groups = match.groups()
+
+                # Extract timestamp
+                timestamp_str = groups[0]
+                timestamp = _parse_timestamp(timestamp_str)
+
+                # Extract level and message based on pattern
+                if len(groups) == 4:  # [time] [thread/level]: message
+                    thread = groups[1]
+                    level = groups[2]
+                    message = groups[3]
+                elif len(groups) == 3:
+                    if "/" in groups[1]:  # [time] [thread/level]: message
+                        thread, level = groups[1].split("/", 1)
+                        message = groups[2]
+                    else:  # [time] level: message
+                        thread = "main"
+                        level = groups[1]
+                        message = groups[2]
+                elif len(groups) == 2:  # [time] message
+                    thread = "main"
+                    level = _infer_log_level(groups[1])
+                    message = groups[1]
+                else:
+                    continue
+
+                # Normalize log level
+                level = _normalize_log_level(level)
+
+                return {
+                    "line_number": line_number,
+                    "timestamp": timestamp,
+                    "level": level,
+                    "thread": thread,
+                    "message": message,
+                    "raw_line": line,
+                }
+
+        # If no pattern matches, treat as unparsed line with inferred level
+        level = _infer_log_level(line)
+        return {
+            "line_number": line_number,
+            "timestamp": None,
+            "level": level,
+            "thread": "unknown",
+            "message": line,
+            "raw_line": line,
+        }
+
+    except Exception as e:
+        logger.debug(f"Error parsing log line {line_number}: {str(e)}")
+        return None
+
+
+def _parse_timestamp(timestamp_str: str) -> Optional[str]:
+    """
+    Parse timestamp string and return ISO format timestamp.
+
+    Args:
+        timestamp_str: Raw timestamp string from log
+
+    Returns:
+        str: ISO format timestamp or None if parsing fails
+    """
+    try:
+        # Try different timestamp formats
+        formats = [
+            "%H:%M:%S",  # HH:MM:SS
+            "%Y-%m-%d %H:%M:%S",  # YYYY-MM-DD HH:MM:SS
+            "%H:%M:%S.%f",  # HH:MM:SS.mmm
+        ]
+
+        for fmt in formats:
+            try:
+                dt = datetime.strptime(timestamp_str, fmt)
+                # If no date, assume today
+                if fmt == "%H:%M:%S" or fmt == "%H:%M:%S.%f":
+                    dt = dt.replace(
+                        year=datetime.now().year, month=datetime.now().month, day=datetime.now().day
+                    )
+                return dt.isoformat()
+            except ValueError:
+                continue
+
+        return None
+    except Exception:
+        return None
+
+
+def _normalize_log_level(level: str) -> str:
+    """
+    Normalize log level to standard format.
+
+    Args:
+        level: Raw log level string
+
+    Returns:
+        str: Normalized log level
+    """
+    level = level.upper()
+
+    # Map common variations to standard levels
+    level_map = {
+        "INFO": "INFO",
+        "INFORMATION": "INFO",
+        "WARN": "WARN",
+        "WARNING": "WARN",
+        "ERROR": "ERROR",
+        "ERR": "ERROR",
+        "FATAL": "ERROR",
+        "CRITICAL": "ERROR",
+        "DEBUG": "DEBUG",
+        "TRACE": "DEBUG",
+        "FINE": "DEBUG",
+        "FINEST": "DEBUG",
+    }
+
+    return level_map.get(level, "INFO")
+
+
+def _infer_log_level(message: str) -> str:
+    """
+    Infer log level from message content.
+
+    Args:
+        message: Log message content
+
+    Returns:
+        str: Inferred log level
+    """
+    message_lower = message.lower()
+
+    # Error indicators
+    if any(
+        word in message_lower
+        for word in ["error", "exception", "failed", "fail", "crash", "fatal", "cannot", "unable"]
+    ):
+        return "ERROR"
+
+    # Warning indicators
+    if any(word in message_lower for word in ["warn", "warning", "caution", "deprecated"]):
+        return "WARN"
+
+    # Debug indicators
+    if any(word in message_lower for word in ["debug", "trace", "verbose"]):
+        return "DEBUG"
+
+    # Default to INFO
+    return "INFO"
