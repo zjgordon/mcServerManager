@@ -1,11 +1,9 @@
-active_card: CARD-081
+active_card: null
 breadcrumb:
-  step: 'CARD-081 - Add pre-defined server commands to management page'
-  last_commit: 'feat: [CARD-080] Implement server command execution system'
-  next_action: 'CARD-081 - Add pre-defined server commands to management page'
+  step: 'CARD-082 - Add server management page CSS styling'
+  last_commit: 'feat: [CARD-082] Add server management page CSS styling'
+  next_action: 'CARD-083 - Next card in queue'
 queue: 
-  - CARD-081
-  - CARD-082
   - CARD-083
   - CARD-084
   - CARD-085
