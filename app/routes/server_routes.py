@@ -32,6 +32,7 @@ from ..utils import (
     get_memory_config,
     get_memory_usage_summary,
     get_version_info,
+    is_feature_enabled,
     is_valid_server_name,
     load_exclusion_list,
     validate_memory_allocation,
@@ -822,6 +823,28 @@ def accept_eula(server_id):
         return redirect(url_for(".home"))
 
     return render_template("accept_eula.html", server=server)
+
+
+@server_bp.route("/manage/<int:server_id>")
+@login_required
+@route_error_handler
+def manage_server(server_id):
+    """Server management page with feature flag check."""
+    # Check if server management page feature is enabled
+    if not is_feature_enabled("server_management_page"):
+        flash("Server management page is currently disabled.", "info")
+        return redirect(url_for("server.home"))
+
+    # Check server access
+    server = check_server_access(server_id)
+    if not server:
+        return redirect(url_for("server.home"))
+
+    logger.info(
+        f"User {current_user.username} accessing server management page for server {server.server_name}"
+    )
+
+    return render_template("server_management.html", server=server)
 
 
 @server_bp.route("/backup_management")

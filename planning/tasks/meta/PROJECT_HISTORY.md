@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-074: Create server management route with feature flag check
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Added new server management route @server_bp.route("/manage/<int:server_id>") to app/routes/server_routes.py with comprehensive feature flag integration using is_feature_enabled('server_management_page'). The route includes proper access control through existing check_server_access() function, feature flag validation with user-friendly flash message redirection when disabled, and GET-only method restriction for security. Created server_management.html template with modern UI displaying server information, configuration details, and action buttons. The implementation follows the existing codebase patterns with proper error handling, logging, and template inheritance. This surgical addition provides the foundation for the server management page while maintaining security through feature gating and access controls.
+
 ## 2025-09-14 - CARD-073: Update admin config handler to manage server management page feature
 
 **Epic:** Epic 1 – Server Management Page Implementation  

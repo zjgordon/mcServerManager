@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Server Management - {{ server.server_name }} - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="server-management-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="pixel-font-lg">
+            <i class="fas fa-cogs"></i> Server Management
+        </h1>
+        <p class="page-description">
+            Manage and configure your Minecraft server: {{ server.server_name }}
+        </p>
+    </div>
+
+    <!-- Server Information Card -->
+    <div class="card mc-card">
+        <div class="card-header">
+            <h3 class="pixel-font">
+                <i class="fas fa-server"></i> Server Information
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <strong>Server Name:</strong> {{ server.server_name }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Version:</strong> {{ server.version }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Port:</strong> {{ server.port }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Status:</strong>
+                        <span class="badge badge-{% if server.status == 'Running' %}success{% else %}secondary{% endif %}">
+                            {{ server.status }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <strong>Memory:</strong> {{ server.memory_mb }}MB
+                    </div>
+                    <div class="info-item">
+                        <strong>Gamemode:</strong> {{ server.gamemode }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Difficulty:</strong> {{ server.difficulty }}
+                    </div>
+                    <div class="info-item">
+                        <strong>PvP:</strong>
+                        <span class="badge badge-{% if server.pvp %}success{% else %}secondary{% endif %}">
+                            {{ 'Enabled' if server.pvp else 'Disabled' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Server Actions Card -->
+    <div class="card mc-card">
+        <div class="card-header">
+            <h3 class="pixel-font">
+                <i class="fas fa-tools"></i> Server Actions
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="action-buttons">
+                <a href="{{ url_for('server.home') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Server List
+                </a>
+                <a href="{{ url_for('server.backup_management', server_id=server.id) }}" class="btn btn-info">
+                    <i class="fas fa-database"></i> Backup Management
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Server Configuration Card -->
+    <div class="card mc-card">
+        <div class="card-header">
+            <h3 class="pixel-font">
+                <i class="fas fa-sliders-h"></i> Server Configuration
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="config-info">
+                <p><strong>Level Seed:</strong> {{ server.level_seed or 'Default' }}</p>
+                <p><strong>MOTD:</strong> {{ server.motd or 'A Minecraft Server' }}</p>
+                <p><strong>Hardcore:</strong> {{ 'Yes' if server.hardcore else 'No' }}</p>
+                <p><strong>Spawn Monsters:</strong> {{ 'Yes' if server.spawn_monsters else 'No' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.server-management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.page-description {
+    color: #666;
+    font-size: 1.1em;
+}
+
+.info-item {
+    margin-bottom: 10px;
+    padding: 5px 0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.config-info p {
+    margin-bottom: 10px;
+    padding: 5px 0;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+</style>
+{% endblock %}

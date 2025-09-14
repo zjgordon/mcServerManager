@@ -1,13 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-073 - Update admin config handler to manage server management page feature'
-  last_commit: 'feat: [CARD-073] Update admin config handler to manage server management page feature toggle'
-  next_action: 'CARD-074 - Next card in queue'
+  step: 'CARD-074 - Create server management route with feature flag check'
+  last_commit: 'feat: [CARD-074] Create server management route with feature flag check'
+  next_action: 'CARD-075 - Next card in queue'
 queue: 
-  - CARD-071
-  - CARD-072
-  - CARD-073
-  - CARD-074
   - CARD-075
   - CARD-076
   - CARD-077
