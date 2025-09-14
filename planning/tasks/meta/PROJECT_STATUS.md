@@ -135,3 +135,4 @@ RELEASE_NOTES.md)
 - CARD-039: ✅ Completed - Comprehensive test suite for backup scheduling system created with 34 unit tests, 17 integration tests, and 8 end-to-end tests covering all functionality, error handling, and security controls
 - CARD-040: ✅ Completed - Comprehensive documentation for backup scheduling system created with user guides, administrator guides, API documentation, troubleshooting guides, best practices, and updated README.md with backup features
 - CARD-041: ✅ Completed - Enhanced dev.sh with comprehensive testing, demo mode, and process management including individual test suite options, fresh install state reset, background server management, and shellcheck compliance
+- CARD-042: ✅ Completed - Fixed JSON.parse error in backup management trigger button with content-type checking and user-friendly error handling for HTML error responses

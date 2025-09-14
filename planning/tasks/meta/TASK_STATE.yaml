@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-041 completed - Enhanced dev.sh with comprehensive testing, demo mode, and process management including individual test suite options, fresh install state reset, background server management, and shellcheck compliance'
-  last_commit: 'feat: [CARD-041] Enhance dev.sh with comprehensive testing, demo mode, and process management'
-  next_action: 'CARD-042 - Fix JSON.parse error in backup management trigger button'
+  step: 'CARD-042 completed - Fixed JSON.parse error in backup management trigger button with content-type checking and user-friendly error handling for HTML error responses'
+  last_commit: 'fix: [CARD-042] Fix JSON.parse error in backup management trigger button'
+  next_action: 'CARD-043 - Next task in queue'
 queue:
-  - CARD-042
   - CARD-043
   - CARD-044
   - CARD-045

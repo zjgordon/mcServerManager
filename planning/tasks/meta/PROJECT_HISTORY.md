@@ -1273,3 +1273,22 @@ comprehensive help documentation with accurate examples and command structure.
 Ensured shellcheck compliance with proper variable quoting and error handling.
 All current functionality preserved while adding new capabilities for enhanced
 development workflow and testing scenarios.
+
+## 2025-01-14 - CARD-042: Fix JSON.parse error in backup management trigger button
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully fixed critical JSON.parse error in backup management JavaScript
+that was causing "unexpected character at line 1 column 1" errors when the
+server returned HTML error pages instead of JSON responses. Implemented
+comprehensive content-type checking before calling response.json() across all
+API interaction methods in backup-management.js. Added proper error handling
+for non-JSON responses with user-friendly error messages displaying HTTP
+status codes and error descriptions. Enhanced all backup management methods
+including triggerManualBackup, loadScheduleStatus, saveSchedule, deleteSchedule,
+loadBackupHistory, loadAvailableBackups, previewRestore, and executeRestore
+with consistent error handling patterns. The fix ensures graceful handling of
+server errors, CSRF token issues, and other HTML error responses without
+breaking the user interface or causing JavaScript console errors.

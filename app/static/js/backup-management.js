@@ -111,6 +111,19 @@ class BackupManager {
     async loadScheduleStatus() {
         try {
             const response = await fetch(`/api/backups/schedules/${this.currentServerId}`);
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Handle non-JSON responses (HTML error pages, etc.)
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -132,6 +145,14 @@ class BackupManager {
     async updateScheduleStatus() {
         try {
             const response = await fetch(`/api/backups/${this.currentServerId}/status`);
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.error('Non-JSON response received for schedule status');
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -196,6 +217,18 @@ class BackupManager {
 
             // Check if schedule exists
             const checkResponse = await fetch(`/api/backups/schedules/${this.currentServerId}`);
+
+            // Check if check response is JSON before parsing
+            const checkContentType = checkResponse.headers.get('content-type');
+            if (!checkContentType || !checkContentType.includes('application/json')) {
+                if (checkResponse.status >= 400) {
+                    this.showError(`Server error (${checkResponse.status}): ${checkResponse.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
+
             const checkData = await checkResponse.json();
 
             let response;
@@ -217,6 +250,17 @@ class BackupManager {
                     },
                     body: JSON.stringify(formData)
                 });
+            }
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
             }
 
             const data = await response.json();
@@ -250,6 +294,17 @@ class BackupManager {
                 method: 'DELETE'
             });
 
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -276,6 +331,19 @@ class BackupManager {
                 method: 'POST'
             });
 
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Handle non-JSON responses (HTML error pages, etc.)
+                const text = await response.text();
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -295,6 +363,18 @@ class BackupManager {
     async loadBackupHistory() {
         try {
             const response = await fetch(`/api/backups/${this.currentServerId}/history`);
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -350,6 +430,18 @@ class BackupManager {
     async loadAvailableBackups() {
         try {
             const response = await fetch(`/api/backups/${this.currentServerId}/available`);
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -404,6 +496,17 @@ class BackupManager {
                     confirm: false
                 })
             });
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
 
             const data = await response.json();
 
@@ -481,6 +584,17 @@ class BackupManager {
                     confirm: true
                 })
             });
+
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                if (response.status >= 400) {
+                    this.showError(`Server error (${response.status}): ${response.statusText}`);
+                } else {
+                    this.showError('Invalid response format from server');
+                }
+                return;
+            }
 
             const data = await response.json();
 
