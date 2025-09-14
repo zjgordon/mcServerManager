@@ -1357,3 +1357,18 @@ already properly handles non-JSON responses by checking content-type headers,
 ensuring the backup management page gracefully handles all API response types.
 This surgical fix eliminates JSON.parse errors in the frontend when the backup
 scheduler encounters unexpected errors or returns malformed responses.
+
+## 2025-01-14 - CARD-047: Test and validate unified backup functionality
+
+**Epic:** Epic 2 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive integration test suite (`test_backup_unification.py`) to validate
+unified backup functionality across all interfaces. Tests cover backup creation from
+table/card buttons and management page, backup history display, JSON error handling,
+file naming consistency, error scenarios, and implementation consistency. Fixed mocking
+strategy to properly intercept BackupScheduler instances created within route handlers.
+All 11 tests pass, ensuring backup functionality works consistently across the web
+interface and API endpoints. This validates the unified backup implementation and
+provides confidence in the backup system's reliability and consistency.
