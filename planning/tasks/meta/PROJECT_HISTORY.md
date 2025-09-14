@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-083: Add real-time status updates to server management page
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Enhanced server management JavaScript module (app/static/js/server_management.js) with comprehensive real-time status updates. Updated status polling interval from 10 seconds to 5 seconds for more responsive updates. Added new updateRealTimeStatus() method that creates dynamic real-time status section with four key metrics: server status with animated indicator, memory usage with percentage calculation and color-coded visual indicators (normal/medium/high usage), CPU usage with color-coded indicators, and player count placeholder. Implemented loading states with spinner animations during status updates and comprehensive error handling with visual error indicators and user notifications. Added corresponding CSS styles in server_management.html template with animated status indicators, responsive metric cards, and color-coded usage levels. The system provides real-time visibility into server performance with visual feedback and graceful error handling. All tests pass (359/363) with no linting errors, delivering enhanced server monitoring capabilities.
+
 ## 2025-09-14 - CARD-080: Implement server command execution system
 
 **Epic:** Epic 1 – Server Management Page Implementation  

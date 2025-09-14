@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-082 - Add server management page CSS styling'
-  last_commit: 'feat: [CARD-082] Add server management page CSS styling'
-  next_action: 'CARD-083 - Next card in queue'
+  step: 'CARD-083 - Add real-time status updates to server management page'
+  last_commit: 'feat: [CARD-083] Add real-time status updates to server management page'
+  next_action: 'CARD-084 - Next card in queue'
 queue: 
-  - CARD-083
   - CARD-084
   - CARD-085
   - CARD-086

@@ -370,7 +370,7 @@ class ServerManagement {
     startStatusPolling() {
         this.statusPollingInterval = setInterval(() => {
             this.updateServerStatus();
-        }, 10000); // Update every 10 seconds
+        }, 5000); // Update every 5 seconds
 
         // Initial update
         this.updateServerStatus();
@@ -384,6 +384,9 @@ class ServerManagement {
     }
 
     async updateServerStatus() {
+        // Show loading state
+        this.showStatusLoading();
+
         try {
             const response = await fetch(`/api/console/${this.serverId}/status`, {
                 method: 'GET',
@@ -402,12 +405,55 @@ class ServerManagement {
 
             if (data.success) {
                 this.updateStatusDisplay(data.status);
+                this.hideStatusError();
             } else {
                 console.error('Failed to fetch server status:', data.error);
+                this.showStatusError(`Failed to fetch status: ${data.error}`);
             }
         } catch (error) {
             console.error('Error fetching server status:', error);
+            this.showStatusError(`Connection error: ${error.message}`);
         }
+    }
+
+    showStatusLoading() {
+        const memoryUsage = document.getElementById('memory-usage');
+        const cpuUsage = document.getElementById('cpu-usage');
+        const playerCount = document.getElementById('player-count');
+
+        if (memoryUsage) memoryUsage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        if (cpuUsage) cpuUsage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        if (playerCount) playerCount.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    }
+
+    showStatusError(message) {
+        const memoryUsage = document.getElementById('memory-usage');
+        const cpuUsage = document.getElementById('cpu-usage');
+        const playerCount = document.getElementById('player-count');
+
+        if (memoryUsage) {
+            memoryUsage.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i> Error';
+            memoryUsage.className = 'metric-value error-state';
+        }
+        if (cpuUsage) {
+            cpuUsage.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i> Error';
+            cpuUsage.className = 'metric-value error-state';
+        }
+        if (playerCount) {
+            playerCount.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i> Error';
+            playerCount.className = 'metric-value error-state';
+        }
+
+        // Show error notification
+        this.showError(`Status update failed: ${message}`);
+    }
+
+    hideStatusError() {
+        // Remove error states if they exist
+        const errorElements = document.querySelectorAll('.metric-value.error-state');
+        errorElements.forEach(el => {
+            el.classList.remove('error-state');
+        });
     }
 
     updateStatusDisplay(status) {
@@ -428,6 +474,118 @@ class ServerManagement {
                 <i class="fas fa-${isRunning ? 'stop' : 'play'}"></i>
                 ${isRunning ? 'Stop Server' : 'Start Server'}
             `;
+        }
+
+        // Update real-time status indicators
+        this.updateRealTimeStatus(status);
+    }
+
+    updateRealTimeStatus(status) {
+        // Create or update real-time status section
+        let statusSection = document.getElementById('realtime-status');
+        if (!statusSection) {
+            // Find the server information card and add real-time status section
+            const serverInfoCard = document.querySelector('.card.mc-card');
+            if (serverInfoCard) {
+                const statusHtml = `
+                    <div class="card mc-card" id="realtime-status">
+                        <div class="card-header">
+                            <h3 class="pixel-font">
+                                <i class="fas fa-chart-line"></i> Real-Time Status
+                                <span class="status-indicator" id="status-indicator">
+                                    <i class="fas fa-circle"></i>
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="status-metric">
+                                        <div class="metric-label">Status</div>
+                                        <div class="metric-value" id="status-value">${status.status}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="status-metric">
+                                        <div class="metric-label">Memory Usage</div>
+                                        <div class="metric-value" id="memory-usage">Loading...</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="status-metric">
+                                        <div class="metric-label">CPU Usage</div>
+                                        <div class="metric-value" id="cpu-usage">Loading...</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="status-metric">
+                                        <div class="metric-label">Players</div>
+                                        <div class="metric-value" id="player-count">N/A</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                serverInfoCard.insertAdjacentHTML('afterend', statusHtml);
+                statusSection = document.getElementById('realtime-status');
+            }
+        }
+
+        if (statusSection) {
+            // Update status value
+            const statusValue = document.getElementById('status-value');
+            if (statusValue) {
+                statusValue.textContent = status.status;
+            }
+
+            // Update status indicator
+            const statusIndicator = document.getElementById('status-indicator');
+            if (statusIndicator) {
+                const isRunning = status.status === 'Running';
+                statusIndicator.className = `status-indicator ${isRunning ? 'running' : 'stopped'}`;
+                statusIndicator.innerHTML = `<i class="fas fa-circle"></i>`;
+            }
+
+            // Update memory usage if process info is available
+            const memoryUsage = document.getElementById('memory-usage');
+            if (memoryUsage && status.process_info && status.process_info.memory_info) {
+                const memoryMB = Math.round(status.process_info.memory_info.rss / 1024 / 1024);
+                const allocatedMB = status.memory_mb || 0;
+                const percentage = allocatedMB > 0 ? Math.round((memoryMB / allocatedMB) * 100) : 0;
+
+                memoryUsage.innerHTML = `
+                    <span class="memory-usage">${memoryMB}MB</span>
+                    <small class="memory-percentage">(${percentage}%)</small>
+                `;
+
+                // Add visual indicator based on usage
+                memoryUsage.className = `metric-value ${percentage > 90 ? 'high-usage' : percentage > 70 ? 'medium-usage' : 'normal-usage'}`;
+            } else if (memoryUsage) {
+                memoryUsage.textContent = 'N/A';
+                memoryUsage.className = 'metric-value';
+            }
+
+            // Update CPU usage if process info is available
+            const cpuUsage = document.getElementById('cpu-usage');
+            if (cpuUsage && status.process_info && status.process_info.cpu_percent !== undefined) {
+                const cpuPercent = Math.round(status.process_info.cpu_percent);
+                cpuUsage.innerHTML = `<span class="cpu-usage">${cpuPercent}%</span>`;
+
+                // Add visual indicator based on usage
+                cpuUsage.className = `metric-value ${cpuPercent > 80 ? 'high-usage' : cpuPercent > 50 ? 'medium-usage' : 'normal-usage'}`;
+            } else if (cpuUsage) {
+                cpuUsage.textContent = 'N/A';
+                cpuUsage.className = 'metric-value';
+            }
+
+            // Update player count (placeholder for now - would need server query)
+            const playerCount = document.getElementById('player-count');
+            if (playerCount) {
+                // For now, show N/A - this would require querying the server for player count
+                playerCount.textContent = 'N/A';
+                playerCount.className = 'metric-value';
+            }
         }
     }
 

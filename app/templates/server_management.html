@@ -349,6 +349,74 @@
     color: white;
 }
 
+/* Real-time Status Styles */
+.status-indicator {
+    margin-left: 10px;
+    font-size: 0.8em;
+}
+
+.status-indicator.running {
+    color: #28a745;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.stopped {
+    color: #6c757d;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.status-metric {
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    margin-bottom: 10px;
+}
+
+.metric-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.metric-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.metric-value.normal-usage {
+    color: #28a745;
+}
+
+.metric-value.medium-usage {
+    color: #ffc107;
+}
+
+.metric-value.high-usage {
+    color: #dc3545;
+}
+
+.metric-value.error-state {
+    color: #dc3545;
+}
+
+.memory-usage, .cpu-usage {
+    display: block;
+}
+
+.memory-percentage {
+    color: #666;
+    font-size: 0.8em;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .server-management-container {
@@ -376,6 +444,10 @@
     .command-buttons .btn {
         flex: 1;
         min-width: 120px;
+    }
+
+    .status-metric {
+        margin-bottom: 15px;
     }
 }
 
