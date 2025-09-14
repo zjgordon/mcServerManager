@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-059: Create database migration for ExperimentalFeature model
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created database migration file `c803b5d807c4_add_experimental_feature_table.py` in migrations/versions/ directory to add the experimental_feature table to the database. The migration includes table creation with all necessary columns (id, feature_key, feature_name, description, enabled, is_stable, created_at, updated_at, updated_by), constraints, indexes, and foreign key relationships to the user table. Inserted the default "Server Management Console" experimental feature as a greyed-out feature with proper metadata. The migration follows the existing pattern and includes proper upgrade/downgrade functions with table existence checks. Database tables created successfully and all existing tests continue to pass with no linting errors.
+
 ## 2025-01-14 - CARD-058: Create ExperimentalFeature database model
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  
