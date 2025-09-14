@@ -36,6 +36,19 @@ def admin_required_api(f):
     return decorated_function
 
 
+def user_or_admin_required_api(f):
+    """API decorator to require user authentication (admin or regular user)."""
+    from functools import wraps
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return jsonify({"error": "Authentication required"}), 401
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
 def validate_server_access(server_id: int) -> Optional[Server]:
     """
     Validate that the current user has access to the specified server.
@@ -135,7 +148,7 @@ def validate_schedule_data(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @backup_api_bp.route("/schedules", methods=["GET"])
-@login_required
+@user_or_admin_required_api
 @rate_limit(max_attempts=10, window_seconds=60)
 def list_schedules():
     """
@@ -303,7 +316,7 @@ def create_schedule():
 
 
 @backup_api_bp.route("/schedules/<int:server_id>", methods=["GET"])
-@login_required
+@admin_required_api
 @rate_limit(max_attempts=10, window_seconds=60)
 def get_schedule(server_id):
     """

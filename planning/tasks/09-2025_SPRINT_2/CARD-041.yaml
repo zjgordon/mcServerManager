@@ -1,0 +1,59 @@
+id: CARD-041
+title: Enhance dev.sh with comprehensive testing, demo mode, and process management
+epic: Epic 2 – Development Environment & Tooling
+sprint: 09-2025_SPRINT_2
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - All current functionality works unchanged
+  - Script passes shellcheck with no warnings
+  - Can run full test suite with `./dev.sh test`
+  - Can run individual test suites (unit, integration, e2e, performance)
+  - --demo flag configures app for fresh install testing
+  - Can start server in background with --background
+  - Can kill running server instances with --kill
+  - Prevents multiple instances from running simultaneously
+  - --help output is accurate and comprehensive
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-041]
+artifacts:
+  - Enhanced dev.sh script
+  - Updated help documentation
+  - Process management functionality
+  - Demo mode configuration
+notes: |
+  Current dev.sh provides basic development environment management with:
+  - Virtual environment setup
+  - Port conflict handling
+  - Basic test running (pytest tests/)
+  - Environment variable configuration
+  
+  Enhancement requirements:
+  1. Test suite management:
+     - Full test suite: `./dev.sh test`
+     - Individual suites: `./dev.sh test --unit`, `./dev.sh test --integration`, `./dev.sh test --e2e`, `./dev.sh test --performance`
+     - Test discovery in tests/unit/, tests/integration/, tests/e2e/, tests/performance/
+  
+  2. Demo mode:
+     - --demo flag resets app to fresh install state
+     - Clears database, resets configuration
+     - Enables admin user creation flow testing
+  
+  3. Process management:
+     - --background starts server in background
+     - --kill terminates all running instances
+     - Instance detection prevents conflicts
+     - PID file management for background processes
+  
+  4. Enhanced help:
+     - Accurate documentation of all options
+     - Examples for each major feature
+     - Clear command structure
+  
+  5. Shellcheck compliance:
+     - No shellcheck warnings or errors
+     - Proper quoting and variable handling
+     - Error handling improvements

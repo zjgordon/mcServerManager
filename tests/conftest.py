@@ -101,9 +101,11 @@ def regular_user(app):
     """Create a regular user for testing."""
     with app.app_context():
         # Always create a fresh regular user for each test
+        from werkzeug.security import generate_password_hash
+
         user = User(
             username="testuser",
-            password_hash="pbkdf2:sha256:600000$test$test_hash",
+            password_hash=generate_password_hash("testpass"),  # pragma: allowlist secret
             is_admin=False,
             is_active=True,
         )

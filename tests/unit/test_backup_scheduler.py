@@ -464,7 +464,7 @@ class TestBackupScheduler:
         # Mock backup directory and files
         with patch("os.path.exists") as mock_exists, patch("os.listdir") as mock_listdir, patch(
             "os.path.join"
-        ) as mock_join, patch("os.stat") as mock_stat:
+        ) as mock_join, patch("os.stat") as mock_stat, patch("os.remove") as mock_remove:
             mock_exists.return_value = True
             mock_listdir.return_value = [
                 "testserver_backup_20240101_120000.tar.gz",  # Old backup
@@ -493,6 +493,11 @@ class TestBackupScheduler:
             assert result["success"] is True
             assert result["removed_count"] == 1  # Only old backup should be removed
             assert result["remaining_backups"] == 1
+
+            # Verify that os.remove was called for the old backup
+            mock_remove.assert_called_once_with(
+                "backups/testserver/testserver_backup_20240101_120000.tar.gz"
+            )
 
     def test_cleanup_old_backups_no_schedule(self, scheduler, test_server):
         """Test backup cleanup when no schedule exists."""
