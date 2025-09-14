@@ -1,10 +1,9 @@
-active_card: CARD-093
+active_card: CARD-094
 breadcrumb:
-  step: 'CARD-092 - Fix console API endpoint functionality and response handling'
-  last_commit: 'fix: [CARD-092] Fix console API endpoint functionality and response handling'
-  next_action: 'CARD-093 - Ready to start next task'
+  step: 'CARD-093 - Fix backup API and E2E workflow test failures'
+  last_commit: 'fix: [CARD-093] Fix backup API and E2E workflow test failures'
+  next_action: 'CARD-094 - Ready to start next task'
 queue:
-  - CARD-093
   - CARD-094
   - CARD-095
   - CARD-096
