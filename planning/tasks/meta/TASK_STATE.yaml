@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-056 - Add memory bar gauge HTML structure to admin template'
-  last_commit: 'feat: [CARD-056] Add memory bar gauge HTML structure to admin template'
-  next_action: 'CARD-057 - Add system CPU utility function for admin configuration'
+  step: 'CARD-057 - Add CSS styling for memory bar gauge component'
+  last_commit: 'feat: [CARD-057] Add CSS styling for memory bar gauge component'
+  next_action: 'CARD-058 - Add system CPU utility function for admin configuration'
 queue: 
-  - CARD-057
   - CARD-058
   - CARD-059
   - CARD-060
