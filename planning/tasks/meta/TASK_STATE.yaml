@@ -1,8 +1,8 @@
-active_card: null
+active_card: CARD-081
 breadcrumb:
-  step: 'CARD-080 - Implement server command execution system'
+  step: 'CARD-081 - Add pre-defined server commands to management page'
   last_commit: 'feat: [CARD-080] Implement server command execution system'
-  next_action: 'CARD-081 - Next card in queue'
+  next_action: 'CARD-081 - Add pre-defined server commands to management page'
 queue: 
   - CARD-081
   - CARD-082
