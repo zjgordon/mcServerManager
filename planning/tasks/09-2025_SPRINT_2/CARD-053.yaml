@@ -2,7 +2,7 @@ id: CARD-053
 title: Improve test fixtures and setup for comprehensive test coverage
 epic: Epic 2 – Test Suite Remediation
 sprint: 09-2025_SPRINT_2
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:

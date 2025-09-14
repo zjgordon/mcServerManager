@@ -3,26 +3,59 @@ Utility test fixtures.
 
 This module provides fixtures for common test utilities and helper functions.
 """
+import os
 import shutil
 import tempfile
+from contextlib import contextmanager
+from typing import Generator
 
 import pytest
 
 
+@contextmanager
+def managed_temp_directory(
+    prefix: str = "test_", cleanup: bool = True
+) -> Generator[str, None, None]:
+    """Context manager for temporary directories with guaranteed cleanup."""
+    temp_dir = tempfile.mkdtemp(prefix=prefix)
+    try:
+        yield temp_dir
+    finally:
+        if cleanup:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 @pytest.fixture
 def temp_server_dir():
-    """Create a temporary directory for server files."""
-    temp_dir = tempfile.mkdtemp()
-    yield temp_dir
-    shutil.rmtree(temp_dir, ignore_errors=True)
+    """Create a temporary directory for server files with proper cleanup."""
+    with managed_temp_directory(prefix="server_") as temp_dir:
+        yield temp_dir
 
 
 @pytest.fixture
 def temp_data_dir():
-    """Create a temporary directory for test data files."""
-    temp_dir = tempfile.mkdtemp()
-    yield temp_dir
-    shutil.rmtree(temp_dir, ignore_errors=True)
+    """Create a temporary directory for test data files with proper cleanup."""
+    with managed_temp_directory(prefix="data_") as temp_dir:
+        yield temp_dir
+
+
+@pytest.fixture
+def temp_backup_dir():
+    """Create a temporary directory for backup files with proper cleanup."""
+    with managed_temp_directory(prefix="backup_") as temp_dir:
+        yield temp_dir
+
+
+@pytest.fixture
+def temp_test_base_dir():
+    """Create a base temporary directory for complex test scenarios."""
+    with managed_temp_directory(prefix="test_base_") as temp_dir:
+        # Create subdirectories for different test components
+        os.makedirs(os.path.join(temp_dir, "servers"), exist_ok=True)
+        os.makedirs(os.path.join(temp_dir, "backups"), exist_ok=True)
+        os.makedirs(os.path.join(temp_dir, "logs"), exist_ok=True)
+        os.makedirs(os.path.join(temp_dir, "data"), exist_ok=True)
+        yield temp_dir
 
 
 @pytest.fixture

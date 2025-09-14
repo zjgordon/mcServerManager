@@ -6,11 +6,28 @@ in tests.
 """
 import os
 import tempfile
+from contextlib import contextmanager
+from typing import Generator
 
 import pytest
 
 from app import create_app
 from app.extensions import db
+
+
+@contextmanager
+def app_context_with_cleanup(app) -> Generator[None, None, None]:
+    """Context manager for Flask app context with proper cleanup."""
+    with app.app_context():
+        try:
+            # Ensure clean database state
+            db.drop_all()
+            db.create_all()
+            yield
+        finally:
+            # Clean up any pending transactions
+            db.session.rollback()
+            db.drop_all()
 
 
 @pytest.fixture
@@ -39,11 +56,7 @@ def app():
     app = create_app()
     app.config.update(test_config)
 
-    with app.app_context():
-        # Drop all tables first to ensure clean state
-        db.drop_all()
-        db.create_all()
-
+    with app_context_with_cleanup(app):
         # Create a default admin user to prevent admin setup redirects in tests
         from werkzeug.security import generate_password_hash
 
@@ -91,13 +104,8 @@ def app_no_admin():
     app = create_app()
     app.config.update(test_config)
 
-    with app.app_context():
-        # Drop all tables first to ensure clean state
-        db.drop_all()
-        db.create_all()
-
+    with app_context_with_cleanup(app):
         # Don't create admin user - for tests that need to test admin setup
-
         yield app
 
     # Clean up
