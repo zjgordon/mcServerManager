@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-079: Create server management JavaScript module
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive server management JavaScript module (app/static/js/server_management.js) with all required functionality: real-time log streaming using polling every 2.5 seconds with fetchServerLogs() method, command execution via API calls to /api/console/<server_id>/command endpoint, auto-scroll management with manual override detection and user scroll handling, log filtering by level (INFO/WARN/ERROR) with filterLogs() method, comprehensive error handling and user feedback with showSuccess()/showError() notifications, command history storage and retrieval using localStorage with addToCommandHistory() and loadCommandHistory(), server status updates every 10 seconds with updateServerStatus() method, and complete server control integration (start/stop, copy link, delete). The module includes proper CSRF token handling, event binding for all UI elements, cleanup methods for polling intervals, and global accessibility for HTML onclick handlers. All tests pass (359/363) with no linting errors, providing a complete frontend foundation for the server management page.
+
 ## 2025-09-14 - CARD-077: Create console API routes for log streaming and commands
 
 **Epic:** Epic 1 – Server Management Page Implementation  

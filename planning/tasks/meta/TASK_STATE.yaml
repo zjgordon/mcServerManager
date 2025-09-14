@@ -1,11 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-078 - Implement server log parsing utility'
-  last_commit: 'feat: [CARD-078] Implement server log parsing utility'
-  next_action: 'CARD-079 - Next card in queue'
+  step: 'CARD-079 - Create server management JavaScript module'
+  last_commit: 'feat: [CARD-079] Create server management JavaScript module'
+  next_action: 'CARD-080 - Next card in queue'
 queue: 
-  - CARD-079
-  - CARD-079
   - CARD-080
   - CARD-081
   - CARD-082
