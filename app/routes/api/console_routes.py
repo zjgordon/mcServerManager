@@ -19,7 +19,7 @@ from flask_login import current_user, login_required
 from ...extensions import csrf, db
 from ...models import Server
 from ...security import audit_log, rate_limit
-from ...utils import is_feature_enabled
+from ...utils import execute_server_command, is_feature_enabled
 
 console_api_bp = Blueprint("console_api", __name__, url_prefix="/api/console")
 
@@ -136,29 +136,8 @@ def send_console_command(server: Server, command: str) -> Dict[str, Any]:
     Returns:
         Dict with success status and result information
     """
-    if not server.pid:
-        return {"success": False, "error": "Server is not running"}
-
-    try:
-        # Check if the process is still running
-        process = psutil.Process(server.pid)
-        if not process.is_running():
-            return {"success": False, "error": "Server process is not running"}
-
-        # For now, we'll simulate command execution
-        # In a real implementation, this would send the command to the server's stdin
-        # This is a placeholder that returns success for demonstration
-        return {
-            "success": True,
-            "message": f"Command '{command}' sent to server",
-            "command": command,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
-
-    except psutil.NoSuchProcess:
-        return {"success": False, "error": "Server process not found"}
-    except Exception as e:
-        return {"success": False, "error": f"Failed to send command: {str(e)}"}
+    # Use the new execute_server_command function from utils
+    return execute_server_command(server.id, command)
 
 
 def get_server_status(server: Server) -> Dict[str, Any]:

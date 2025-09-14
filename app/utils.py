@@ -1837,3 +1837,134 @@ def _infer_log_level(message: str) -> str:
 
     # Default to INFO
     return "INFO"
+
+
+def _validate_command_input(server_id, command):
+    """Validate command input parameters."""
+    if not server_id or not isinstance(server_id, int):
+        raise ValidationError("Invalid server ID provided")
+
+    if not command or not isinstance(command, str):
+        raise ValidationError("Invalid command provided")
+
+    command = command.strip()
+    if not command:
+        raise ValidationError("Command cannot be empty")
+
+    return command
+
+
+def _check_dangerous_commands(command):
+    """Check for potentially dangerous commands."""
+    dangerous_commands = ["rm", "del", "format", "shutdown", "halt", "reboot"]
+    command_lower = command.lower()
+    for dangerous in dangerous_commands:
+        if command_lower.startswith(dangerous):
+            logger.warning(f"Potentially dangerous command blocked: {command}")
+            raise ValidationError(f"Command '{dangerous}' is not allowed")
+
+
+def _validate_server_running(server):
+    """Validate that server is running and update status if needed."""
+    if not server.pid:
+        return False, "Server is not running"
+
+    # Verify process is actually running
+    process_status = verify_process_status(server.pid)
+    if not process_status["is_running"]:
+        # Update server status in database
+        try:
+            server.status = "Stopped"
+            server.pid = None
+            db.session.commit()
+            logger.info(f"Updated server {server.server_name} status to Stopped")
+        except Exception as e:
+            logger.error(f"Failed to update server status: {str(e)}")
+
+        return False, "Server process is not running"
+
+    return True, None
+
+
+def _send_command_to_process(server, command):
+    """Send command to server process stdin."""
+    import psutil
+
+    process = psutil.Process(server.pid)
+
+    try:
+        # Write command to process stdin
+        process.stdin.write(f"{command}\n")
+        process.stdin.flush()
+
+        # Log the command execution for security
+        logger.info(
+            f"Executed command '{command}' on server {server.server_name} (PID {server.pid})"
+        )
+
+        return {
+            "success": True,
+            "message": f"Command '{command}' executed successfully",
+            "server_id": server.id,
+            "server_name": server.server_name,
+            "command": command,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+    except (OSError, IOError) as e:
+        logger.error(f"Failed to send command to server process: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Failed to send command to server: {str(e)}",
+            "server_id": server.id,
+            "command": command,
+        }
+
+
+def execute_server_command(server_id, command):
+    """
+    Execute a command on a running Minecraft server process.
+
+    Args:
+        server_id: ID of the server to execute command on
+        command: Command string to send to the server
+
+    Returns:
+        dict: Execution result with success/error status and details
+    """
+    try:
+        # Input validation
+        command = _validate_command_input(server_id, command)
+        _check_dangerous_commands(command)
+
+        # Get server from database
+        from .models import Server
+
+        server = Server.query.get(server_id)
+        if not server:
+            raise ValidationError("Server not found")
+
+        # Validate server is running
+        is_running, error_msg = _validate_server_running(server)
+        if not is_running:
+            return {
+                "success": False,
+                "error": error_msg,
+                "server_id": server_id,
+                "command": command,
+            }
+
+        # Send command to process
+        return _send_command_to_process(server, command)
+
+    except ValidationError as e:
+        logger.warning(f"Command execution validation failed: {str(e)}")
+        return {"success": False, "error": str(e), "server_id": server_id, "command": command}
+    except Exception as e:
+        logger.error(f"Unexpected error executing server command: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Command execution failed: {str(e)}",
+            "server_id": server_id,
+            "command": command,
+        }

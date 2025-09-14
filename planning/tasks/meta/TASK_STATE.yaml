@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-079 - Create server management JavaScript module'
-  last_commit: 'feat: [CARD-079] Create server management JavaScript module'
-  next_action: 'CARD-080 - Next card in queue'
+  step: 'CARD-080 - Implement server command execution system'
+  last_commit: 'feat: [CARD-080] Implement server command execution system'
+  next_action: 'CARD-081 - Next card in queue'
 queue: 
-  - CARD-080
   - CARD-081
   - CARD-082
   - CARD-083
