@@ -1325,3 +1325,18 @@ robust verification, compression, and metadata tracking as the backup management
 interface. Both interfaces now produce identical backup quality and metadata,
 eliminating inconsistent backup functionality and ensuring consistent user
 experience across all backup creation methods.
+
+## 2025-01-14 - CARD-045: Update backup history API to recognize both naming patterns
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Updated _get_backup_files() method in backup_scheduler.py to recognize both
+backup file naming patterns for backward compatibility. Modified the file
+pattern matching logic to support both {server_name}_backup_{timestamp}.tar.gz
+(new pattern) and {server_name}_{timestamp}.tar.gz (old pattern) formats.
+This surgical change ensures that backup history API can discover and display
+all backup files regardless of which naming convention was used during creation,
+providing seamless backward compatibility with existing backups while maintaining
+support for the new unified naming standard.

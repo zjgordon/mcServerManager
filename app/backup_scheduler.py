@@ -1191,7 +1191,10 @@ class BackupScheduler:
         backup_files = []
 
         for filename in os.listdir(backup_dir):
-            if filename.endswith(".tar.gz") and filename.startswith(f"{server_name}_backup_"):
+            if filename.endswith(".tar.gz") and (
+                filename.startswith(f"{server_name}_backup_")
+                or (filename.startswith(f"{server_name}_") and "_backup_" not in filename)
+            ):
                 filepath = os.path.join(backup_dir, filename)
                 try:
                     stat = os.stat(filepath)

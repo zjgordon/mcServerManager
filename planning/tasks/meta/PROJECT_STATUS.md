@@ -138,3 +138,4 @@ RELEASE_NOTES.md)
 - CARD-042: ✅ Completed - Fixed JSON.parse error in backup management trigger button with content-type checking and user-friendly error handling for HTML error responses
 - CARD-043: ✅ Completed - Unified backup file naming convention between table/card and management interfaces to ensure consistent backup file discovery
 - CARD-044: ✅ Completed - Replaced table/card backup implementation with backup scheduler for unified backup quality and metadata
+- CARD-045: ✅ Completed - Updated backup history API to recognize both naming patterns for backward compatibility
