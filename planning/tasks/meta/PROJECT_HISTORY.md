@@ -1,5 +1,22 @@
 # Project History
 
+## 2025-09-14 - CARD-099: Add test discovery and listing capability to dev.sh
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+**Summary:** Added comprehensive test discovery and listing capability to dev.sh using pytest's `--collect-only` option. This enhancement allows developers and agents to discover and list available tests without running them, providing better visibility into the test suite structure and enabling more efficient test selection. The implementation includes support for filtering by test suite, pattern matching, and specific files with formatted output and test count information.
+
+**Changes Made:**
+- Added `--list` option to dev.sh test command argument parsing with comprehensive support for all existing test filtering options
+- Created new `list_tests()` function using pytest `--collect-only` with formatted output showing file, class, and function hierarchy
+- Implemented support for filtering by test suite (--unit, --integration, --e2e, --performance) when using --list option
+- Added pattern filtering support (--pattern with --list) using pytest -k syntax with validation
+- Enhanced output formatting with test count display, pagination (50 test limit), and helpful usage guidance
+- Updated help documentation with comprehensive examples including all --list usage scenarios
+- Added proper argument validation and error handling for --list option combinations
+
 ## 2025-09-14 - CARD-098: Add pattern-based test filtering to dev.sh
 
 **Epic:** Epic 3 – Test Suite Stabilization  

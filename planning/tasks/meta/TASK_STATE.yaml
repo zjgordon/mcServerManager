@@ -1,10 +1,9 @@
-active_card: CARD-099
+active_card: CARD-100
 breadcrumb:
-  step: 'CARD-098 - Add pattern-based test filtering to dev.sh'
-  last_commit: 'feat: [CARD-098] Add pattern-based test filtering to dev.sh'
-  next_action: 'CARD-099 - Ready to start next task'
+  step: 'CARD-099 - Add test discovery and listing capability to dev.sh'
+  last_commit: 'feat: [CARD-099] Add test discovery and listing capability to dev.sh'
+  next_action: 'CARD-100 - Ready to start next task'
 queue:
-  - CARD-099
   - CARD-100
   - CARD-101
   

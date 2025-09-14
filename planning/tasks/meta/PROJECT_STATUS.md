@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-099: ✅ Completed - Added test discovery and listing capability to dev.sh with --list option using pytest --collect-only, comprehensive filtering by test suite and pattern, formatted output with test counts, and enhanced usage documentation for improved test visibility and selection
 - CARD-098: ✅ Completed - Added pattern-based test filtering to dev.sh with --pattern option using pytest -k syntax, comprehensive validation, error handling, and usage documentation for improved development workflow efficiency
 - CARD-093: ✅ Completed - Fixed backup API and E2E workflow test failures by correcting error message expectations in tests to match actual API behavior, ensuring consistent error handling across backup endpoints
 - CARD-094: ✅ Completed - Fixed server management page integration test failures by correcting route accessibility and feature flag integration, resolving 2 out of 3 failing tests with proper home route access and feature flag functionality
