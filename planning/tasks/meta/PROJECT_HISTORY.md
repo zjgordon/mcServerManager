@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-077: Create console API routes for log streaming and commands
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive console API routes in app/routes/api/console_routes.py with three REST endpoints: GET /api/console/<server_id>/logs for server log streaming with pagination support, POST /api/console/<server_id>/command for executing console commands on running servers, and GET /api/console/<server_id>/status for retrieving server status and metadata. Implemented proper access control using validate_server_access() function with admin and user permission checks, feature flag validation using is_feature_enabled('server_management_page'), comprehensive error handling with JSON responses, rate limiting for security, and audit logging for command execution. The implementation includes log parsing from server log files, process status verification using psutil, and proper CSRF exemption for API endpoints. Registered the console_api_bp blueprint in app/__init__.py and all tests pass with no linting errors.
+
 ## 2025-09-14 - CARD-076: Add conditional console/manage button to home template
 
 **Epic:** Epic 1 – Server Management Page Implementation  

@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-077: ✅ Completed - Created console API routes with three REST endpoints for log streaming, command execution, and server status retrieval, including proper access control, feature flag validation, error handling, and audit logging
 - CARD-076: ✅ Completed - Added conditional console/manage button to home template with feature flag integration, showing "Manage Server" button when server_management_page feature enabled, falling back to console button when disabled
 - CARD-075: ✅ Completed - Created comprehensive server management page template with four main sections (Server Information, Server Controls, Real-Time Console, Server Commands), consistent styling, mobile responsiveness, and Minecraft-inspired theme
 - CARD-074: ✅ Completed - Created server management route with feature flag check using is_feature_enabled('server_management_page'), proper access control, and modern server_management.html template for enhanced server management interface

@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-076 - Add conditional console/manage button to home template'
-  last_commit: 'feat: [CARD-076] Add conditional console/manage button to home template'
-  next_action: 'CARD-077 - Next card in queue'
+  step: 'CARD-077 - Create console API routes for log streaming and commands'
+  last_commit: 'feat: [CARD-077] Create console API routes for log streaming and commands'
+  next_action: 'CARD-078 - Next card in queue'
 queue: 
-  - CARD-077
   - CARD-078
   - CARD-079
   - CARD-080
