@@ -16,6 +16,12 @@ class BackupManager {
     init() {
         this.bindEvents();
         this.setupRealTimeUpdates();
+
+        // Auto-load data if a server is pre-selected
+        const serverSelect = document.getElementById('serverSelect');
+        if (serverSelect.value) {
+            this.loadServerBackupData();
+        }
     }
 
     bindEvents() {

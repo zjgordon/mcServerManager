@@ -28,7 +28,8 @@
                     <select id="serverSelect" class="form-control mc-input" onchange="loadServerBackupData()">
                         <option value="">-- Select a server --</option>
                         {% for server in servers %}
-                        <option value="{{ server.id }}" data-server-name="{{ server.server_name }}">
+                        <option value="{{ server.id }}" data-server-name="{{ server.server_name }}"
+                                {% if selected_server_id and server.id == selected_server_id %}selected{% endif %}>
                             {{ server.server_name }} ({{ server.status }})
                         </option>
                         {% endfor %}

@@ -1118,3 +1118,23 @@ theme for backup management interface including loading overlays, status
 indicators, and responsive design. Added navigation link to backup management
 page in base template. All tests pass (249/259) with 60.35% coverage and no
 linting errors, providing complete backup management user experience.
+
+## 2025-09-13 - CARD-034: Add backup scheduling to server configuration flow
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully integrated backup scheduling options into the server configuration
+flow, providing seamless backup management during server creation. Added backup
+scheduling section to configure_server.html template with optional checkbox to
+enable automated backups, schedule type selection (daily/weekly/monthly), backup
+time picker, and retention days configuration. Updated server_routes.py to handle
+backup schedule data during server creation with proper validation and error
+handling. Enhanced home.html to display backup schedule status in both table and
+card views with visual indicators for enabled/disabled schedules. Added "Manage
+Backups" buttons to server actions for easy access to backup management interface.
+Updated backup_management.html to support pre-selection of servers via URL
+parameters. All integration points work seamlessly with existing backup management
+system, providing complete backup scheduling workflow from server creation to
+ongoing management.

@@ -25,7 +25,7 @@ from ..error_handlers import (
     safe_execute,
 )
 from ..extensions import db
-from ..models import Server
+from ..models import BackupSchedule, Server
 from ..utils import (
     fetch_version_manifest,
     find_next_available_port,
@@ -70,6 +70,11 @@ def home():
             servers = Server.query.all()
         else:
             servers = Server.query.filter_by(owner_id=current_user.id).all()
+
+        # Load backup schedule information for each server
+        for server in servers:
+            backup_schedule = BackupSchedule.query.filter_by(server_id=server.id).first()
+            server.backup_schedule = backup_schedule
 
         # Verify actual process status for each server in real-time
         for server in servers:
@@ -191,6 +196,12 @@ def configure_server():
         spawn_monsters = "spawn_monsters" in request.form
         motd = (request.form.get("motd") or "").strip()
 
+        # Extract backup schedule data
+        enable_backup_schedule = "enable_backup_schedule" in request.form
+        backup_schedule_type = (request.form.get("backup_schedule_type") or "daily").strip()
+        backup_schedule_time = (request.form.get("backup_schedule_time") or "02:00").strip()
+        backup_retention_days = int(request.form.get("backup_retention_days") or "30")
+
         # Validation with proper error handling
         valid_gamemodes = {"survival", "creative", "adventure", "spectator"}
         valid_difficulties = {"peaceful", "easy", "normal", "hard"}
@@ -211,6 +222,17 @@ def configure_server():
 
         if len(motd) > 150:
             raise ValidationError("MOTD is too long. Maximum length is 150 characters.")
+
+        # Validate backup schedule data if enabled
+        if enable_backup_schedule:
+            valid_schedule_types = {"daily", "weekly", "monthly"}
+            if backup_schedule_type not in valid_schedule_types:
+                raise ValidationError(
+                    "Invalid backup schedule type. Please choose daily, weekly, or monthly."
+                )
+
+            if backup_retention_days < 1 or backup_retention_days > 365:
+                raise ValidationError("Backup retention days must be between 1 and 365.")
 
         # Validate server name
         if not server_name or not is_valid_server_name(server_name):
@@ -357,6 +379,31 @@ def configure_server():
                 session.add(new_server)
                 # Session will be committed automatically by context manager
             logger.info(f"Server '{server_name}' added to database with ID {new_server.id}")
+
+            # Create backup schedule if enabled
+            if enable_backup_schedule:
+                try:
+                    backup_schedule = BackupSchedule(
+                        server_id=new_server.id,
+                        schedule_type=backup_schedule_type,
+                        schedule_time=backup_schedule_time,
+                        retention_days=backup_retention_days,
+                        enabled=True,
+                    )
+
+                    with SafeDatabaseOperation(db.session) as session:
+                        session.add(backup_schedule)
+                        # Session will be committed automatically by context manager
+
+                    logger.info(
+                        f"Backup schedule created for server '{server_name}': {backup_schedule_type} at {backup_schedule_time}"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to create backup schedule for server '{server_name}': {str(e)}"
+                    )
+                    # Don't fail server creation if backup schedule creation fails
+
         except DatabaseError as e:
             # Clean up created files if database operation fails
             try:
@@ -844,4 +891,14 @@ def backup_management():
     else:
         servers = Server.query.filter_by(owner_id=current_user.id).all()
 
-    return render_template("backup_management.html", servers=servers)
+    # Get pre-selected server ID from query parameter
+    selected_server_id = request.args.get("server_id", type=int)
+
+    # Load backup schedule information for each server
+    for server in servers:
+        backup_schedule = BackupSchedule.query.filter_by(server_id=server.id).first()
+        server.backup_schedule = backup_schedule
+
+    return render_template(
+        "backup_management.html", servers=servers, selected_server_id=selected_server_id
+    )

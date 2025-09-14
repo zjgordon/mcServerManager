@@ -145,6 +145,66 @@
                     </div>
                 </div>
 
+                <!-- Backup Scheduling Section -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-database"></i> Backup Scheduling (Optional)
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" name="enable_backup_schedule" id="enable_backup_schedule"
+                                           class="form-check-input" {% if request.form.get('enable_backup_schedule') %}checked{% endif %}
+                                           onchange="toggleBackupSchedule()">
+                                    <label for="enable_backup_schedule" class="form-check-label" data-tooltip="Enable automated backups for this server">
+                                        <i class="fas fa-clock"></i> Enable Automated Backups
+                                    </label>
+                                </div>
+
+                                <div id="backupScheduleOptions" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="backup_schedule_type" class="form-label">Schedule Type</label>
+                                                <select name="backup_schedule_type" id="backup_schedule_type" class="form-control" data-tooltip="How often to create backups">
+                                                    <option value="daily" {% if request.form.backup_schedule_type == 'daily' %}selected{% endif %}>Daily</option>
+                                                    <option value="weekly" {% if request.form.backup_schedule_type == 'weekly' %}selected{% endif %}>Weekly</option>
+                                                    <option value="monthly" {% if request.form.backup_schedule_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="backup_schedule_time" class="form-label">Backup Time</label>
+                                                <input type="time" name="backup_schedule_time" id="backup_schedule_time"
+                                                       class="form-control" value="{{ request.form.backup_schedule_time or '02:00' }}"
+                                                       data-tooltip="Time of day to create backups">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="backup_retention_days" class="form-label">Retention (Days)</label>
+                                                <input type="number" name="backup_retention_days" id="backup_retention_days"
+                                                       class="form-control" min="1" max="365"
+                                                       value="{{ request.form.backup_retention_days or '30' }}"
+                                                       data-tooltip="How many days to keep backup files">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i>
+                                        Backups will be created automatically at the specified time and frequency.
+                                        Old backups will be automatically deleted based on the retention period.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-plus"></i> Create Server
@@ -153,4 +213,24 @@
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleBackupSchedule() {
+    const checkbox = document.getElementById('enable_backup_schedule');
+    const options = document.getElementById('backupScheduleOptions');
+
+    if (checkbox.checked) {
+        options.style.display = 'block';
+    } else {
+        options.style.display = 'none';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleBackupSchedule();
+});
+</script>
 {% endblock %}

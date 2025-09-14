@@ -127,3 +127,4 @@ RELEASE_NOTES.md)
 - CARD-031: ✅ Completed - Backup retention policy and cleanup logic implemented with configurable policies, disk space monitoring, safety checks, audit logging, and comprehensive unit tests
 - CARD-032: ✅ Completed - Backup management API endpoints created with comprehensive REST API for schedule management, backup triggering, history viewing, and status checking with authentication, validation, and integration tests
 - CARD-033: ✅ Completed - Backup schedule management interface created with form validation, real-time updates, mobile-responsive design, and comprehensive user experience for managing backup schedules and viewing backup history
+- CARD-034: ✅ Completed - Backup scheduling integrated into server configuration flow with optional backup setup during server creation, backup status display in server details, and seamless integration with existing backup management system

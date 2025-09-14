@@ -143,6 +143,7 @@
                     <th><i class="fas fa-code-branch"></i> Version</th>
                     <th><i class="fas fa-plug"></i> Port</th>
                     <th><i class="fas fa-memory"></i> Memory</th>
+                    <th><i class="fas fa-database"></i> Backup</th>
                     {% if current_user.is_admin %}
                     <th><i class="fas fa-user"></i> Owner</th>
                     {% endif %}
@@ -183,6 +184,23 @@
                     <td>
                         <i class="fas fa-memory"></i> {{ server.memory_mb }}MB
                     </td>
+                    <td>
+                        {% if server.backup_schedule %}
+                            {% if server.backup_schedule.enabled %}
+                                <span class="badge badge-success" data-tooltip="Backup scheduled: {{ server.backup_schedule.schedule_type }} at {{ server.backup_schedule.schedule_time }}">
+                                    <i class="fas fa-clock"></i> {{ server.backup_schedule.schedule_type|title }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-warning" data-tooltip="Backup schedule disabled">
+                                    <i class="fas fa-pause"></i> Disabled
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge badge-secondary" data-tooltip="No backup schedule configured">
+                                <i class="fas fa-times"></i> None
+                            </span>
+                        {% endif %}
+                    </td>
                     {% if current_user.is_admin %}
                     <td>{{ server.owner.username }}</td>
                     {% endif %}
@@ -219,6 +237,9 @@
                                     <i class="fas fa-download"></i> Backup
                                 </button>
                             </form>
+                            <a href="{{ url_for('server.backup_management') }}?server_id={{ server.id }}" class="btn btn-mc btn-mc-info btn-sm" data-tooltip="Manage backup schedules">
+                                <i class="fas fa-cog"></i> Manage
+                            </a>
                             <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <button type="submit" class="btn btn-mc btn-mc-danger btn-sm"
@@ -255,6 +276,20 @@
                 <div class="info-tag memory-tag">
                     <i class="fas fa-memory"></i>
                     <span>{{ server.memory_mb }}MB</span>
+                </div>
+                <div class="info-tag backup-tag">
+                    <i class="fas fa-database"></i>
+                    <span>
+                        {% if server.backup_schedule %}
+                            {% if server.backup_schedule.enabled %}
+                                {{ server.backup_schedule.schedule_type|title }}
+                            {% else %}
+                                Disabled
+                            {% endif %}
+                        {% else %}
+                            None
+                        {% endif %}
+                    </span>
                 </div>
                 {% if current_user.is_admin %}
                 <div class="info-tag owner-tag">
@@ -316,6 +351,11 @@
                         ⬇
                     </button>
                 </form>
+
+                <!-- Manage Backups Button -->
+                <a href="{{ url_for('server.backup_management') }}?server_id={{ server.id }}" class="control-btn manage-btn" data-tooltip="Manage backups">
+                    ⚙
+                </a>
 
                 <!-- Delete Button -->
                 <form action="{{ url_for('server.delete_server', server_id=server.id) }}" method="post" style="display:inline;">
