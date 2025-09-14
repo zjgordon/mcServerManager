@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-073: Update admin config handler to manage server management page feature
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Updated the admin_config() function in app/routes/auth_routes.py to handle the server_management_page feature toggle using the existing toggle_experimental_feature() utility function. The form processing now includes the new feature checkbox and properly updates the database when the server management page feature is enabled or disabled. Fixed the admin_config.html template to properly display the current state of the server_management_page feature by iterating through the experimental features list and checking the enabled status. This surgical change enables administrators to toggle the server management page feature directly from the admin configuration form, completing the integration between the experimental feature system and the admin configuration interface.
+
 ## 2025-09-14 - CARD-072: Create database migration to update experimental features
 
 **Epic:** Epic 1 – Server Management Page Implementation  

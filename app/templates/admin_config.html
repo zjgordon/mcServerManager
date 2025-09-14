@@ -163,7 +163,7 @@
                                     </p>
                                     <div class="feature-toggle-container">
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="server_management_page" name="server_management_page">
+                                            <input class="form-check-input" type="checkbox" id="server_management_page" name="server_management_page" {% if experimental_features %}{% for feature in experimental_features %}{% if feature.feature_key == 'server_management_page' and feature.enabled %}checked{% endif %}{% endfor %}{% endif %}>
                                             <label class="form-check-label" for="server_management_page">
                                                 Enable Server Management Page
                                             </label>

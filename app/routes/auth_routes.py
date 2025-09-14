@@ -424,6 +424,18 @@ def admin_config():
             else:
                 flash("Failed to update system configuration.", "danger")
 
+            # Handle server management page feature toggle
+            server_management_page_enabled = "server_management_page" in request.form
+            toggle_success = toggle_experimental_feature(
+                "server_management_page", server_management_page_enabled
+            )
+
+            if toggle_success:
+                feature_status = "enabled" if server_management_page_enabled else "disabled"
+                flash(f"Server Management Page feature {feature_status} successfully.", "info")
+            else:
+                flash("Failed to update Server Management Page feature setting.", "warning")
+
         except ValueError:
             flash("Invalid memory values provided.", "danger")
         except Exception as e:

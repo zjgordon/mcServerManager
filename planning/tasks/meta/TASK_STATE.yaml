@@ -1,8 +1,8 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-072 - Create database migration to update experimental features'
-  last_commit: 'feat: [CARD-072] Create database migration to remove dummy experimental features and add server management page'
-  next_action: 'CARD-073 - Next card in queue'
+  step: 'CARD-073 - Update admin config handler to manage server management page feature'
+  last_commit: 'feat: [CARD-073] Update admin config handler to manage server management page feature toggle'
+  next_action: 'CARD-074 - Next card in queue'
 queue: 
   - CARD-071
   - CARD-072
