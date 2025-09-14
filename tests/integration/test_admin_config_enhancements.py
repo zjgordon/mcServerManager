@@ -78,19 +78,22 @@ class TestAdminConfigEnhancements:
             sess["_user_id"] = str(admin_user.id)
             sess["_fresh"] = True
 
-        # Create test experimental feature
+        # Use existing experimental feature from test fixture
         with app.app_context():
-            feature = ExperimentalFeature(
-                feature_key="server_management_page",
-                feature_name="Server Management Page",
-                description="Comprehensive server management interface with advanced controls and monitoring",
-                enabled=False,
-                is_stable=False,
-            )
             from app.extensions import db
 
-            db.session.add(feature)
-            db.session.commit()
+            # Get the existing feature created by the test fixture
+            feature = ExperimentalFeature.query.filter_by(
+                feature_key="server_management_page"
+            ).first()
+
+            # Ensure it exists and update its properties for this test
+            if feature:
+                feature.feature_name = "Server Management Page"
+                feature.description = "Comprehensive server management interface with advanced controls and monitoring"
+                feature.enabled = False
+                feature.is_stable = False
+                db.session.commit()
 
         response = client.get("/admin_config")
 

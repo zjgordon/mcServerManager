@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-103: Fix experimental feature database integrity constraint violations
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+Fixed UNIQUE constraint violation in test_admin_config_experimental_features_display test by modifying test to use existing experimental feature from test fixture instead of creating a new one. The test was failing with SQLAlchemy IntegrityError due to UNIQUE constraint violation on experimental_feature.feature_key because it was trying to create an experimental feature with feature_key 'server_management_page' that already existed in the database from the test fixture setup. Updated test to query for existing feature and update its properties instead of creating a new one, ensuring proper test isolation and preventing database integrity constraint violations. This surgical fix maintains test functionality while resolving the duplicate feature creation issue, ensuring all experimental feature tests pass without affecting other test functionality or database state.
+
 ## 2025-01-14 - CARD-102: Fix experimental feature toggle functionality returning False
 
 **Epic:** Epic 3 – Test Suite Stabilization  
