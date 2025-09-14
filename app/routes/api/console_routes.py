@@ -209,16 +209,16 @@ def get_server_logs_api(server_id):
     try:
         # Check feature flag
         if not is_feature_enabled("server_management_page"):
-            return jsonify({"error": "Console API is not enabled"}), 403
+            return jsonify({"success": False, "error": "Console API is not enabled"}), 403
 
         # Validate server access
         try:
             server = validate_server_access(server_id)
         except ValueError as e:
             if "Server not found" in str(e):
-                return jsonify({"error": "Server not found"}), 404
+                return jsonify({"success": False, "error": "Server not found"}), 404
             else:  # Access denied
-                return jsonify({"error": "Access denied"}), 403
+                return jsonify({"success": False, "error": "Access denied"}), 403
 
         # Get pagination parameters
         limit = min(int(request.args.get("limit", 100)), 1000)  # Cap at 1000
@@ -273,25 +273,29 @@ def execute_command(server_id):
     try:
         # Check feature flag
         if not is_feature_enabled("server_management_page"):
-            return jsonify({"error": "Console API is not enabled"}), 403
+            return jsonify({"success": False, "error": "Console API is not enabled"}), 403
 
         # Validate server access
         try:
             server = validate_server_access(server_id)
         except ValueError as e:
             if "Server not found" in str(e):
-                return jsonify({"error": "Server not found"}), 404
+                return jsonify({"success": False, "error": "Server not found"}), 404
             else:  # Access denied
-                return jsonify({"error": "Access denied"}), 403
+                return jsonify({"success": False, "error": "Access denied"}), 403
 
         # Get command from request
-        data = request.get_json()
+        try:
+            data = request.get_json()
+        except Exception:
+            return jsonify({"success": False, "error": "JSON data required"}), 400
+
         if not data:
-            return jsonify({"error": "JSON data required"}), 400
+            return jsonify({"success": False, "error": "JSON data required"}), 400
 
         command = data.get("command", "").strip()
         if not command:
-            return jsonify({"error": "Command is required"}), 400
+            return jsonify({"success": False, "error": "Command is required"}), 400
 
         # Execute command
         result = send_console_command(server, command)
@@ -358,16 +362,16 @@ def get_server_status_api(server_id):
     try:
         # Check feature flag
         if not is_feature_enabled("server_management_page"):
-            return jsonify({"error": "Console API is not enabled"}), 403
+            return jsonify({"success": False, "error": "Console API is not enabled"}), 403
 
         # Validate server access
         try:
             server = validate_server_access(server_id)
         except ValueError as e:
             if "Server not found" in str(e):
-                return jsonify({"error": "Server not found"}), 404
+                return jsonify({"success": False, "error": "Server not found"}), 404
             else:  # Access denied
-                return jsonify({"error": "Access denied"}), 403
+                return jsonify({"success": False, "error": "Access denied"}), 403
 
         # Get server status
         status_info = get_server_status(server)

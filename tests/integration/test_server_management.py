@@ -463,6 +463,9 @@ class TestErrorHandlingIntegration:
                 feature.enabled = True
             db.session.commit()
 
+            # Enable rate limiting for this test
+            authenticated_client.application.config["RATELIMIT_ENABLED"] = True
+
             # Make many requests to trigger rate limiting
             for i in range(65):  # Exceed the 60 request limit
                 response = authenticated_client.get(f"/api/console/{test_server.id}/logs")

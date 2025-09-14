@@ -1,5 +1,19 @@
 # Project History
 
+## 2025-09-14 - CARD-091: Fix console API error handling and rate limiting issues
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+**Summary:** Fixed failing tests related to console API error handling and rate limiting configuration. Updated error responses to include consistent `success` field, added proper JSON parsing error handling, and enabled rate limiting in test environment. All four failing tests now pass: `test_validate_server_access_owner_user`, `test_console_api_server_not_found`, `test_console_api_invalid_json_data`, and `test_console_api_rate_limiting_integration`.
+
+**Changes Made:**
+- Updated console API error responses to include `"success": False` field for consistency
+- Added try-catch block around `request.get_json()` to handle invalid JSON gracefully
+- Modified rate limiting test to explicitly enable rate limiting in test environment
+- Ensured all error responses return proper HTTP status codes (400, 403, 404, 429)
+
 ## 2025-09-14 - CARD-090: Fix mock configuration and process verification issues
 
 **Epic:** Epic 3 – Test Suite Stabilization  

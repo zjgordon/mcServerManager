@@ -1,10 +1,9 @@
-active_card: CARD-091
+active_card: CARD-092
 breadcrumb:
-  step: 'CARD-090 - Fix mock configuration and process verification issues'
-  last_commit: 'fix: [CARD-090] Fix mock configuration and process verification issues'
-  next_action: 'CARD-091 - Ready to start next task'
+  step: 'CARD-091 - Fix console API error handling and rate limiting issues'
+  last_commit: 'fix: [CARD-091] Fix console API error handling and rate limiting issues'
+  next_action: 'CARD-092 - Ready to start next task'
 queue:
-  - CARD-091
   - CARD-092
   - CARD-093
   - CARD-094

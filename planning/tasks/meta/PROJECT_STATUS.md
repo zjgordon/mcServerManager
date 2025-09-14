@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-091: ✅ Completed - Fixed console API error handling and rate limiting issues by updating error responses to include consistent success field, adding proper JSON parsing error handling, and enabling rate limiting in test environment
 - CARD-090: ✅ Completed - Fixed mock configuration and process verification issues by properly mocking psutil.Process.cmdline() method to return list instead of Mock object, resolving "argument of type 'Mock' is not iterable" errors
 - CARD-089: ✅ Completed - Fixed error message inconsistencies in command execution by properly mocking psutil.Process attributes in test fixtures to ensure consistent error message flow
 - CARD-088: ✅ Completed - Fixed feature flag management and NoneType errors by seeding ExperimentalFeature objects in test database, adding admin authorization checks, and resolving fixture availability issues
