@@ -2,7 +2,7 @@ id: CARD-058
 title: Create ExperimentalFeature database model
 epic: Epic 3 – Admin Configuration Enhancements
 sprint: 09-2025_SPRINT_3
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:

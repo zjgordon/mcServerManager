@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-057 - Add CSS styling for memory bar gauge component'
-  last_commit: 'feat: [CARD-057] Add CSS styling for memory bar gauge component'
-  next_action: 'CARD-058 - Add system CPU utility function for admin configuration'
+  step: 'CARD-058 - Create ExperimentalFeature database model'
+  last_commit: 'feat: [CARD-058] Create ExperimentalFeature database model'
+  next_action: 'CARD-059 - Add system CPU utility function for admin configuration'
 queue: 
-  - CARD-058
   - CARD-059
   - CARD-060
   - CARD-061

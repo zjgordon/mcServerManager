@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-14 - CARD-058: Create ExperimentalFeature database model
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created ExperimentalFeature database model in app/models.py with comprehensive schema including id, feature_key (unique), feature_name, description, enabled, is_stable, created_at, updated_at, and updated_by fields. Implemented proper validation methods for feature_key format, feature_name length, and description requirements with database constraints for data integrity. Added relationship to User model for tracking feature updates and comprehensive validation methods that return detailed error messages. The model supports the feature gating system for experimental functionality with proper field constraints and validation. Database tables created successfully and all existing tests continue to pass with no linting errors.
+
 ## 2025-01-14 - CARD-056: Add memory bar gauge HTML structure to admin template
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  
