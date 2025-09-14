@@ -275,16 +275,18 @@ class TestConsoleFunctionalityIntegration:
             db.session.commit()
 
             # Test command execution with mocked process
-            with patch("psutil.Process") as mock_process:
+            with patch("app.utils.verify_process_status") as mock_verify, patch(
+                "psutil.Process"
+            ) as mock_process:
+                # Mock verify_process_status to return running
+                mock_verify.return_value = {
+                    "is_running": True,
+                    "process_info": {"pid": running_server.pid},
+                    "error": None,
+                }
+
+                # Mock the process for stdin operations
                 mock_proc = Mock()
-                mock_proc.is_running.return_value = True
-                mock_proc.pid = running_server.pid
-                mock_proc.name.return_value = "java"
-                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
-                mock_proc.cwd.return_value = "/path/to/server"
-                mock_proc.create_time.return_value = 1234567890
-                mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
-                mock_proc.cpu_percent.return_value = 5.0
                 mock_proc.stdin = Mock()
                 mock_process.return_value = mock_proc
 

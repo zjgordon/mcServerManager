@@ -1,10 +1,9 @@
-active_card: CARD-092
+active_card: CARD-093
 breadcrumb:
-  step: 'CARD-091 - Fix console API error handling and rate limiting issues'
-  last_commit: 'fix: [CARD-091] Fix console API error handling and rate limiting issues'
-  next_action: 'CARD-092 - Ready to start next task'
+  step: 'CARD-092 - Fix console API endpoint functionality and response handling'
+  last_commit: 'fix: [CARD-092] Fix console API endpoint functionality and response handling'
+  next_action: 'CARD-093 - Ready to start next task'
 queue:
-  - CARD-092
   - CARD-093
   - CARD-094
   - CARD-095

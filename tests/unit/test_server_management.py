@@ -188,12 +188,19 @@ class TestConsoleAPIEndpoints:
                 f.write("[12:34:57] [WARN] Warning message\n")
                 f.write("[12:34:58] [ERROR] Error message\n")
 
-            logs = get_server_logs(test_server, limit=10, offset=0)
+            try:
+                logs = get_server_logs(test_server, limit=10, offset=0)
 
-            assert len(logs) == 3
-            assert logs[0]["timestamp"] == "12:34:56"
-            assert logs[0]["level"] == "info"
-            assert logs[0]["message"] == "Server starting"
+                assert len(logs) == 3
+                assert logs[0]["timestamp"] == "12:34:56"
+                assert logs[0]["level"] == "info"
+                assert logs[0]["message"] == "Server starting"
+            finally:
+                # Clean up the test files
+                import shutil
+
+                if os.path.exists(server_dir):
+                    shutil.rmtree(server_dir, ignore_errors=True)
 
     def test_get_server_logs_file_not_found(self, app, test_server):
         """Test getting logs when log file doesn't exist."""
@@ -213,14 +220,21 @@ class TestConsoleAPIEndpoints:
             with open(log_file, "w") as f:
                 f.write("Invalid log format\n")
 
-            logs = get_server_logs(test_server, limit=10, offset=0)
-            # Should still return something, even if parsing fails
-            assert isinstance(logs, list)
+            try:
+                logs = get_server_logs(test_server, limit=10, offset=0)
+                # Should still return something, even if parsing fails
+                assert isinstance(logs, list)
+            finally:
+                # Clean up the test files
+                import shutil
+
+                if os.path.exists(server_dir):
+                    shutil.rmtree(server_dir, ignore_errors=True)
 
     def test_send_console_command_success(self, app, test_server):
         """Test successfully sending console command."""
         with app.app_context():
-            with patch("app.utils.execute_server_command") as mock_execute:
+            with patch("app.routes.api.console_routes.execute_server_command") as mock_execute:
                 mock_execute.return_value = {
                     "success": True,
                     "message": "Command executed",
@@ -233,16 +247,29 @@ class TestConsoleAPIEndpoints:
                 assert result["message"] == "Command executed"
                 mock_execute.assert_called_once_with(test_server.id, "test command")
 
-    def test_get_server_status_running_server(self, app, running_server, mock_psutil_process):
+    def test_get_server_status_running_server(self, app, running_server):
         """Test getting status of a running server."""
         with app.app_context():
-            status = get_server_status(running_server)
+            with patch("psutil.Process") as mock_process:
+                mock_proc = Mock()
+                mock_proc.is_running.return_value = True
+                mock_proc.pid = running_server.pid
+                mock_proc.name.return_value = "java"
+                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
+                mock_proc.cwd.return_value = "/test/server"
+                mock_proc.create_time.return_value = 1234567890
+                mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
+                mock_proc.cpu_percent.return_value = 5.0
+                mock_proc.status.return_value = "running"
+                mock_process.return_value = mock_proc
 
-            assert status["server_id"] == running_server.id
-            assert status["server_name"] == running_server.server_name
-            assert status["status"] == running_server.status
-            assert status["is_actually_running"] is True
-            assert "process_info" in status
+                status = get_server_status(running_server)
+
+                assert status["server_id"] == running_server.id
+                assert status["server_name"] == running_server.server_name
+                assert status["status"] == running_server.status
+                assert status["is_actually_running"] is True
+                assert "process_info" in status
 
     def test_get_server_status_stopped_server(self, app, test_server):
         """Test getting status of a stopped server."""
@@ -268,16 +295,18 @@ class TestCommandExecutionSystem:
     def test_execute_server_command_success(self, app, running_server):
         """Test successfully executing a server command."""
         with app.app_context():
-            with patch("psutil.Process") as mock_process:
+            with patch("app.utils.verify_process_status") as mock_verify, patch(
+                "psutil.Process"
+            ) as mock_process:
+                # Mock verify_process_status to return running
+                mock_verify.return_value = {
+                    "is_running": True,
+                    "process_info": {"pid": running_server.pid},
+                    "error": None,
+                }
+
+                # Mock the process for stdin operations
                 mock_proc = Mock()
-                mock_proc.is_running.return_value = True
-                mock_proc.pid = running_server.pid
-                mock_proc.name.return_value = "java"
-                mock_proc.cmdline.return_value = ["java", "-jar", "server.jar", "nogui"]
-                mock_proc.cwd.return_value = "/path/to/server"
-                mock_proc.create_time.return_value = 1234567890
-                mock_proc.memory_info.return_value = Mock(rss=1000000, vms=2000000)
-                mock_proc.cpu_percent.return_value = 5.0
                 mock_proc.stdin = Mock()
                 mock_process.return_value = mock_proc
 

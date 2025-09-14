@@ -1,5 +1,20 @@
 # Project History
 
+## 2025-09-14 - CARD-092: Fix console API endpoint functionality and response handling
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+**Summary:** Fixed console API endpoint functionality issues that were causing test failures in command execution and log retrieval. The root cause was improper test isolation and incorrect mocking strategies that prevented console API endpoints from functioning correctly in the test environment. All four failing tests now pass: `test_get_server_logs_file_not_found`, `test_send_console_command_success`, `test_execute_server_command_success`, and `test_console_command_execution_integration`.
+
+**Changes Made:**
+- Fixed test isolation issues by adding proper cleanup in log file tests to prevent leftover files from affecting subsequent tests
+- Updated mock patching strategy in `test_send_console_command_success` to patch the correct module path (`app.routes.api.console_routes.execute_server_command`)
+- Fixed `test_execute_server_command_success` by mocking `verify_process_status` function instead of just `psutil.Process` to properly simulate running server state
+- Updated integration test `test_console_command_execution_integration` with same mocking strategy for consistency
+- Fixed missing fixture error in `test_get_server_status_running_server` by adding proper psutil.Process mocking
+
 ## 2025-09-14 - CARD-091: Fix console API error handling and rate limiting issues
 
 **Epic:** Epic 3 – Test Suite Stabilization  
