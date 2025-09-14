@@ -2,7 +2,7 @@ id: CARD-089
 title: Fix error message inconsistencies in command execution
 epic: Epic 3 – Test Suite Stabilization
 sprint: 09-2025_SPRINT_3
-status: todo  # todo | doing | review | done | blocked
+status: done  # todo | doing | review | done | blocked
 owner: cursor
 links: []
 acceptance:

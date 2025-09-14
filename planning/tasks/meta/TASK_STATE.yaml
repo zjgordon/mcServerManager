@@ -1,10 +1,9 @@
-active_card: CARD-089
+active_card: CARD-090
 breadcrumb:
-  step: 'CARD-088 - Fix feature flag management and NoneType errors'
-  last_commit: 'fix: [CARD-088] Fix feature flag management and NoneType errors'
-  next_action: 'CARD-089 - Ready to start next task'
+  step: 'CARD-089 - Fix error message inconsistencies in command execution'
+  last_commit: 'fix: [CARD-089] Fix error message inconsistencies in command execution'
+  next_action: 'CARD-090 - Ready to start next task'
 queue:
-  - CARD-089
   - CARD-090
   - CARD-091
   - CARD-092

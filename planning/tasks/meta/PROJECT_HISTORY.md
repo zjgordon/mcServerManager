@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-089: Fix error message inconsistencies in command execution
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed error message inconsistencies in command execution tests by properly mocking psutil.Process attributes in test fixtures. The issue was that tests expected "Failed to send command" error message but received "Server process is not running" instead. Root cause was incomplete mocking of psutil.Process in test_execute_server_command_process_error and test_console_api_process_error_handling tests. Updated both unit and integration tests to properly mock process attributes including pid, name, cmdline, cwd, create_time, memory_info, and cpu_percent to ensure process verification passes and command execution reaches the expected error path. Tests now correctly validate the command execution error handling flow and return consistent error messages.
+
 ## 2025-09-14 - CARD-088: Fix feature flag management and NoneType errors
 
 **Epic:** Epic 3 – Test Suite Stabilization  
