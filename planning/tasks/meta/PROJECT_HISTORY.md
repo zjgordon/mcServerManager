@@ -1340,3 +1340,20 @@ This surgical change ensures that backup history API can discover and display
 all backup files regardless of which naming convention was used during creation,
 providing seamless backward compatibility with existing backups while maintaining
 support for the new unified naming standard.
+
+## 2025-01-14 - CARD-046: Add error handling for backup trigger API to ensure JSON responses
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Enhanced trigger_backup() endpoint in backup_routes.py with comprehensive error
+handling to ensure all responses are valid JSON, even when backup_scheduler.execute_backup_job()
+fails. Added nested try-catch blocks to handle backup scheduler errors, validate
+backup result structure, and provide graceful fallback for audit logging failures.
+Implemented fallback JSON response creation for critical errors that prevent
+normal JSON generation. The existing JavaScript error handling in backup-management.js
+already properly handles non-JSON responses by checking content-type headers,
+ensuring the backup management page gracefully handles all API response types.
+This surgical fix eliminates JSON.parse errors in the frontend when the backup
+scheduler encounters unexpected errors or returns malformed responses.

@@ -1,9 +1,8 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-045 completed - Updated backup history API to recognize both naming patterns for backward compatibility'
-  last_commit: 'feat: [CARD-045] Update backup history API to recognize both naming patterns'
-  next_action: 'CARD-046 - Next task in queue'
+  step: 'CARD-046 completed - Added comprehensive error handling for backup trigger API to ensure JSON responses'
+  last_commit: 'feat: [CARD-046] Add error handling for backup trigger API to ensure JSON responses'
+  next_action: 'CARD-047 - Next task in queue'
 queue:
-  - CARD-046
   - CARD-047
   

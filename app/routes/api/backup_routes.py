@@ -547,20 +547,49 @@ def trigger_backup(server_id):
         if not server:
             return jsonify({"error": "Server not found or access denied"}), 404
 
-        # Trigger manual backup
-        backup_result = backup_scheduler.execute_backup_job(server_id)
-
-        if backup_result["success"]:
-            audit_log(
-                "manual_backup_triggered",
-                {
-                    "server_id": server_id,
-                    "server_name": server.server_name,
-                    "backup_file": backup_result.get("backup_filename"),
-                    "backup_size": backup_result.get("size"),
-                    "duration": backup_result.get("duration"),
-                },
+        # Trigger manual backup with comprehensive error handling
+        try:
+            backup_result = backup_scheduler.execute_backup_job(server_id)
+        except Exception as backup_error:
+            # Handle any unexpected errors from backup_scheduler
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Backup scheduler error: {str(backup_error)}",
+                    }
+                ),
+                500,
             )
+
+        # Validate backup_result structure
+        if not isinstance(backup_result, dict):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Invalid backup result format",
+                    }
+                ),
+                500,
+            )
+
+        if backup_result.get("success"):
+            # Log successful backup
+            try:
+                audit_log(
+                    "manual_backup_triggered",
+                    {
+                        "server_id": server_id,
+                        "server_name": server.server_name,
+                        "backup_file": backup_result.get("backup_filename"),
+                        "backup_size": backup_result.get("size"),
+                        "duration": backup_result.get("duration"),
+                    },
+                )
+            except Exception:
+                # Don't fail the backup if logging fails
+                pass
 
             return jsonify(
                 {
@@ -579,26 +608,37 @@ def trigger_backup(server_id):
                 }
             )
         else:
+            # Handle backup failure with proper error message
+            error_msg = backup_result.get("error", "Unknown backup error")
             return (
                 jsonify(
                     {
                         "success": False,
-                        "error": f"Backup failed: {backup_result.get('error')}",
+                        "error": f"Backup failed: {error_msg}",
                     }
                 ),
                 500,
             )
 
     except Exception as e:
-        return (
-            jsonify(
-                {
-                    "success": False,
-                    "error": f"Failed to trigger backup: {str(e)}",
-                }
-            ),
-            500,
-        )
+        # Comprehensive error handling to ensure JSON response
+        try:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Failed to trigger backup: {str(e)}",
+                    }
+                ),
+                500,
+            )
+        except Exception:
+            # If even JSON creation fails, return a basic response
+            return (
+                '{"success": false, "error": "Critical error: Unable to create JSON response"}',
+                500,
+                {"Content-Type": "application/json"},
+            )
 
 
 @backup_api_bp.route("/<int:server_id>/history", methods=["GET"])
