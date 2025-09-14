@@ -1350,3 +1350,146 @@ def generate_backup_quality_score(verification_results):
             "deductions": [f"Score calculation error: {str(e)}"],
             "max_possible_score": 100,
         }
+
+
+def get_experimental_features():
+    """
+    Get all experimental features from the database.
+
+    Returns:
+        list: List of experimental feature dictionaries
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        features = ExperimentalFeature.query.all()
+        return [
+            {
+                "id": feature.id,
+                "feature_key": feature.feature_key,
+                "feature_name": feature.feature_name,
+                "description": feature.description,
+                "enabled": feature.enabled,
+                "is_stable": feature.is_stable,
+                "created_at": feature.created_at,
+                "updated_at": feature.updated_at,
+                "updated_by": feature.updated_by,
+            }
+            for feature in features
+        ]
+    except Exception as e:
+        logger.error(f"Error getting experimental features: {str(e)}")
+        return []
+
+
+def toggle_experimental_feature(feature_key, enabled):
+    """
+    Toggle an experimental feature on or off.
+
+    Args:
+        feature_key: The unique key identifying the feature
+        enabled: Boolean indicating whether to enable or disable the feature
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        # Try to get current user, but don't fail if not available
+        try:
+            user_id = current_user.id if current_user.is_authenticated else None
+        except (AttributeError, RuntimeError):
+            user_id = None
+
+        feature = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if not feature:
+            logger.warning(f"Experimental feature '{feature_key}' not found")
+            return False
+
+        feature.enabled = enabled
+        feature.updated_by = user_id
+        db.session.commit()
+
+        logger.info(f"Experimental feature '{feature_key}' {'enabled' if enabled else 'disabled'}")
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling experimental feature '{feature_key}': {str(e)}")
+        db.session.rollback()
+        return False
+
+
+def is_feature_enabled(feature_key):
+    """
+    Check if an experimental feature is enabled.
+
+    Args:
+        feature_key: The unique key identifying the feature
+
+    Returns:
+        bool: True if feature is enabled, False otherwise
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        feature = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if not feature:
+            logger.debug(f"Experimental feature '{feature_key}' not found, returning False")
+            return False
+
+        return feature.enabled
+    except Exception as e:
+        logger.error(f"Error checking if feature '{feature_key}' is enabled: {str(e)}")
+        return False
+
+
+def add_experimental_feature(
+    feature_key, feature_name, description, enabled=False, is_stable=False
+):
+    """
+    Add a new experimental feature to the database.
+
+    Args:
+        feature_key: Unique key for the feature
+        feature_name: Human-readable name for the feature
+        description: Description of what the feature does
+        enabled: Whether the feature is enabled by default
+        is_stable: Whether the feature is considered stable
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        # Check if feature already exists
+        existing = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if existing:
+            logger.warning(f"Experimental feature '{feature_key}' already exists")
+            return False
+
+        # Try to get current user, but don't fail if not available
+        try:
+            user_id = current_user.id if current_user.is_authenticated else None
+        except (AttributeError, RuntimeError):
+            user_id = None
+
+        # Create new feature
+        feature = ExperimentalFeature(
+            feature_key=feature_key,
+            feature_name=feature_name,
+            description=description,
+            enabled=enabled,
+            is_stable=is_stable,
+            updated_by=user_id,
+        )
+
+        db.session.add(feature)
+        db.session.commit()
+
+        logger.info(f"Added experimental feature '{feature_key}': {feature_name}")
+        return True
+    except Exception as e:
+        logger.error(f"Error adding experimental feature '{feature_key}': {str(e)}")
+        db.session.rollback()
+        return False

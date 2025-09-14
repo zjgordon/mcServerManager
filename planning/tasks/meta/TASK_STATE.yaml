@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-059 - Create database migration for ExperimentalFeature model'
-  last_commit: 'feat: [CARD-059] Create database migration for ExperimentalFeature model'
-  next_action: 'CARD-060 - Add system CPU utility function for admin configuration'
+  step: 'CARD-060 - Add experimental feature utility functions'
+  last_commit: 'feat: [CARD-060] Add experimental feature utility functions'
+  next_action: 'CARD-061 - Add experimental feature management interface'
 queue: 
-  - CARD-060
   - CARD-061
   - CARD-062
   - CARD-063

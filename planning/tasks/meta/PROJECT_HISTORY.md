@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-060: Add experimental feature utility functions
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Added comprehensive experimental feature utility functions to app/utils.py for managing the feature gating system. Implemented get_experimental_features() to retrieve all features from database, toggle_experimental_feature(feature_key, enabled) to enable/disable features with user tracking, is_feature_enabled(feature_key) to check feature status, and add_experimental_feature() to create new features with validation. All functions include proper error handling, database transaction management, user context tracking, and comprehensive logging. The utility functions provide a complete API for experimental feature management that integrates with the existing ExperimentalFeature database model. All tests pass with no linting errors.
+
 ## 2025-01-27 - CARD-059: Create database migration for ExperimentalFeature model
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  
