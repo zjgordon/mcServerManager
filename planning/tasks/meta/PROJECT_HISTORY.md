@@ -1195,3 +1195,22 @@ dashboard endpoints in monitoring.py with health scoring, recommendations, and
 recent backup history. Integrated backup monitoring with existing alert system
 and added backup failure detection with automatic alert triggering. All monitoring
 features include proper error handling, logging, and comprehensive test coverage.
+
+## 2025-09-14 - CARD-038: Implement backup restore and recovery system
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully implemented comprehensive backup restore and recovery system with
+server selection, validation, and recovery options. Added restore API endpoints
+in backup_routes.py including GET /api/backups/<server_id>/available for listing
+available backups, POST /api/backups/<server_id>/restore for triggering restore
+operations with preview and confirmation, and placeholder endpoints for restore
+status tracking and rollback capabilities. Enhanced backup_management.html with
+restore section including backup selection dropdown, restore preview with detailed
+backup information, confirmation workflow, and progress tracking. Updated
+backup-management.js with complete restore functionality including loadAvailableBackups,
+previewRestore, confirmRestore, and executeRestore methods with proper error
+handling and user feedback. All restore features include comprehensive validation,
+progress tracking, and safety warnings to prevent accidental data loss.

@@ -51,6 +51,23 @@ class BackupManager {
             this.loadBackupHistory();
         });
 
+        // Restore functionality
+        document.getElementById('restoreBackupSelect').addEventListener('change', () => {
+            this.updateRestoreButtons();
+        });
+
+        document.getElementById('previewRestoreBtn').addEventListener('click', () => {
+            this.previewRestore();
+        });
+
+        document.getElementById('confirmRestoreBtn').addEventListener('click', () => {
+            this.confirmRestore();
+        });
+
+        document.getElementById('cancelRestoreBtn').addEventListener('click', () => {
+            this.cancelRestore();
+        });
+
         // Confirmation modal
         document.getElementById('confirmAction').addEventListener('click', () => {
             this.executeConfirmedAction();
@@ -84,7 +101,8 @@ class BackupManager {
         // Load all data for the selected server
         Promise.all([
             this.loadScheduleStatus(),
-            this.loadBackupHistory()
+            this.loadBackupHistory(),
+            this.loadAvailableBackups()
         ]).finally(() => {
             this.hideLoadingOverlay();
         });
@@ -329,16 +347,197 @@ class BackupManager {
         document.body.removeChild(link);
     }
 
+    async loadAvailableBackups() {
+        try {
+            const response = await fetch(`/api/backups/${this.currentServerId}/available`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.populateRestoreSelect(data.backups);
+            } else {
+                this.showError('Failed to load available backups: ' + data.error);
+            }
+        } catch (error) {
+            this.showError('Error loading available backups: ' + error.message);
+        }
+    }
+
+    populateRestoreSelect(backups) {
+        const select = document.getElementById('restoreBackupSelect');
+        select.innerHTML = '<option value="">-- Select a backup --</option>';
+
+        backups.forEach(backup => {
+            const option = document.createElement('option');
+            option.value = backup.filename;
+            option.textContent = `${backup.filename} (${backup.size_mb} MB, ${backup.age_days} days ago)`;
+            option.disabled = !backup.can_restore;
+            select.appendChild(option);
+        });
+    }
+
+    updateRestoreButtons() {
+        const select = document.getElementById('restoreBackupSelect');
+        const previewBtn = document.getElementById('previewRestoreBtn');
+
+        previewBtn.disabled = !select.value;
+    }
+
+    async previewRestore() {
+        const select = document.getElementById('restoreBackupSelect');
+        const backupFilename = select.value;
+
+        if (!backupFilename) {
+            this.showError('Please select a backup to restore');
+            return;
+        }
+
+        try {
+            this.showLoadingOverlay();
+
+            const response = await fetch(`/api/backups/${this.currentServerId}/restore`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    backup_filename: backupFilename,
+                    confirm: false
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.preview) {
+                this.displayRestorePreview(data);
+            } else {
+                this.showError('Failed to preview restore: ' + data.error);
+            }
+        } catch (error) {
+            this.showError('Error previewing restore: ' + error.message);
+        } finally {
+            this.hideLoadingOverlay();
+        }
+    }
+
+    displayRestorePreview(data) {
+        const previewDiv = document.getElementById('restorePreview');
+        const previewContent = document.getElementById('restorePreviewContent');
+        const confirmBtn = document.getElementById('confirmRestoreBtn');
+        const cancelBtn = document.getElementById('cancelRestoreBtn');
+        const previewBtn = document.getElementById('previewRestoreBtn');
+
+        previewContent.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Backup File:</strong> ${data.backup_info.filename}
+                </div>
+                <div class="col-md-6">
+                    <strong>Size:</strong> ${data.backup_info.size_mb} MB
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <strong>Created:</strong> ${new Date(data.backup_info.created).toLocaleString()}
+                </div>
+                <div class="col-md-6">
+                    <strong>Server:</strong> ${data.backup_info.server_name}
+                </div>
+            </div>
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                ${data.restore_warning}
+            </div>
+        `;
+
+        previewDiv.style.display = 'block';
+        confirmBtn.style.display = 'inline-block';
+        cancelBtn.style.display = 'inline-block';
+        previewBtn.style.display = 'none';
+    }
+
+    async confirmRestore() {
+        const select = document.getElementById('restoreBackupSelect');
+        const backupFilename = select.value;
+
+        this.showConfirmModal(
+            'Confirm Restore',
+            `Are you sure you want to restore from backup "${backupFilename}"? This will replace all current server files.`,
+            () => this.executeRestore(backupFilename)
+        );
+    }
+
+    async executeRestore(backupFilename) {
+        try {
+            this.showLoadingOverlay();
+            this.showRestoreProgress();
+
+            const response = await fetch(`/api/backups/${this.currentServerId}/restore`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    backup_filename: backupFilename,
+                    confirm: true
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showSuccess(data.message);
+                this.resetRestoreInterface();
+                this.loadBackupHistory(); // Refresh history
+            } else {
+                this.showError('Restore failed: ' + data.error);
+            }
+        } catch (error) {
+            this.showError('Error executing restore: ' + error.message);
+        } finally {
+            this.hideLoadingOverlay();
+            this.hideRestoreProgress();
+        }
+    }
+
+    cancelRestore() {
+        this.resetRestoreInterface();
+    }
+
+    resetRestoreInterface() {
+        const previewDiv = document.getElementById('restorePreview');
+        const confirmBtn = document.getElementById('confirmRestoreBtn');
+        const cancelBtn = document.getElementById('cancelRestoreBtn');
+        const previewBtn = document.getElementById('previewRestoreBtn');
+        const select = document.getElementById('restoreBackupSelect');
+
+        previewDiv.style.display = 'none';
+        confirmBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+        previewBtn.style.display = 'inline-block';
+        select.value = '';
+        this.updateRestoreButtons();
+    }
+
+    showRestoreProgress() {
+        document.getElementById('restoreProgress').style.display = 'block';
+    }
+
+    hideRestoreProgress() {
+        document.getElementById('restoreProgress').style.display = 'none';
+    }
+
     showAllSections() {
         document.getElementById('scheduleSection').style.display = 'block';
         document.getElementById('manualBackupSection').style.display = 'block';
         document.getElementById('backupHistorySection').style.display = 'block';
+        document.getElementById('backupRestoreSection').style.display = 'block';
     }
 
     hideAllSections() {
         document.getElementById('scheduleSection').style.display = 'none';
         document.getElementById('manualBackupSection').style.display = 'none';
         document.getElementById('backupHistorySection').style.display = 'none';
+        document.getElementById('backupRestoreSection').style.display = 'none';
     }
 
     showDeleteButton() {

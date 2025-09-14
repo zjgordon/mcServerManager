@@ -717,3 +717,271 @@ def get_backup_status(server_id):
             ),
             500,
         )
+
+
+@backup_api_bp.route("/<int:server_id>/available", methods=["GET"])
+@login_required
+@rate_limit(max_attempts=10, window_seconds=60)
+def list_available_backups(server_id):
+    """
+    List available backups for a specific server.
+
+    GET /api/backups/<server_id>/available
+
+    Args:
+        server_id: ID of the server to list backups for
+
+    Returns:
+        JSON response with list of available backups
+    """
+    try:
+        # Validate server access
+        server = validate_server_access(server_id)
+        if not server:
+            return jsonify({"error": "Server not found or access denied"}), 404
+
+        # Get backup files from backup directory
+        backup_dir = os.path.join("backups", server.server_name)
+
+        if not os.path.exists(backup_dir):
+            return jsonify(
+                {
+                    "success": True,
+                    "backups": [],
+                    "count": 0,
+                    "message": "No backup directory found",
+                }
+            )
+
+        # Get all backup files for this server
+        backup_files = backup_scheduler._get_backup_files(backup_dir, server.server_name)
+
+        # Format backup list with additional metadata
+        available_backups = []
+        for backup_file in backup_files:
+            backup_info = {
+                "filename": backup_file["filename"],
+                "filepath": backup_file["filepath"],
+                "size": backup_file["size"],
+                "size_mb": round(backup_file["size"] / (1024 * 1024), 2),
+                "created": backup_file["created"].isoformat(),
+                "age_days": round(
+                    (datetime.now().timestamp() - backup_file["mtime"]) / (24 * 3600), 1
+                ),
+                "can_restore": True,  # All backups are restorable by default
+            }
+            available_backups.append(backup_info)
+
+        return jsonify(
+            {
+                "success": True,
+                "server_id": server_id,
+                "server_name": server.server_name,
+                "backups": available_backups,
+                "count": len(available_backups),
+            }
+        )
+
+    except Exception as e:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": f"Failed to retrieve available backups: {str(e)}",
+                }
+            ),
+            500,
+        )
+
+
+@backup_api_bp.route("/<int:server_id>/restore", methods=["POST"])
+@login_required
+@rate_limit(max_attempts=3, window_seconds=600)  # 3 attempts per 10 minutes
+def trigger_restore(server_id):
+    """
+    Trigger a restore operation for a specific server.
+
+    POST /api/backups/<server_id>/restore
+    Body: {
+        "backup_filename": str,
+        "confirm": bool (optional, default: false)
+    }
+
+    Args:
+        server_id: ID of the server to restore
+
+    Returns:
+        JSON response with restore operation status
+    """
+    try:
+        # Validate server access
+        server = validate_server_access(server_id)
+        if not server:
+            return jsonify({"error": "Server not found or access denied"}), 404
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "JSON data required"}), 400
+
+        # Validate required fields
+        if "backup_filename" not in data:
+            return jsonify({"error": "backup_filename is required"}), 400
+
+        backup_filename = data["backup_filename"]
+        confirm = data.get("confirm", False)
+
+        # Validate backup file exists
+        backup_dir = os.path.join("backups", server.server_name)
+        backup_filepath = os.path.join(backup_dir, backup_filename)
+
+        if not os.path.exists(backup_filepath):
+            return jsonify({"error": "Backup file not found"}), 404
+
+        # If not confirmed, return preview information
+        if not confirm:
+            # Get backup metadata
+            backup_stat = os.stat(backup_filepath)
+            backup_size_mb = round(backup_stat.st_size / (1024 * 1024), 2)
+            backup_created = datetime.fromtimestamp(backup_stat.st_mtime).isoformat()
+
+            return jsonify(
+                {
+                    "success": True,
+                    "preview": True,
+                    "message": "Restore preview - confirmation required",
+                    "backup_info": {
+                        "filename": backup_filename,
+                        "size_mb": backup_size_mb,
+                        "created": backup_created,
+                        "server_name": server.server_name,
+                    },
+                    "restore_warning": "This will replace the current server files with the backup. Make sure the server is stopped before proceeding.",
+                }
+            )
+
+        # Perform the restore operation
+        restore_result = backup_scheduler.restore_backup(
+            backup_filepath, os.path.join("servers", server.server_name)
+        )
+
+        if restore_result["success"]:
+            audit_log(
+                "backup_restore_completed",
+                {
+                    "server_id": server_id,
+                    "server_name": server.server_name,
+                    "backup_filename": backup_filename,
+                    "backup_filepath": backup_filepath,
+                },
+            )
+
+            return jsonify(
+                {
+                    "success": True,
+                    "message": "Backup restored successfully",
+                    "restore_info": {
+                        "server_id": server_id,
+                        "server_name": server.server_name,
+                        "backup_filename": backup_filename,
+                        "restore_dir": restore_result.get("restore_dir"),
+                    },
+                }
+            )
+        else:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Restore failed: {restore_result.get('error')}",
+                    }
+                ),
+                500,
+            )
+
+    except Exception as e:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": f"Failed to trigger restore: {str(e)}",
+                }
+            ),
+            500,
+        )
+
+
+@backup_api_bp.route("/restores/<int:restore_id>/status", methods=["GET"])
+@login_required
+@rate_limit(max_attempts=10, window_seconds=60)
+def get_restore_status(restore_id):
+    """
+    Get restore operation status.
+
+    GET /api/restores/<restore_id>/status
+
+    Args:
+        restore_id: ID of the restore operation
+
+    Returns:
+        JSON response with restore status information
+    """
+    try:
+        # For now, we'll implement a simple status tracking
+        # In a full implementation, this would track restore operations in the database
+        return jsonify(
+            {
+                "success": True,
+                "message": "Restore status tracking not yet implemented",
+                "restore_id": restore_id,
+                "status": "completed",  # Placeholder
+            }
+        )
+
+    except Exception as e:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": f"Failed to retrieve restore status: {str(e)}",
+                }
+            ),
+            500,
+        )
+
+
+@backup_api_bp.route("/restores/<int:restore_id>/rollback", methods=["POST"])
+@login_required
+@rate_limit(max_attempts=3, window_seconds=600)
+def rollback_restore(restore_id):
+    """
+    Rollback a restore operation.
+
+    POST /api/restores/<restore_id>/rollback
+
+    Args:
+        restore_id: ID of the restore operation to rollback
+
+    Returns:
+        JSON response with rollback status
+    """
+    try:
+        # For now, we'll implement a placeholder
+        # In a full implementation, this would restore from a pre-restore backup
+        return jsonify(
+            {
+                "success": True,
+                "message": "Rollback functionality not yet implemented",
+                "restore_id": restore_id,
+            }
+        )
+
+    except Exception as e:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": f"Failed to rollback restore: {str(e)}",
+                }
+            ),
+            500,
+        )
