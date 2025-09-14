@@ -134,3 +134,4 @@ RELEASE_NOTES.md)
 - CARD-038: ✅ Completed - Backup restore and recovery system implemented with restore API endpoints, server selection and validation, progress tracking, preview and confirmation system, and comprehensive error handling
 - CARD-039: ✅ Completed - Comprehensive test suite for backup scheduling system created with 34 unit tests, 17 integration tests, and 8 end-to-end tests covering all functionality, error handling, and security controls
 - CARD-040: ✅ Completed - Comprehensive documentation for backup scheduling system created with user guides, administrator guides, API documentation, troubleshooting guides, best practices, and updated README.md with backup features
+- CARD-041: ✅ Completed - Enhanced dev.sh with comprehensive testing, demo mode, and process management including individual test suite options, fresh install state reset, background server management, and shellcheck compliance

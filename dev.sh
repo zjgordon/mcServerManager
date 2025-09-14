@@ -2,6 +2,7 @@
 
 # dev.sh - Development Environment Management Script
 # CARD-001: Create dev.sh development environment management script
+# CARD-041: Enhance dev.sh with comprehensive testing, demo mode, and process management
 
 set -e  # Exit on any error
 
@@ -16,6 +17,7 @@ NC='\033[0m' # No Color
 DEFAULT_PORT=5000
 VENV_DIR="venv"
 REQUIREMENTS_FILE="requirements.txt"
+PID_FILE=".dev_server.pid"
 
 # Function to print colored output
 print_info() {
@@ -37,7 +39,7 @@ print_error() {
 # Function to check if a port is in use
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+    if lsof -Pi :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
         return 0  # Port is in use
     else
         return 1  # Port is free
@@ -49,7 +51,7 @@ find_available_port() {
     local start_port=$1
     local port=$start_port
 
-    while check_port $port; do
+    while check_port "$port"; do
         port=$((port + 1))
         if [ $port -gt $((start_port + 100)) ]; then
             print_error "Could not find available port starting from $start_port"
@@ -57,7 +59,7 @@ find_available_port() {
         fi
     done
 
-    echo $port
+    echo "$port"
 }
 
 # Function to setup virtual environment
@@ -125,9 +127,9 @@ handle_port_conflicts() {
 
     print_info "Checking for port conflicts on port $requested_port..."
 
-    if check_port $requested_port; then
+    if check_port "$requested_port"; then
         print_warning "Port $requested_port is already in use"
-        flask_port=$(find_available_port $requested_port)
+        flask_port=$(find_available_port "$requested_port")
         print_info "Using alternative port: $flask_port"
     else
         print_success "Port $requested_port is available"
@@ -139,29 +141,139 @@ handle_port_conflicts() {
 
 # Function to show usage
 show_usage() {
-    echo "Usage: $0 [OPTIONS] [COMMAND]"
+    echo "Usage: $0 [OPTIONS] [COMMAND] [COMMAND_OPTIONS]"
     echo ""
-    echo "Options:"
+    echo "OPTIONS:"
     echo "  -p, --port PORT     Specify port to run on (default: 5000)"
     echo "  -d, --debug         Run in debug mode (default)"
     echo "  -t, --test          Run in test mode"
+    echo "  --demo              Reset app to fresh install state for testing"
+    echo "  --background        Start server in background mode"
+    echo "  --kill              Kill running server instances"
     echo "  -h, --help          Show this help message"
     echo ""
-    echo "Commands:"
+    echo "COMMANDS:"
     echo "  run                 Run the Flask application (default)"
-    echo "  test                Run tests"
+    echo "  test                Run tests (with optional test suite selection)"
     echo "  setup               Setup development environment only"
     echo ""
-    echo "Examples:"
-    echo "  $0                  # Run with default settings"
-    echo "  $0 -p 5001         # Run on port 5001"
-    echo "  $0 test            # Run tests"
-    echo "  $0 setup           # Setup environment without running"
+    echo "TEST OPTIONS (use with 'test' command):"
+    echo "  --unit              Run only unit tests (tests/unit/)"
+    echo "  --integration       Run only integration tests (tests/integration/)"
+    echo "  --e2e               Run only end-to-end tests (tests/e2e/)"
+    echo "  --performance       Run only performance tests (tests/performance/)"
+    echo ""
+    echo "EXAMPLES:"
+    echo "  $0                                    # Run with default settings"
+    echo "  $0 -p 5001                           # Run on port 5001"
+    echo "  $0 --demo                            # Reset to fresh install state"
+    echo "  $0 --background                      # Start server in background"
+    echo "  $0 --kill                            # Kill running server"
+    echo "  $0 test                              # Run all tests"
+    echo "  $0 test --unit                       # Run only unit tests"
+    echo "  $0 test --integration                # Run only integration tests"
+    echo "  $0 test --e2e                        # Run only e2e tests"
+    echo "  $0 test --performance                # Run only performance tests"
+    echo "  $0 setup                             # Setup environment without running"
+    echo ""
+    echo "PROCESS MANAGEMENT:"
+    echo "  The script prevents multiple instances from running simultaneously"
+    echo "  Use --background to run server in background, --kill to stop it"
+    echo "  Background processes are tracked via PID file: $PID_FILE"
 }
 
-# Function to run tests
+# Function to check if server is already running
+check_running_server() {
+    if [ -f "$PID_FILE" ]; then
+        local pid
+        pid=$(cat "$PID_FILE")
+        if kill -0 "$pid" 2>/dev/null; then
+            return 0  # Server is running
+        else
+            # PID file exists but process is dead
+            rm -f "$PID_FILE"
+            return 1
+        fi
+    fi
+    return 1  # No server running
+}
+
+# Function to kill running server instances
+kill_server() {
+    print_info "Checking for running server instances..."
+
+    if check_running_server; then
+        local pid
+        pid=$(cat "$PID_FILE")
+        print_info "Killing server process (PID: $pid)..."
+        kill "$pid" 2>/dev/null || true
+        rm -f "$PID_FILE"
+        print_success "Server process killed"
+    else
+        print_info "No running server instances found"
+    fi
+}
+
+# Function to setup demo mode
+setup_demo_mode() {
+    print_info "Setting up demo mode - resetting app to fresh install state..."
+
+    # Clear database
+    if [ -f "instance/minecraft_manager.db" ]; then
+        print_info "Clearing existing database..."
+        rm -f "instance/minecraft_manager.db"
+        print_success "Database cleared"
+    fi
+
+    if [ -f "instance/dev_minecraft_manager.db" ]; then
+        print_info "Clearing development database..."
+        rm -f "instance/dev_minecraft_manager.db"
+        print_success "Development database cleared"
+    fi
+
+    # Reset configuration
+    print_info "Resetting configuration..."
+    export FLASK_ENV="development"
+    export FLASK_DEBUG="1"
+
+    print_success "Demo mode setup complete - app is ready for fresh install testing"
+}
+
+# Function to run tests with enhanced options
 run_tests() {
-    print_info "Running tests..."
+    local test_type="all"
+    local test_path="tests/"
+
+    # Parse test arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --unit)
+                test_type="unit"
+                test_path="tests/unit/"
+                shift
+                ;;
+            --integration)
+                test_type="integration"
+                test_path="tests/integration/"
+                shift
+                ;;
+            --e2e)
+                test_type="e2e"
+                test_path="tests/e2e/"
+                shift
+                ;;
+            --performance)
+                test_type="performance"
+                test_path="tests/performance/"
+                shift
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    print_info "Running $test_type tests..."
 
     # Check if pytest is available
     if ! command -v pytest &> /dev/null; then
@@ -169,9 +281,19 @@ run_tests() {
         pip install pytest >/dev/null 2>&1
     fi
 
+    # Check if test directory exists
+    if [ ! -d "$test_path" ]; then
+        print_warning "Test directory $test_path not found"
+        if [ "$test_type" != "all" ]; then
+            print_info "Falling back to all tests..."
+            test_path="tests/"
+        fi
+    fi
+
     # Run tests
-    if [ -d "tests" ]; then
-        pytest tests/ -v
+    if [ -d "$test_path" ]; then
+        print_info "Running tests from: $test_path"
+        pytest "$test_path" -v
         print_success "Tests completed"
     else
         print_warning "No tests directory found"
@@ -180,21 +302,48 @@ run_tests() {
 
 # Function to run the application
 run_app() {
+    local background_mode=false
+
+    # Check for background mode flag
+    if [[ "$*" == *"--background"* ]]; then
+        background_mode=true
+    fi
+
+    # Check if server is already running
+    if check_running_server; then
+        print_error "Server is already running (PID: $(cat "$PID_FILE"))"
+        print_info "Use --kill to stop the running server first"
+        exit 1
+    fi
+
     print_info "Starting Flask application..."
     print_info "Environment: $FLASK_ENV"
     print_info "Debug mode: $FLASK_DEBUG"
     print_info "Port: $FLASK_PORT"
     print_info "App: $FLASK_APP"
-    echo ""
 
-    # Run the Flask application
-    python "$FLASK_APP"
+    if [ "$background_mode" = true ]; then
+        print_info "Starting server in background mode..."
+        python "$FLASK_APP" &
+        local server_pid=$!
+        echo "$server_pid" > "$PID_FILE"
+        print_success "Server started in background (PID: $server_pid)"
+        print_info "Use --kill to stop the server"
+        print_info "Server logs: tail -f app.log"
+    else
+        echo ""
+        # Run the Flask application in foreground
+        python "$FLASK_APP"
+    fi
 }
 
 # Main function
 main() {
     local port=$DEFAULT_PORT
     local command="run"
+    local demo_mode=false
+    local background_mode=false
+    local kill_mode=false
 
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -213,12 +362,37 @@ main() {
                 export FLASK_DEBUG="0"
                 shift
                 ;;
+            --demo)
+                demo_mode=true
+                shift
+                ;;
+            --background)
+                background_mode=true
+                shift
+                ;;
+            --kill)
+                kill_mode=true
+                shift
+                ;;
             -h|--help)
                 show_usage
                 exit 0
                 ;;
             run|test|setup)
                 command="$1"
+                shift
+                # For test command, continue parsing test-specific options
+                if [ "$command" = "test" ]; then
+                    continue
+                fi
+                ;;
+            --unit|--integration|--e2e|--performance)
+                # These are test-specific options, only valid after 'test' command
+                if [ "$command" != "test" ]; then
+                    print_error "Option $1 is only valid with 'test' command"
+                    show_usage
+                    exit 1
+                fi
                 shift
                 ;;
             *)
@@ -232,11 +406,22 @@ main() {
     print_info "Minecraft Server Manager - Development Environment"
     print_info "=================================================="
 
+    # Handle special modes first
+    if [ "$kill_mode" = true ]; then
+        kill_server
+        exit 0
+    fi
+
+    if [ "$demo_mode" = true ]; then
+        setup_demo_mode
+        # Continue with normal setup after demo mode
+    fi
+
     # Setup virtual environment
     setup_venv
 
     # Handle port conflicts
-    handle_port_conflicts $port
+    handle_port_conflicts "$port"
 
     # Setup environment variables
     setup_env_vars
@@ -244,10 +429,15 @@ main() {
     # Execute command
     case $command in
         run)
-            run_app
+            if [ "$background_mode" = true ]; then
+                run_app --background
+            else
+                run_app
+            fi
             ;;
         test)
-            run_tests
+            # Pass all remaining arguments to run_tests
+            run_tests "$@"
             ;;
         setup)
             print_success "Development environment setup complete"

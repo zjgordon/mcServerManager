@@ -1255,3 +1255,21 @@ integration, and monitoring & alerting. Enhanced "Managing Servers" section
 with detailed backup management capabilities. All documentation includes
 examples, screenshots references, troubleshooting guides, and comprehensive
 coverage of all backup system functionality.
+
+## 2025-01-14 - CARD-041: Enhance dev.sh with comprehensive testing, demo mode, and process management
+
+**Epic:** Epic 2 – Development Environment & Tooling  
+**Status:** Completed  
+**Owner:** cursor  
+
+Successfully enhanced dev.sh development environment management script with
+comprehensive testing capabilities, demo mode functionality, and process
+management features. Implemented individual test suite management with options
+for unit, integration, e2e, and performance tests. Added --demo flag for
+resetting app to fresh install state for testing admin user creation flow.
+Enhanced process management with --background flag for starting server in
+background and --kill flag for terminating running instances. Improved
+comprehensive help documentation with accurate examples and command structure.
+Ensured shellcheck compliance with proper variable quoting and error handling.
+All current functionality preserved while adding new capabilities for enhanced
+development workflow and testing scenarios.
