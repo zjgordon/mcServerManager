@@ -9,9 +9,12 @@ This module provides comprehensive backup scheduling capabilities including:
 - Backup execution with verification and compression
 """
 
+import base64
+import bz2
 import gzip
 import hashlib
 import logging
+import lzma
 import os
 import shutil
 import subprocess
@@ -26,6 +29,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from flask import current_app
 
 from .extensions import db
@@ -41,6 +47,12 @@ class BackupScheduler:
         self.scheduler = None
         self.logger = StructuredLogger("backup_scheduler")
         self.app = app
+
+        # Compression and encryption settings
+        self.compression_method = "gzip"  # gzip, bzip2, lzma, none
+        self.encryption_enabled = False
+        self.encryption_key = None
+        self.encryption_password = None
 
         if app is not None:
             self.init_app(app)
@@ -602,7 +614,8 @@ class BackupScheduler:
 
         # Generate backup filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_filename = f"{server.server_name}_backup_{timestamp}.tar.gz"
+        extension = self._get_backup_extension()
+        backup_filename = f"{server.server_name}_backup_{timestamp}{extension}"
         backup_filepath = os.path.join(backup_dir, backup_filename)
 
         was_running = False
@@ -613,13 +626,19 @@ class BackupScheduler:
             # Step 1: Stop server if running
             was_running = self._stop_server_for_backup(server)
 
-            # Step 2: Create backup archive with retry logic
+            # Step 2: Create backup archive with retry logic and performance tracking
             backup_created = False
             last_error = None
+            compression_start_time = 0
+            compression_duration = 0
+            encryption_duration = 0
 
             for attempt in range(max_retries):
                 try:
+                    # Track compression performance
+                    compression_start_time = time.time()
                     if self._create_backup_archive(server_dir, backup_filepath):
+                        compression_duration = time.time() - compression_start_time
                         backup_created = True
                         break
                 except Exception as e:
@@ -684,6 +703,10 @@ class BackupScheduler:
                 "quality_level": verification_result.get("quality_score", {}).get(
                     "quality_level", "Unknown"
                 ),
+                "compression_method": self.compression_method,
+                "encryption_enabled": self.encryption_enabled,
+                "compression_duration": compression_duration,
+                "encryption_duration": encryption_duration,
             }
 
         except Exception as e:
@@ -746,15 +769,225 @@ class BackupScheduler:
             )
             raise
 
+    def configure_compression(self, method: str) -> bool:
+        """
+        Configure compression method for backups.
+
+        Args:
+            method: Compression method ('gzip', 'bzip2', 'lzma', 'none')
+
+        Returns:
+            bool: True if configuration successful, False otherwise
+        """
+        valid_methods = ["gzip", "bzip2", "lzma", "none"]
+        if method not in valid_methods:
+            self.logger.error(
+                f"Invalid compression method: {method}",
+                {"event_type": "config_error", "method": method, "valid_methods": valid_methods},
+            )
+            return False
+
+        self.compression_method = method
+        self.logger.info(
+            f"Compression method set to: {method}",
+            {"event_type": "compression_configured", "method": method},
+        )
+        return True
+
+    def configure_encryption(self, enabled: bool, password: str = None, key: str = None) -> bool:
+        """
+        Configure encryption for backups.
+
+        Args:
+            enabled: Whether to enable encryption
+            password: Password for key derivation (optional if key provided)
+            key: Pre-generated encryption key (optional if password provided)
+
+        Returns:
+            bool: True if configuration successful, False otherwise
+        """
+        if not enabled:
+            self.encryption_enabled = False
+            self.encryption_key = None
+            self.encryption_password = None
+            self.logger.info("Encryption disabled", {"event_type": "encryption_configured"})
+            return True
+
+        if not password and not key:
+            self.logger.error(
+                "Either password or key must be provided for encryption",
+                {"event_type": "config_error", "error": "missing_credentials"},
+            )
+            return False
+
+        try:
+            if key:
+                # Use provided key
+                self.encryption_key = key.encode() if isinstance(key, str) else key
+            else:
+                # Derive key from password
+                self.encryption_key = self._derive_key_from_password(password)
+
+            self.encryption_enabled = True
+            self.encryption_password = password
+
+            self.logger.info(
+                "Encryption configured successfully",
+                {"event_type": "encryption_configured", "key_provided": bool(key)},
+            )
+            return True
+
+        except Exception as e:
+            self.logger.error(
+                f"Failed to configure encryption: {str(e)}",
+                {"event_type": "config_error", "error": str(e)},
+            )
+            return False
+
+    def _derive_key_from_password(self, password: str) -> bytes:
+        """Derive encryption key from password using PBKDF2."""
+        salt = b"mcservermanager_backup_salt"  # In production, use random salt
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        return key
+
+    def _compress_data(self, data: bytes, method: str) -> bytes:
+        """
+        Compress data using specified method.
+
+        Args:
+            data: Data to compress
+            method: Compression method ('gzip', 'bzip2', 'lzma', 'none')
+
+        Returns:
+            bytes: Compressed data
+        """
+        if method == "none":
+            return data
+        elif method == "gzip":
+            return gzip.compress(data, compresslevel=6)
+        elif method == "bzip2":
+            return bz2.compress(data, compresslevel=6)
+        elif method == "lzma":
+            return lzma.compress(data, preset=6)
+        else:
+            raise ValueError(f"Unsupported compression method: {method}")
+
+    def _decompress_data(self, data: bytes, method: str) -> bytes:
+        """
+        Decompress data using specified method.
+
+        Args:
+            data: Compressed data
+            method: Compression method ('gzip', 'bzip2', 'lzma', 'none')
+
+        Returns:
+            bytes: Decompressed data
+        """
+        if method == "none":
+            return data
+        elif method == "gzip":
+            return gzip.decompress(data)
+        elif method == "bzip2":
+            return bz2.decompress(data)
+        elif method == "lzma":
+            return lzma.decompress(data)
+        else:
+            raise ValueError(f"Unsupported compression method: {method}")
+
+    def _encrypt_data(self, data: bytes) -> bytes:
+        """
+        Encrypt data using configured encryption key.
+
+        Args:
+            data: Data to encrypt
+
+        Returns:
+            bytes: Encrypted data
+        """
+        if not self.encryption_enabled or not self.encryption_key:
+            return data
+
+        fernet = Fernet(self.encryption_key)
+        return fernet.encrypt(data)
+
+    def _decrypt_data(self, data: bytes) -> bytes:
+        """
+        Decrypt data using configured encryption key.
+
+        Args:
+            data: Encrypted data
+
+        Returns:
+            bytes: Decrypted data
+        """
+        if not self.encryption_enabled or not self.encryption_key:
+            return data
+
+        fernet = Fernet(self.encryption_key)
+        return fernet.decrypt(data)
+
+    def _get_backup_extension(self) -> str:
+        """Get file extension based on compression method."""
+        if self.compression_method == "gzip":
+            return ".tar.gz"
+        elif self.compression_method == "bzip2":
+            return ".tar.bz2"
+        elif self.compression_method == "lzma":
+            return ".tar.xz"
+        else:
+            return ".tar"
+
     def _create_backup_archive(self, server_dir: str, backup_filepath: str) -> bool:
-        """Create compressed backup archive."""
+        """Create compressed and optionally encrypted backup archive."""
         if not os.path.exists(server_dir):
             raise FileNotFoundError(f"Server directory not found: {server_dir}")
 
         try:
-            # Create tar.gz archive
-            with tarfile.open(backup_filepath, "w:gz", compresslevel=6) as tar:
+            # Create tar archive first
+            temp_tar_path = backup_filepath + ".temp"
+
+            # Determine tar mode based on compression
+            if self.compression_method == "gzip":
+                tar_mode = "w:gz"
+            elif self.compression_method == "bzip2":
+                tar_mode = "w:bz2"
+            elif self.compression_method == "lzma":
+                tar_mode = "w:xz"
+            else:
+                tar_mode = "w"
+
+            # Create tar archive
+            with tarfile.open(temp_tar_path, tar_mode) as tar:
                 tar.add(server_dir, arcname=os.path.basename(server_dir), recursive=True)
+
+            # Read the tar file
+            with open(temp_tar_path, "rb") as f:
+                tar_data = f.read()
+
+            # Apply compression if not handled by tar
+            if self.compression_method != "none" and tar_mode == "w":
+                compressed_data = self._compress_data(tar_data, self.compression_method)
+            else:
+                compressed_data = tar_data
+
+            # Apply encryption if enabled
+            if self.encryption_enabled:
+                encrypted_data = self._encrypt_data(compressed_data)
+            else:
+                encrypted_data = compressed_data
+
+            # Write final backup file
+            with open(backup_filepath, "wb") as f:
+                f.write(encrypted_data)
+
+            # Clean up temp file
+            os.remove(temp_tar_path)
 
             # Verify archive was created and has content
             if not os.path.exists(backup_filepath) or os.path.getsize(backup_filepath) == 0:
@@ -763,10 +996,13 @@ class BackupScheduler:
             return True
 
         except Exception:
-            # Clean up failed backup file
+            # Clean up failed backup files
             try:
                 if os.path.exists(backup_filepath):
                     os.remove(backup_filepath)
+                temp_tar_path = backup_filepath + ".temp"
+                if os.path.exists(temp_tar_path):
+                    os.remove(temp_tar_path)
             except OSError:
                 pass
             raise
@@ -1457,6 +1693,169 @@ class BackupScheduler:
                 "repair_successful": False,
                 "errors": [f"Repair attempt failed: {str(e)}"],
             }
+
+    def restore_backup(
+        self, backup_filepath: str, restore_dir: str, password: str = None, key: str = None
+    ) -> Dict[str, Any]:
+        """
+        Restore a backup by decrypting and decompressing it.
+
+        Args:
+            backup_filepath: Path to the backup file to restore
+            restore_dir: Directory to restore the backup to
+            password: Password for decryption (if encrypted with password)
+            key: Encryption key for decryption (if encrypted with key)
+
+        Returns:
+            Dict containing restore results
+        """
+        try:
+            self.logger.info(
+                f"Starting backup restore from {backup_filepath}",
+                {
+                    "event_type": "backup_restore_started",
+                    "backup_file": backup_filepath,
+                    "restore_dir": restore_dir,
+                },
+            )
+
+            if not os.path.exists(backup_filepath):
+                return {"success": False, "error": "Backup file not found"}
+
+            # Process backup file (decrypt and decompress)
+            processed_data = self._process_backup_for_restore(backup_filepath, password, key)
+            if not processed_data["success"]:
+                return processed_data
+
+            # Extract tar archive
+            return self._extract_backup_archive(
+                processed_data["data"], restore_dir, backup_filepath
+            )
+
+        except Exception as e:
+            self.logger.error_tracking(
+                e,
+                {
+                    "event_type": "backup_restore_error",
+                    "backup_file": backup_filepath,
+                    "restore_dir": restore_dir,
+                    "action": "restore_backup",
+                },
+            )
+            return {"success": False, "error": f"Restore failed: {str(e)}"}
+
+    def _process_backup_for_restore(
+        self, backup_filepath: str, password: str = None, key: str = None
+    ) -> Dict[str, Any]:
+        """Process backup file for restoration (decrypt and decompress)."""
+        try:
+            # Read backup file
+            with open(backup_filepath, "rb") as f:
+                backup_data = f.read()
+
+            # Decrypt if needed
+            decrypted_data = self._decrypt_backup_data(backup_data, password, key)
+            if not decrypted_data["success"]:
+                return decrypted_data
+
+            # Decompress if needed
+            decompressed_data = self._decompress_backup_data(
+                decrypted_data["data"], backup_filepath
+            )
+            if not decompressed_data["success"]:
+                return decompressed_data
+
+            return {"success": True, "data": decompressed_data["data"]}
+
+        except Exception as e:
+            return {"success": False, "error": f"Backup processing failed: {str(e)}"}
+
+    def _decrypt_backup_data(
+        self, backup_data: bytes, password: str = None, key: str = None
+    ) -> Dict[str, Any]:
+        """Decrypt backup data if encryption is enabled."""
+        if not (self.encryption_enabled or password or key):
+            return {"success": True, "data": backup_data}
+
+        try:
+            if key:
+                temp_key = key.encode() if isinstance(key, str) else key
+            elif password:
+                temp_key = self._derive_key_from_password(password)
+            else:
+                temp_key = self.encryption_key
+
+            fernet = Fernet(temp_key)
+            decrypted_data = fernet.decrypt(backup_data)
+            return {"success": True, "data": decrypted_data}
+        except Exception as e:
+            return {"success": False, "error": f"Decryption failed: {str(e)}"}
+
+    def _decompress_backup_data(self, data: bytes, backup_filepath: str) -> Dict[str, Any]:
+        """Decompress backup data based on file extension."""
+        try:
+            if backup_filepath.endswith(".gz"):
+                decompressed_data = self._decompress_data(data, "gzip")
+            elif backup_filepath.endswith(".bz2"):
+                decompressed_data = self._decompress_data(data, "bzip2")
+            elif backup_filepath.endswith(".xz"):
+                decompressed_data = self._decompress_data(data, "lzma")
+            else:
+                decompressed_data = data
+            return {"success": True, "data": decompressed_data}
+        except Exception as e:
+            return {"success": False, "error": f"Decompression failed: {str(e)}"}
+
+    def _extract_backup_archive(
+        self, data: bytes, restore_dir: str, backup_filepath: str
+    ) -> Dict[str, Any]:
+        """Extract tar archive to restore directory."""
+        try:
+            os.makedirs(restore_dir, exist_ok=True)
+
+            # Write data to temp file
+            temp_tar_path = os.path.join(restore_dir, "temp_restore.tar")
+            with open(temp_tar_path, "wb") as f:
+                f.write(data)
+
+            # Extract tar archive
+            with tarfile.open(temp_tar_path, "r") as tar:
+                tar.extractall(restore_dir)
+
+            # Clean up temp file
+            os.remove(temp_tar_path)
+
+            self.logger.info(
+                f"Backup restore completed successfully to {restore_dir}",
+                {
+                    "event_type": "backup_restore_completed",
+                    "backup_file": backup_filepath,
+                    "restore_dir": restore_dir,
+                },
+            )
+
+            return {
+                "success": True,
+                "restore_dir": restore_dir,
+                "message": "Backup restored successfully",
+            }
+
+        except Exception as e:
+            return {"success": False, "error": f"Archive extraction failed: {str(e)}"}
+
+    def get_compression_info(self) -> Dict[str, Any]:
+        """Get current compression configuration information."""
+        return {
+            "compression_method": self.compression_method,
+            "encryption_enabled": self.encryption_enabled,
+            "supported_compression_methods": ["gzip", "bzip2", "lzma", "none"],
+            "compression_extension": self._get_backup_extension(),
+        }
+
+    def generate_encryption_key(self) -> str:
+        """Generate a new encryption key for backup encryption."""
+        key = Fernet.generate_key()
+        return key.decode()
 
 
 # Global scheduler instance
