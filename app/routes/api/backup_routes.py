@@ -14,7 +14,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
 from ...backup_scheduler import backup_scheduler
-from ...extensions import db
+from ...extensions import csrf, db
 from ...models import BackupSchedule, Server
 from ...security import audit_log, rate_limit
 
@@ -148,8 +148,9 @@ def validate_schedule_data(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @backup_api_bp.route("/schedules", methods=["GET"])
+@csrf.exempt
 @user_or_admin_required_api
-@rate_limit(max_attempts=10, window_seconds=60)
+@rate_limit(max_attempts=30, window_seconds=60)
 def list_schedules():
     """
     List all backup schedules.
@@ -215,8 +216,9 @@ def list_schedules():
 
 
 @backup_api_bp.route("/schedules", methods=["POST"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=5, window_seconds=300)
+@rate_limit(max_attempts=20, window_seconds=300)
 def create_schedule():
     """
     Create a new backup schedule.
@@ -316,8 +318,9 @@ def create_schedule():
 
 
 @backup_api_bp.route("/schedules/<int:server_id>", methods=["GET"])
+@csrf.exempt
 @admin_required_api
-@rate_limit(max_attempts=10, window_seconds=60)
+@rate_limit(max_attempts=30, window_seconds=60)
 def get_schedule(server_id):
     """
     Get backup schedule for a specific server.
@@ -373,8 +376,9 @@ def get_schedule(server_id):
 
 
 @backup_api_bp.route("/schedules/<int:server_id>", methods=["PUT"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=5, window_seconds=300)
+@rate_limit(max_attempts=20, window_seconds=300)
 def update_schedule(server_id):
     """
     Update backup schedule for a specific server.
@@ -468,8 +472,9 @@ def update_schedule(server_id):
 
 
 @backup_api_bp.route("/schedules/<int:server_id>", methods=["DELETE"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=5, window_seconds=300)
+@rate_limit(max_attempts=20, window_seconds=300)
 def delete_schedule(server_id):
     """
     Delete backup schedule for a specific server.
@@ -527,8 +532,9 @@ def delete_schedule(server_id):
 
 
 @backup_api_bp.route("/<int:server_id>/trigger", methods=["POST"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=3, window_seconds=600)  # 3 attempts per 10 minutes
+@rate_limit(max_attempts=10, window_seconds=600)  # 10 attempts per 10 minutes
 def trigger_backup(server_id):
     """
     Trigger a manual backup for a specific server.
@@ -642,8 +648,9 @@ def trigger_backup(server_id):
 
 
 @backup_api_bp.route("/<int:server_id>/history", methods=["GET"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=10, window_seconds=60)
+@rate_limit(max_attempts=30, window_seconds=60)
 def get_backup_history(server_id):
     """
     Get backup history for a specific server.
@@ -715,8 +722,9 @@ def get_backup_history(server_id):
 
 
 @backup_api_bp.route("/<int:server_id>/status", methods=["GET"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=10, window_seconds=60)
+@rate_limit(max_attempts=30, window_seconds=60)
 def get_backup_status(server_id):
     """
     Get backup status for a specific server.
@@ -773,8 +781,9 @@ def get_backup_status(server_id):
 
 
 @backup_api_bp.route("/<int:server_id>/available", methods=["GET"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=10, window_seconds=60)
+@rate_limit(max_attempts=30, window_seconds=60)
 def list_available_backups(server_id):
     """
     List available backups for a specific server.
@@ -848,8 +857,9 @@ def list_available_backups(server_id):
 
 
 @backup_api_bp.route("/<int:server_id>/restore", methods=["POST"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=3, window_seconds=600)  # 3 attempts per 10 minutes
+@rate_limit(max_attempts=10, window_seconds=600)  # 10 attempts per 10 minutes
 def trigger_restore(server_id):
     """
     Trigger a restore operation for a specific server.
@@ -964,8 +974,9 @@ def trigger_restore(server_id):
 
 
 @backup_api_bp.route("/restores/<int:restore_id>/status", methods=["GET"])
+@csrf.exempt
 @login_required
-@rate_limit(max_attempts=10, window_seconds=60)
+@rate_limit(max_attempts=30, window_seconds=60)
 def get_restore_status(restore_id):
     """
     Get restore operation status.
@@ -1003,6 +1014,7 @@ def get_restore_status(restore_id):
 
 
 @backup_api_bp.route("/restores/<int:restore_id>/rollback", methods=["POST"])
+@csrf.exempt
 @login_required
 @rate_limit(max_attempts=3, window_seconds=600)
 def rollback_restore(restore_id):

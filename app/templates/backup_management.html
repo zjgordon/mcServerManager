@@ -3,6 +3,8 @@
 {% block title %}Backup Management - {{ app_title }}{% endblock %}
 
 {% block content %}
+<!-- CSRF Token for JavaScript API calls -->
+<input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
 <div class="backup-management-container">
     <!-- Page Header -->
     <div class="page-header">

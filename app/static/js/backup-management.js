@@ -10,10 +10,17 @@ class BackupManager {
         this.currentServerId = null;
         this.currentServerName = null;
         this.updateInterval = null;
+        this.csrfToken = null;
         this.init();
     }
 
     init() {
+        // Get CSRF token
+        const csrfTokenElement = document.getElementById('csrf-token');
+        if (csrfTokenElement) {
+            this.csrfToken = csrfTokenElement.value;
+        }
+
         this.bindEvents();
         this.setupRealTimeUpdates();
 
@@ -83,6 +90,29 @@ class BackupManager {
         }, 30000);
     }
 
+    // Helper method to create fetch requests with proper headers
+    createFetchRequest(url, options = {}) {
+        const defaultOptions = {
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': this.csrfToken
+            }
+        };
+
+        // Merge with provided options
+        const mergedOptions = {
+            ...defaultOptions,
+            ...options,
+            headers: {
+                ...defaultOptions.headers,
+                ...options.headers
+            }
+        };
+
+        return fetch(url, mergedOptions);
+    }
+
     loadServerBackupData() {
         const serverSelect = document.getElementById('serverSelect');
         const selectedOption = serverSelect.options[serverSelect.selectedIndex];
@@ -110,7 +140,7 @@ class BackupManager {
 
     async loadScheduleStatus() {
         try {
-            const response = await fetch(`/api/backups/schedules/${this.currentServerId}`);
+            const response = await this.createFetchRequest(`/api/backups/schedules/${this.currentServerId}`);
 
             // Check if response is JSON before parsing
             const contentType = response.headers.get('content-type');
@@ -144,7 +174,7 @@ class BackupManager {
 
     async updateScheduleStatus() {
         try {
-            const response = await fetch(`/api/backups/${this.currentServerId}/status`);
+            const response = await this.createFetchRequest(`/api/backups/${this.currentServerId}/status`);
 
             // Check if response is JSON before parsing
             const contentType = response.headers.get('content-type');
@@ -216,7 +246,7 @@ class BackupManager {
             this.showLoadingOverlay();
 
             // Check if schedule exists
-            const checkResponse = await fetch(`/api/backups/schedules/${this.currentServerId}`);
+            const checkResponse = await this.createFetchRequest(`/api/backups/schedules/${this.currentServerId}`);
 
             // Check if check response is JSON before parsing
             const checkContentType = checkResponse.headers.get('content-type');
@@ -234,20 +264,14 @@ class BackupManager {
             let response;
             if (checkData.success) {
                 // Update existing schedule
-                response = await fetch(`/api/backups/schedules/${this.currentServerId}`, {
+                response = await this.createFetchRequest(`/api/backups/schedules/${this.currentServerId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify(formData)
                 });
             } else {
                 // Create new schedule
-                response = await fetch('/api/backups/schedules', {
+                response = await this.createFetchRequest('/api/backups/schedules', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify(formData)
                 });
             }
@@ -290,7 +314,7 @@ class BackupManager {
         try {
             this.showLoadingOverlay();
 
-            const response = await fetch(`/api/backups/schedules/${this.currentServerId}`, {
+            const response = await this.createFetchRequest(`/api/backups/schedules/${this.currentServerId}`, {
                 method: 'DELETE'
             });
 
@@ -327,7 +351,7 @@ class BackupManager {
             this.showLoadingOverlay();
             this.showBackupProgress();
 
-            const response = await fetch(`/api/backups/${this.currentServerId}/trigger`, {
+            const response = await this.createFetchRequest(`/api/backups/${this.currentServerId}/trigger`, {
                 method: 'POST'
             });
 
@@ -362,7 +386,7 @@ class BackupManager {
 
     async loadBackupHistory() {
         try {
-            const response = await fetch(`/api/backups/${this.currentServerId}/history`);
+            const response = await this.createFetchRequest(`/api/backups/${this.currentServerId}/history`);
 
             // Check if response is JSON before parsing
             const contentType = response.headers.get('content-type');
@@ -429,7 +453,7 @@ class BackupManager {
 
     async loadAvailableBackups() {
         try {
-            const response = await fetch(`/api/backups/${this.currentServerId}/available`);
+            const response = await this.createFetchRequest(`/api/backups/${this.currentServerId}/available`);
 
             // Check if response is JSON before parsing
             const contentType = response.headers.get('content-type');
@@ -486,11 +510,8 @@ class BackupManager {
         try {
             this.showLoadingOverlay();
 
-            const response = await fetch(`/api/backups/${this.currentServerId}/restore`, {
+            const response = await this.createFetchRequest(`/api/backups/${this.currentServerId}/restore`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     backup_filename: backupFilename,
                     confirm: false
@@ -574,11 +595,8 @@ class BackupManager {
             this.showLoadingOverlay();
             this.showRestoreProgress();
 
-            const response = await fetch(`/api/backups/${this.currentServerId}/restore`, {
+            const response = await this.createFetchRequest(`/api/backups/${this.currentServerId}/restore`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     backup_filename: backupFilename,
                     confirm: true
@@ -742,3 +760,10 @@ let backupManager;
 document.addEventListener('DOMContentLoaded', () => {
     backupManager = new BackupManager();
 });
+
+// Make loadServerBackupData globally accessible for HTML onclick
+function loadServerBackupData() {
+    if (backupManager) {
+        backupManager.loadServerBackupData();
+    }
+}
