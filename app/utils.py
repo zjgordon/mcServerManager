@@ -1214,6 +1214,71 @@ def verify_backup_restore(backup_filepath, test_extract_dir=None):
         }
 
 
+def get_system_memory_for_admin():
+    """
+    Get system memory data specifically formatted for admin configuration page.
+
+    This function extracts and formats system memory data from the existing
+    get_system_metrics() function and returns a dictionary with total system
+    memory, used memory, available memory, and percentages formatted for
+    display in the memory bar gauge.
+
+    Returns:
+        dict: Formatted memory data for admin configuration display
+    """
+    try:
+        from .monitoring import get_system_metrics
+
+        # Get system metrics
+        metrics = get_system_metrics()
+
+        # Check if metrics collection was successful
+        if metrics.get("status") != "healthy":
+            logger.warning("System metrics collection failed, using fallback values")
+            return {
+                "total_memory_gb": 8.0,
+                "used_memory_gb": 4.0,
+                "available_memory_gb": 4.0,
+                "usage_percentage": 50.0,
+                "status": "unhealthy",
+                "error": metrics.get("message", "Unknown error"),
+            }
+
+        # Extract memory data from metrics
+        memory_data = metrics.get("memory", {})
+
+        # Convert bytes to GB for display
+        total_bytes = memory_data.get("total_bytes", 0)
+        used_bytes = memory_data.get("used_bytes", 0)
+        available_bytes = memory_data.get("available_bytes", 0)
+        usage_percent = memory_data.get("usage_percent", 0.0)
+
+        # Convert to GB (1 GB = 1024^3 bytes)
+        total_gb = round(total_bytes / (1024**3), 2)
+        used_gb = round(used_bytes / (1024**3), 2)
+        available_gb = round(available_bytes / (1024**3), 2)
+
+        return {
+            "total_memory_gb": total_gb,
+            "used_memory_gb": used_gb,
+            "available_memory_gb": available_gb,
+            "usage_percentage": round(usage_percent, 1),
+            "status": "healthy",
+            "error": None,
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting system memory for admin: {str(e)}")
+        return {
+            "total_memory_gb": 8.0,
+            "used_memory_gb": 4.0,
+            "available_memory_gb": 4.0,
+            "usage_percentage": 50.0,
+            "status": "unhealthy",
+            "error": str(e),
+        }
+
+
 def generate_backup_quality_score(verification_results):
     """
     Generate a quality score for backup verification results.

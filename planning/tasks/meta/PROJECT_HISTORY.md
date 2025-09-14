@@ -1,5 +1,20 @@
 # Project History
 
+## 2025-01-14 - CARD-054: Add system memory utility function for admin configuration
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created get_system_memory_for_admin() function in app/utils.py that extracts
+and formats system memory data specifically for the admin configuration page.
+The function leverages the existing get_system_metrics() function from
+app/monitoring.py and returns a dictionary with total system memory, used
+memory, available memory, and percentages formatted for display in the memory
+bar gauge. Includes proper error handling with fallback values and converts
+memory data from bytes to GB for user-friendly display. The function provides
+real-time system memory information for admin configuration management.
+
 ## 2025-01-14 - CARD-052: Fix backup verification test failures and quality scoring
 
 **Epic:** Epic 2 – Test Suite Remediation  
