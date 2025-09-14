@@ -21,3 +21,4 @@ notes: |
   - Custom command input field
   Add JavaScript event handlers in server_management.js to execute these commands
   and display results in the console area.
+

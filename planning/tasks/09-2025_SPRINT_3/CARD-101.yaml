@@ -1,0 +1,53 @@
+id: CARD-101
+title: Update help documentation and examples for enhanced test functionality
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: The help documentation needs to be updated to reflect all the new individual test execution capabilities added in previous cards.
+  
+  **Solution**: Update show_usage() function with comprehensive documentation and examples for all new test features.
+  
+  **Implementation Details**:
+  1. Update show_usage() function with new test options
+  2. Add comprehensive examples for individual test execution
+  3. Document all new command combinations
+  4. Add troubleshooting section for common issues
+  5. Ensure help text is clear and actionable
+  
+  **New Help Sections to Add**:
+  - Individual Test Execution Options
+  - Pattern-based Test Filtering
+  - Test Discovery and Listing
+  - Advanced Pytest Options
+  - Comprehensive Examples Section
+  
+  **Updated Examples to Include**:
+  - `./dev.sh test --file tests/unit/test_server_management.py`
+  - `./dev.sh test --file test_server_management.py --class TestConsoleAPIEndpoints`
+  - `./dev.sh test --file test_server_management.py --class TestConsoleAPIEndpoints --function test_send_console_command_success`
+  - `./dev.sh test --pattern "authentication"`
+  - `./dev.sh test --list --unit`
+  - `./dev.sh test --pytest-args "-v --tb=short"`
+  
+  **Files to Modify**:
+  - dev.sh (show_usage() function)
+  - Ensure all new options are documented
+  - Add troubleshooting tips
+  - Include common use cases and patterns
+  
+  **Documentation Requirements**:
+  - Clear explanation of each new option
+  - Practical examples for common scenarios
+  - Troubleshooting section for common issues
+  - Maintain existing help structure and formatting
+  - Ensure examples are copy-pasteable and work correctly

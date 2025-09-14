@@ -16,3 +16,4 @@ notes: |
   Update the admin_config() function in app/routes/auth_routes.py to handle the server_management_page 
   feature toggle. Use the existing toggle_experimental_feature() utility function. Ensure the form 
   processing includes the new feature checkbox and properly updates the database.
+

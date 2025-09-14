@@ -1,0 +1,40 @@
+id: CARD-088
+title: Fix feature flag management and NoneType errors
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Tests are failing with AttributeError: 'NoneType' object has no attribute 'enabled' when trying to access feature flags.
+  
+  **Root Cause**: Tests are querying for ExperimentalFeature objects that don't exist in the test database, resulting in None being returned instead of a feature object.
+  
+  **Affected Tests**:
+  - `test_console_api_feature_flag_integration` (line 640)
+  - `test_feature_flag_affects_all_console_endpoints` (line 640)
+  - `test_regular_user_cannot_toggle_feature_flag`
+  
+  **Actions Required**:
+  1. Ensure ExperimentalFeature test data is properly seeded in test database
+  2. Add proper feature flag creation in test fixtures
+  3. Update tests to handle cases where feature flags don't exist
+  4. Create helper functions for feature flag setup in tests
+  5. Verify feature flag queries are working correctly in test environment
+  
+  **Files to Examine**:
+  - tests/fixtures/ (feature flag fixtures)
+  - tests/integration/test_server_management.py (lines 620-640)
+  - app/models.py (ExperimentalFeature model)
+  - app/utils.py (is_feature_enabled function)
+  
+  **Test Data Requirements**:
+  - Create "server_management_page" feature flag in test fixtures
+  - Ensure feature flag is properly initialized in test database

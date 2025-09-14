@@ -18,3 +18,4 @@ notes: |
   Add: server_management_page with feature_key='server_management_page', feature_name='Server Management Page',
   description='Enhanced server management interface with real-time console and advanced controls',
   enabled=false, is_stable=false.
+

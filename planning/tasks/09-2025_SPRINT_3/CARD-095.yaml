@@ -1,0 +1,47 @@
+id: CARD-095
+title: Update test fixtures and improve test data management
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Test fixtures and data management need improvement to support all the fixes made in previous cards and ensure consistent test execution.
+  
+  **Root Cause**: As we fix individual test failures, we need to ensure that test fixtures provide consistent, reliable test data and proper setup/teardown.
+  
+  **Actions Required**:
+  1. Review and update all test fixtures to ensure consistency
+  2. Add proper ExperimentalFeature test data seeding
+  3. Improve mock configuration for process verification
+  4. Ensure proper test database setup and cleanup
+  5. Add helper functions for common test setup operations
+  6. Verify test isolation and independence
+  
+  **Files to Examine**:
+  - tests/conftest.py (main test configuration)
+  - tests/fixtures/ (all fixture files)
+  - tests/utils/test_helpers.py
+  - tests/utils/database_seeder.py
+  - tests/utils/test_cleanup.py
+  
+  **Fixture Improvements Needed**:
+  - Feature flag test data creation
+  - Process mocking improvements
+  - User authentication fixtures
+  - Server creation and management fixtures
+  - Database seeding and cleanup
+  - Mock object configuration standardization
+  
+  **Test Data Management**:
+  - Ensure consistent test data across all test files
+  - Proper setup and teardown for database state
+  - Reliable mock object configuration
+  - Test isolation to prevent cross-test contamination

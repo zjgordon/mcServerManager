@@ -135,14 +135,21 @@ class TestServerManagementRouteAccessControl:
     def test_validate_server_access_owner_user(self, app, regular_user, test_server):
         """Test regular user can access their own server."""
         with app.app_context():
-            # Set server owner to regular user
-            test_server.owner_id = regular_user.id
+            # Create a new server owned by the regular user
+            from tests.factories import ServerFactory
+
+            user_server = ServerFactory.create(
+                server_name="user_server",
+                owner_id=regular_user.id,
+            )
+            db.session.add(user_server)
             db.session.commit()
+            db.session.refresh(user_server)
 
             with patch("app.routes.api.console_routes.current_user", regular_user):
-                result = validate_server_access(test_server.id)
-                assert result.id == test_server.id
-                assert result.server_name == test_server.server_name
+                result = validate_server_access(user_server.id)
+                assert result.id == user_server.id
+                assert result.server_name == user_server.server_name
 
     def test_validate_server_access_non_owner_user(self, app, regular_user, test_server):
         """Test regular user cannot access server they don't own."""
@@ -462,9 +469,7 @@ class TestErrorHandlingScenarios:
         """Test console API returns 403 when feature flag is disabled."""
         with app.app_context():
             # Login as admin first
-            client.post(
-                "/auth/login", data={"username": admin_user.username, "password": "testpass"}
-            )
+            client.post("/login", data={"username": admin_user.username, "password": "adminpass"})
 
             # Ensure feature is disabled
             feature = ExperimentalFeature.query.filter_by(
@@ -524,7 +529,7 @@ class TestErrorHandlingScenarios:
 
             # Login as regular user
             response = client.post(
-                "/auth/login", data={"username": regular_user.username, "password": "testpass"}
+                "/login", data={"username": regular_user.username, "password": "userpass123"}
             )
             # Check if login was successful
             if response.status_code == 302:  # Redirect after successful login

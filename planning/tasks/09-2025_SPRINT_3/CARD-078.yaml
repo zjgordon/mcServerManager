@@ -19,3 +19,4 @@ notes: |
   - Return structured data with error handling for missing/corrupted logs
   - Support pagination for large log files
   - Include proper error handling and logging
+

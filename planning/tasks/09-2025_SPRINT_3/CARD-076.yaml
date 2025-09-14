@@ -17,3 +17,4 @@ notes: |
   button when server_management_page feature is enabled. Use is_feature_enabled('server_management_page') 
   check. Keep existing console button as fallback when feature is disabled. Update both table view 
   (line 230) and card view (line 341) console buttons.
+

@@ -17,3 +17,4 @@ notes: |
   from app/templates/admin_config.html lines 151-239. Replace with a single "Server Management Page" 
   feature card that is experimental and disabled by default. This prepares the system for the real 
   server management page feature flag.
+

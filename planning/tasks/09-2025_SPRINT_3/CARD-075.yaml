@@ -19,3 +19,4 @@ notes: |
   3) Real-Time Console (log display area, controls for refresh/clear/download)
   4) Server Commands (pre-defined command buttons, custom command input, command history)
   Use consistent styling with existing design system and ensure mobile responsiveness.
+

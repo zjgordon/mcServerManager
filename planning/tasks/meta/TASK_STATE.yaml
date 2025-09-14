@@ -1,8 +1,21 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-085 - Create integration tests for server management page'
-  last_commit: 'test: [CARD-085] Create comprehensive integration tests for server management page'
-  next_action: 'CARD-086 - Next card in queue'
+  step: 'CARD-087 - Completed authentication and authorization test fixes'
+  last_commit: 'fix: [CARD-087] Fix authentication and authorization test failures'
+  next_action: 'CARD-088 - Next card in queue'
 queue: 
-  - CARD-086
+  - CARD-088
+  - CARD-089
+  - CARD-090
+  - CARD-091
+  - CARD-092
+  - CARD-093
+  - CARD-094
+  - CARD-095
+  - CARD-096
+  - CARD-097
+  - CARD-098
+  - CARD-099
+  - CARD-100
+  - CARD-101
   

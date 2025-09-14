@@ -1,0 +1,43 @@
+id: CARD-092
+title: Fix console API endpoint functionality and response handling
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Console API endpoints are not functioning correctly in tests, with command execution and log retrieval failing unexpectedly.
+  
+  **Root Cause**: The console API endpoints may have issues with command execution logic, log file handling, or response formatting that are causing tests to fail.
+  
+  **Affected Tests**:
+  - `test_console_command_execution_integration` (expects 200, gets 400)
+  - `test_get_server_logs_file_not_found` (expects 0, gets 3)
+  - `test_send_console_command_success` (expects True, gets False)
+  - `test_execute_server_command_success` (expects True, gets False)
+  
+  **Actions Required**:
+  1. Review console API endpoint implementations in console_routes.py
+  2. Fix command execution logic to properly handle success cases
+  3. Ensure log file handling works correctly in test environment
+  4. Verify response formatting matches test expectations
+  5. Check that server status and process verification work correctly
+  
+  **Files to Examine**:
+  - app/routes/api/console_routes.py (all endpoint functions)
+  - tests/unit/test_server_management.py (console API tests)
+  - tests/integration/test_server_management.py (integration tests)
+  - app/utils.py (command execution functions)
+  
+  **Functionality Issues**:
+  - Command execution not returning success when expected
+  - Log file handling may have path or permission issues
+  - Server status verification may be failing
+  - Response format inconsistencies

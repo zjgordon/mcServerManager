@@ -86,7 +86,7 @@ class TestBackupAPI:
         # Login as regular user
         client.post(
             "/login",
-            data={"username": "testuser", "password": "testpass"},  # pragma: allowlist secret
+            data={"username": "testuser", "password": "userpass123"},  # pragma: allowlist secret
             follow_redirects=True,
         )
 
@@ -553,7 +553,7 @@ class TestBackupAPI:
         # Login as regular user
         client.post(
             "/login",
-            data={"username": "testuser", "password": "testpass"},  # pragma: allowlist secret
+            data={"username": "testuser", "password": "userpass123"},  # pragma: allowlist secret
             follow_redirects=True,
         )
 

@@ -253,7 +253,7 @@ def get_server_logs_api(server_id):
 
 @console_api_bp.route("/<int:server_id>/command", methods=["POST"])
 @csrf.exempt
-@login_required
+@user_or_admin_required_api
 @rate_limit(max_attempts=20, window_seconds=300)
 def execute_command(server_id):
     """
