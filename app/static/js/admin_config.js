@@ -17,7 +17,7 @@ class ExperimentalFeaturesManager {
 
     bindEventListeners() {
         // Bind to all experimental feature toggles
-        const toggles = document.querySelectorAll('input[type="checkbox"][id^="advanced_monitoring"], input[type="checkbox"][id^="auto_backup"], input[type="checkbox"][id^="multi_user"], input[type="checkbox"][id^="plugin_manager"]');
+        const toggles = document.querySelectorAll('input[type="checkbox"][id^="server_management_page"]');
 
         toggles.forEach(toggle => {
             toggle.addEventListener('change', (e) => {
@@ -79,15 +79,13 @@ class ExperimentalFeaturesManager {
     }
 
     isExperimentalFeature(featureKey) {
-        const experimentalFeatures = ['advanced_monitoring', 'multi_user', 'plugin_manager'];
+        const experimentalFeatures = ['server_management_page'];
         return experimentalFeatures.includes(featureKey);
     }
 
     showConfirmationDialog(featureKey, enabled) {
         const featureNames = {
-            'advanced_monitoring': 'Advanced Monitoring',
-            'multi_user': 'Multi-User Support',
-            'plugin_manager': 'Plugin Manager'
+            'server_management_page': 'Server Management Page'
         };
 
         const action = enabled ? 'enable' : 'disable';
@@ -197,10 +195,7 @@ class ExperimentalFeaturesManager {
 
     getOriginalLabelText(featureKey) {
         const labels = {
-            'advanced_monitoring': 'Enable Advanced Monitoring',
-            'auto_backup': 'Enable Auto-Backup',
-            'multi_user': 'Enable Multi-User Support',
-            'plugin_manager': 'Enable Plugin Manager'
+            'server_management_page': 'Enable Server Management Page'
         };
         return labels[featureKey] || `Enable ${featureKey}`;
     }
@@ -208,38 +203,16 @@ class ExperimentalFeaturesManager {
     updateFeatureDependentUI(featureKey, enabled) {
         // Update UI elements that depend on feature states
         switch (featureKey) {
-            case 'advanced_monitoring':
-                this.updateMonitoringUI(enabled);
-                break;
-            case 'multi_user':
-                this.updateMultiUserUI(enabled);
-                break;
-            case 'plugin_manager':
-                this.updatePluginManagerUI(enabled);
+            case 'server_management_page':
+                this.updateServerManagementUI(enabled);
                 break;
         }
     }
 
-    updateMonitoringUI(enabled) {
-        // Update monitoring-related UI elements
-        const monitoringElements = document.querySelectorAll('[data-feature="advanced_monitoring"]');
-        monitoringElements.forEach(el => {
-            el.style.display = enabled ? 'block' : 'none';
-        });
-    }
-
-    updateMultiUserUI(enabled) {
-        // Update multi-user related UI elements
-        const multiUserElements = document.querySelectorAll('[data-feature="multi_user"]');
-        multiUserElements.forEach(el => {
-            el.style.display = enabled ? 'block' : 'none';
-        });
-    }
-
-    updatePluginManagerUI(enabled) {
-        // Update plugin manager related UI elements
-        const pluginElements = document.querySelectorAll('[data-feature="plugin_manager"]');
-        pluginElements.forEach(el => {
+    updateServerManagementUI(enabled) {
+        // Update server management page related UI elements
+        const serverManagementElements = document.querySelectorAll('[data-feature="server_management_page"]');
+        serverManagementElements.forEach(el => {
             el.style.display = enabled ? 'block' : 'none';
         });
     }

@@ -3,6 +3,9 @@
 {% block title %}Server Management - {{ server.server_name }} - {{ app_title }}{% endblock %}
 
 {% block content %}
+<!-- CSRF Token for JavaScript -->
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
 <div class="server-management-container">
     <!-- Page Header -->
     <div class="page-header">
@@ -125,7 +128,7 @@
             </div>
             <div class="console-output" id="console-output">
                 <div class="console-line">
-                    <span class="console-timestamp">[{{ moment().format('HH:mm:ss') }}]</span>
+                    <span class="console-timestamp">[<span id="current-time"></span>]</span>
                     <span class="console-message">Console ready. Server status: {{ server.status }}</span>
                 </div>
             </div>
@@ -205,7 +208,7 @@
                 <h5>Command History</h5>
                 <div class="history-list" id="command-history">
                     <div class="history-item">
-                        <span class="history-timestamp">[{{ moment().format('HH:mm:ss') }}]</span>
+                        <span class="history-timestamp">[<span id="history-time"></span>]</span>
                         <span class="history-command">No commands executed yet</span>
                     </div>
                 </div>
@@ -471,4 +474,139 @@
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        const timeElement = document.getElementById('current-time');
+        if (timeElement) {
+            timeElement.textContent = timeString;
+        }
+    }
+
+    // Update time immediately and then every second
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // Also update history time
+    function updateHistoryTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        const historyElement = document.getElementById('history-time');
+        if (historyElement) {
+            historyElement.textContent = timeString;
+        }
+    }
+
+    updateHistoryTime();
+    setInterval(updateHistoryTime, 1000);
+
+    // Server control button handlers
+    const serverControlBtn = document.querySelector('.server-control-btn');
+    if (serverControlBtn) {
+        serverControlBtn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            const serverId = this.dataset.serverId;
+
+            if (action === 'start') {
+                startServer(serverId);
+            } else if (action === 'stop') {
+                stopServer(serverId);
+            }
+        });
+    }
+
+    // Copy link button handler
+    const copyLinkBtn = document.querySelector('.copy-link-btn');
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function() {
+            const serverId = this.dataset.serverId;
+            copyServerLink('{{ server_hostname }}', {{ server.port }}, '{{ server.server_name }}');
+        });
+    }
+
+    // Delete server button handler
+    const deleteServerBtn = document.querySelector('.delete-server-btn');
+    if (deleteServerBtn) {
+        deleteServerBtn.addEventListener('click', function() {
+            const serverId = this.dataset.serverId;
+            deleteServer(serverId, '{{ server.server_name }}');
+        });
+    }
+
+    // Server control functions
+    function startServer(serverId) {
+        if (confirm('Start the server?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/start/${serverId}`;
+
+            const csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken.value;
+                form.appendChild(csrfInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function stopServer(serverId) {
+        if (confirm('Stop the server?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/stop/${serverId}`;
+
+            const csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken.value;
+                form.appendChild(csrfInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function deleteServer(serverId, serverName) {
+        if (confirm(`⚠️ Delete server "${serverName}"?\n\nThis action cannot be undone and will permanently delete all server files, including world data, configurations, and backups.`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/delete/${serverId}`;
+
+            const csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken.value;
+                form.appendChild(csrfInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+});
+</script>
 {% endblock %}
