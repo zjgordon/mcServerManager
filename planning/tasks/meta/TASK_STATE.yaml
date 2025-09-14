@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-065 - Add CSS styling for experimental features section'
-  last_commit: 'feat: [CARD-065] Add CSS styling for experimental features section'
-  next_action: 'CARD-066 - Add experimental feature management tests'
+  step: 'CARD-066 - Update configuration help sidebar with memory bar gauge documentation'
+  last_commit: 'docs: [CARD-066] Update configuration help sidebar with memory bar gauge documentation'
+  next_action: 'CARD-067 - Add experimental feature management tests'
 queue: 
-  - CARD-066
   - CARD-067
   - CARD-068
   - CARD-069
