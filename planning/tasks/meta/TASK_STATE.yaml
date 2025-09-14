@@ -1,9 +1,9 @@
-active_card: CARD-104
+active_card: CARD-105
 breadcrumb:
-  step: 'CARD-103 - Fix experimental feature database integrity constraint violations'
-  last_commit: 'fix: [CARD-103] Fix experimental feature database integrity constraint violations'
-  next_action: 'CARD-105'
+  step: 'CARD-104 - Fix feature flag integration tests expecting 403 but getting 200'
+  last_commit: 'fix: [CARD-104] Fix feature flag integration tests expecting 403 but getting 200'
+  next_action: 'CARD-106'
 queue:
-  - CARD-104
   - CARD-105
+  - CARD-106
   

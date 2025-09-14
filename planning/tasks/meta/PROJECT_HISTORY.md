@@ -1911,6 +1911,14 @@ Added test class and function execution capability to dev.sh development script 
 
 Added individual test file execution capability to dev.sh development script to allow agents to run specific test files instead of entire test suites. Implemented --file option for test command with support for both absolute and relative paths, file existence validation, and clear error messages for invalid files. Modified argument parsing in main() function to capture --file option and its value, passing them to run_tests() function. Updated run_tests() function to handle --file parameter with proper file validation logic that checks both direct path and tests/ directory fallback. Enhanced show_usage() function with comprehensive documentation including --file option description and usage examples. The implementation supports all existing test suite options (--unit, --integration, --e2e, --performance) and maintains backward compatibility. New usage examples include "./dev.sh test --file tests/unit/test_server_management.py" and "./dev.sh test --file test_server_management.py" for improved development workflow efficiency. All functionality tested with both existing and non-existent test files, confirming proper error handling and file execution.
 
+## 2025-01-14 - CARD-104: Fix feature flag integration tests expecting 403 but getting 200
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+Fixed feature flag integration tests that were expecting 403 (Forbidden) responses when feature flags are disabled, but were getting 200 (OK) responses instead. The issue was that feature flag checks in console API endpoints were commented out with "temporarily disabled for testing" comments. Uncommented and restored the feature flag checks in all three console API endpoints (logs, command, status) in app/routes/api/console_routes.py. The is_feature_enabled("server_management_page") function was working correctly, but the API endpoints were not actually checking the feature flag status. Fixed 3 failing tests: test_console_api_feature_flag_integration, test_feature_flag_affects_all_console_endpoints, and test_console_api_feature_flag_disabled. All tests now properly return 403 responses when the server_management_page feature is disabled and 200 responses when enabled. The fix ensures proper feature flag integration for console API endpoints, maintaining security and access control as intended.
+
 ## 2025-01-14 - CARD-094: Fix server management page integration test failures
 
 **Epic:** Epic 3 – Test Suite Stabilization  
