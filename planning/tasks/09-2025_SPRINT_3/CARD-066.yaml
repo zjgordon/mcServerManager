@@ -1,0 +1,19 @@
+id: CARD-066
+title: Update configuration help sidebar with memory bar gauge documentation
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-057]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-066]
+artifacts: []
+notes: |
+  Add memory bar gauge help section to the Configuration Help sidebar in 
+  app/templates/admin_config.html (lines 134-168). Include explanation of the visual 
+  representation, how to use it for memory allocation decisions, and best practices 
+  for memory management.

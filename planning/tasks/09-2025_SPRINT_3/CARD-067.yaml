@@ -1,0 +1,19 @@
+id: CARD-067
+title: Update configuration help sidebar with experimental features documentation
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-065]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-067]
+artifacts: []
+notes: |
+  Add experimental features help section to the Configuration Help sidebar in 
+  app/templates/admin_config.html. Include explanation of the toggle system, warnings 
+  about experimental features, difference between experimental and stable features, 
+  and guidance on when to enable experimental features.

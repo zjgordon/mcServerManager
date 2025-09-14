@@ -1,0 +1,19 @@
+id: CARD-056
+title: Add memory bar gauge HTML structure to admin template
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-055]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-056]
+artifacts: []
+notes: |
+  Add the memory bar gauge HTML structure to app/templates/admin_config.html under the 
+  Memory Configuration section (after line 107). Include the visual bar showing total 
+  system memory with current used memory overlay, labels for "System Memory" and 
+  "X.X GB Used / Y.Y GB Total", and percentage usage display.

@@ -1,0 +1,19 @@
+id: CARD-069
+title: Add integration tests for admin configuration enhancements
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-061, CARD-068]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-069]
+artifacts: []
+notes: |
+  Create integration tests in tests/integration/test_admin_config_enhancements.py to 
+  test the complete admin configuration flow including memory bar gauge data display, 
+  experimental features toggling, admin authentication, CSRF protection, and error 
+  handling scenarios.

@@ -1,0 +1,19 @@
+id: CARD-063
+title: Add experimental features section HTML to admin template
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-062]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-063]
+artifacts: []
+notes: |
+  Add the experimental features section HTML structure to app/templates/admin_config.html 
+  at the bottom of the main card (after line 131). Include the section header, feature 
+  toggle cards with Bootstrap custom switches, feature names and descriptions, status 
+  indicators (Experimental/Stable), and warning text for experimental features.

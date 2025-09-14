@@ -1,0 +1,19 @@
+id: CARD-068
+title: Add unit tests for experimental feature utilities
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-060]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-068]
+artifacts: []
+notes: |
+  Create comprehensive unit tests for the experimental feature utility functions in 
+  tests/unit/test_experimental_features.py. Test get_experimental_features(), 
+  toggle_experimental_feature(), is_feature_enabled(), and add_experimental_feature() 
+  with various scenarios including edge cases and error conditions.

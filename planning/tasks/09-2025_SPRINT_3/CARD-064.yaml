@@ -1,0 +1,19 @@
+id: CARD-064
+title: Add JavaScript for experimental features toggles
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-061, CARD-063]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-064]
+artifacts: []
+notes: |
+  Create app/static/js/admin_config.js with JavaScript functionality for experimental 
+  features: AJAX calls to toggle features, real-time UI updates, confirmation dialogs 
+  for experimental features, error handling, and user feedback. Include debouncing 
+  to prevent rapid-fire API calls.

@@ -1,0 +1,19 @@
+id: CARD-070
+title: Add feature gating implementation examples
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-060]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-070]
+artifacts: []
+notes: |
+  Create documentation and implementation examples for the feature gating system in 
+  docs/experimental-features.md. Include code examples showing how to use 
+  is_feature_enabled() in routes and functions, feature lifecycle management process, 
+  and guidelines for moving features from experimental to production.

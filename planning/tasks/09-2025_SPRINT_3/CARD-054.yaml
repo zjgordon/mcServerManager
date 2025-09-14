@@ -1,0 +1,20 @@
+id: CARD-054
+title: Add system memory utility function for admin configuration
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-054]
+artifacts: []
+notes: |
+  Create get_system_memory_for_admin() function in app/utils.py that extracts and formats 
+  system memory data specifically for the admin configuration page. This function should 
+  leverage the existing get_system_metrics() function from app/monitoring.py and return 
+  a dictionary with total system memory, used memory, available memory, and percentages 
+  formatted for display in the memory bar gauge.

@@ -1,0 +1,18 @@
+id: CARD-065
+title: Add CSS styling for experimental features section
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-063]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-065]
+artifacts: []
+notes: |
+  Add CSS styling for the experimental features section including card-based layout 
+  for each feature, toggle switch styling, status indicators, warning text styling, 
+  and responsive design. Ensure consistent styling with the existing Minecraft-themed UI.

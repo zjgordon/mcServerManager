@@ -1,0 +1,19 @@
+id: CARD-060
+title: Add experimental feature utility functions
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-058]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-060]
+artifacts: []
+notes: |
+  Add utility functions to app/utils.py for experimental feature management: 
+  get_experimental_features(), toggle_experimental_feature(feature_key, enabled), 
+  is_feature_enabled(feature_key), and add_experimental_feature(). These functions 
+  will handle database operations for the feature gating system.

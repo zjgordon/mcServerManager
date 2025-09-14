@@ -1,0 +1,19 @@
+id: CARD-062
+title: Enhance admin_config route with experimental features data
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-060]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-062]
+artifacts: []
+notes: |
+  Modify the existing admin_config() function in app/routes/auth_routes.py to include 
+  experimental features data in the template context by calling get_experimental_features(). 
+  This enables the frontend to display the experimental features section with current 
+  toggle states.

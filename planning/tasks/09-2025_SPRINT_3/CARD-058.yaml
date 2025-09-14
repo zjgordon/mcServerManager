@@ -1,0 +1,19 @@
+id: CARD-058
+title: Create ExperimentalFeature database model
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-058]
+artifacts: []
+notes: |
+  Add ExperimentalFeature model to app/models.py with fields: id, feature_key, feature_name, 
+  description, enabled, is_stable, created_at, updated_at, updated_by. Include proper 
+  validation methods and constraints. This model will store experimental feature toggles 
+  and metadata for the feature gating system.

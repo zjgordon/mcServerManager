@@ -1,0 +1,19 @@
+id: CARD-055
+title: Enhance admin_config route with system memory data
+epic: Epic 3 – Admin Configuration Enhancements
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: [CARD-054]
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-055]
+artifacts: []
+notes: |
+  Modify the admin_config() function in app/routes/auth_routes.py to import and call 
+  get_system_memory_for_admin() and include the system memory data in the template 
+  context. This enables the frontend to display real-time system memory information 
+  in the memory bar gauge.
