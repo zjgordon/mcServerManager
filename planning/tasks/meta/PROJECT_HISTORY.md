@@ -1,5 +1,21 @@
 # Project History
 
+## 2025-09-14 - CARD-100: Add pytest options passthrough and advanced test execution features
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor
+
+**Summary:** Added comprehensive pytest options passthrough capability to dev.sh, enabling agents and developers to access pytest's advanced options without losing the convenience of dev.sh's environment management. The implementation includes both direct pytest options (--verbose, --quiet, --tb, --maxfail, --markers) and a flexible --pytest-args option for passing arbitrary pytest arguments, significantly enhancing test execution flexibility and debugging capabilities.
+
+**Changes Made:**
+- Added `--pytest-args` option to dev.sh test command for passing arbitrary pytest options with proper argument parsing and validation
+- Extended `run_tests()` function to build and pass through pytest arguments from both direct options and --pytest-args
+- Added common pytest options as direct dev.sh options: --verbose/-v, --quiet/-q, --tb=STYLE, --maxfail=NUM, --markers
+- Updated help documentation with comprehensive examples showing all new pytest options and usage patterns
+- Enhanced argument parsing to recognize all new test-specific options with proper validation and error handling
+- Implemented proper argument building logic that combines direct options with --pytest-args for maximum flexibility
+
 ## 2025-09-14 - CARD-099: Add test discovery and listing capability to dev.sh
 
 **Epic:** Epic 3 – Test Suite Stabilization  

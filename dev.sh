@@ -167,6 +167,12 @@ show_usage() {
     echo "  --function FUNCTION Run specific test function (use with --file and --class)"
     echo "  --pattern PATTERN   Run tests matching pattern using pytest -k syntax"
     echo "  --list              List available tests without running them"
+    echo "  --pytest-args ARGS  Pass arbitrary pytest options (e.g., --pytest-args "-v --tb=short")"
+    echo "  --verbose, -v       Run tests with verbose output"
+    echo "  --quiet, -q         Run tests with quiet output"
+    echo "  --tb=STYLE          Set traceback style (short, long, auto, line, native)"
+    echo "  --maxfail=NUM       Stop after NUM failures"
+    echo "  --markers           Show available pytest markers"
     echo ""
     echo "EXAMPLES:"
     echo "  $0                                    # Run with default settings"
@@ -191,6 +197,14 @@ show_usage() {
     echo "  $0 test --list --unit                                 # List unit tests only"
     echo "  $0 test --list --pattern \"authentication\"           # List tests matching pattern"
     echo "  $0 test --list --file tests/unit/test_server_management.py  # List tests in specific file"
+    echo "  $0 test --pytest-args "-v --tb=short"               # Run with verbose output and short traceback"
+    echo "  $0 test --pytest-args "-m 'not slow' --maxfail=5"   # Run with markers and max failures"
+    echo "  $0 test --file test_server_management.py --pytest-args "-v --tb=long"  # Run specific file with options"
+    echo "  $0 test --unit --pytest-args "--cov=app --cov-report=html"  # Run unit tests with coverage"
+    echo "  $0 test --verbose                                    # Run with verbose output"
+    echo "  $0 test --quiet                                      # Run with quiet output"
+    echo "  $0 test --tb=short                                   # Run with short traceback style"
+    echo "  $0 test --maxfail=3                                  # Stop after 3 failures"
     echo "  $0 setup                             # Setup environment without running"
     echo ""
     echo "PROCESS MANAGEMENT:"
@@ -265,6 +279,11 @@ run_tests() {
     local test_function=""
     local test_pattern=""
     local list_mode=false
+    local pytest_args=""
+    local verbose=false
+    local quiet=false
+    local tb_style=""
+    local maxfail=""
 
     # Parse test arguments
     while [[ $# -gt 0 ]]; do
@@ -309,6 +328,30 @@ run_tests() {
                 list_mode=true
                 shift
                 ;;
+            --pytest-args)
+                pytest_args="$2"
+                shift 2
+                ;;
+            --verbose|-v)
+                verbose=true
+                shift
+                ;;
+            --quiet|-q)
+                quiet=true
+                shift
+                ;;
+            --tb=*)
+                tb_style="${1#--tb=}"
+                shift
+                ;;
+            --maxfail=*)
+                maxfail="${1#--maxfail=}"
+                shift
+                ;;
+            --markers)
+                pytest_args="$pytest_args --markers"
+                shift
+                ;;
             *)
                 shift
                 ;;
@@ -330,6 +373,24 @@ run_tests() {
         fi
         list_tests $list_args
         return
+    fi
+
+    # Build pytest arguments from options
+    local final_pytest_args=""
+    if [ "$verbose" = true ]; then
+        final_pytest_args="$final_pytest_args -v"
+    fi
+    if [ "$quiet" = true ]; then
+        final_pytest_args="$final_pytest_args -q"
+    fi
+    if [ -n "$tb_style" ]; then
+        final_pytest_args="$final_pytest_args --tb=$tb_style"
+    fi
+    if [ -n "$maxfail" ]; then
+        final_pytest_args="$final_pytest_args --maxfail=$maxfail"
+    fi
+    if [ -n "$pytest_args" ]; then
+        final_pytest_args="$final_pytest_args $pytest_args"
     fi
 
     # Validate that class/function options are used with file option
@@ -429,9 +490,17 @@ run_tests() {
         # Run the specific test
         if [ -n "$test_pattern" ]; then
             print_info "Running tests with pattern: $test_pattern"
-            pytest "$pytest_path" -v -k "$test_pattern"
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$pytest_path" -k "$test_pattern" $final_pytest_args
+            else
+                pytest "$pytest_path" -v -k "$test_pattern"
+            fi
         else
-            pytest "$pytest_path" -v
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$pytest_path" $final_pytest_args
+            else
+                pytest "$pytest_path" -v
+            fi
         fi
         print_success "Test execution completed"
         return
@@ -459,9 +528,17 @@ run_tests() {
         print_info "Running tests from: $test_path"
         if [ -n "$test_pattern" ]; then
             print_info "Running tests with pattern: $test_pattern"
-            pytest "$test_path" -v -k "$test_pattern"
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$test_path" -k "$test_pattern" $final_pytest_args
+            else
+                pytest "$test_path" -v -k "$test_pattern"
+            fi
         else
-            pytest "$test_path" -v
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$test_path" $final_pytest_args
+            else
+                pytest "$test_path" -v
+            fi
         fi
         print_success "Tests completed"
     else
@@ -691,7 +768,7 @@ main() {
                     break
                 fi
                 ;;
-            --unit|--integration|--e2e|--performance|--file|--class|--function|--pattern|--list)
+            --unit|--integration|--e2e|--performance|--file|--class|--function|--pattern|--list|--pytest-args|--verbose|-v|--quiet|-q|--tb=*|--maxfail=*|--markers)
                 # These are test-specific options, only valid after 'test' command
                 if [ "$command" != "test" ]; then
                     print_error "Option $1 is only valid with 'test' command"
