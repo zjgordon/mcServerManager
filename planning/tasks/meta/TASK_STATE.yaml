@@ -1,8 +1,7 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-069 - Add integration tests for admin configuration enhancements'
-  last_commit: 'test: [CARD-069] Add comprehensive integration tests for admin configuration enhancements'
-  next_action: 'CARD-070 - Add experimental feature integration tests'
-queue: 
-  - CARD-070
+  step: 'CARD-070 - Add feature gating implementation examples'
+  last_commit: 'docs: [CARD-070] Add comprehensive feature gating implementation examples and documentation'
+  next_action: 'CARD-071 - Next task in queue'
+queue: []
   
