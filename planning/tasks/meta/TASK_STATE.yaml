@@ -1,10 +1,9 @@
-active_card: null
+active_card: CARD-089
 breadcrumb:
-  step: 'CARD-087 - Completed authentication and authorization test fixes'
-  last_commit: 'fix: [CARD-087] Fix authentication and authorization test failures'
-  next_action: 'CARD-088 - Next card in queue'
-queue: 
-  - CARD-088
+  step: 'CARD-088 - Fix feature flag management and NoneType errors'
+  last_commit: 'fix: [CARD-088] Fix feature flag management and NoneType errors'
+  next_action: 'CARD-089 - Ready to start next task'
+queue:
   - CARD-089
   - CARD-090
   - CARD-091

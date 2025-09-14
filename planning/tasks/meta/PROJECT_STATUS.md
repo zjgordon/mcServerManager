@@ -120,6 +120,7 @@ RELEASE_NOTES.md)
 
 ## 09-2025_SPRINT_3 Status
 
+- CARD-088: ✅ Completed - Fixed feature flag management and NoneType errors by seeding ExperimentalFeature objects in test database, adding admin authorization checks, and resolving fixture availability issues
 - CARD-085: ✅ Completed - Created comprehensive integration tests for server management page with 17 test methods covering complete server management flow, console functionality with real server logs, command execution, feature flag integration, user access control, and error handling scenarios
 - CARD-087: ✅ Completed - Fixed authentication and authorization test failures by correcting login routes, password credentials, and API decorators to ensure proper test authentication flow and consistent 401 responses
 - CARD-084: ✅ Completed - Created comprehensive unit tests for server management functionality with 36 test cases covering feature flags, access control, console API endpoints, command execution, log parsing, and error handling scenarios

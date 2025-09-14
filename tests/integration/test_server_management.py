@@ -566,43 +566,57 @@ class TestErrorHandlingIntegration:
 class TestFeatureFlagAdminIntegration:
     """Test feature flag integration with admin configuration."""
 
-    def test_admin_can_toggle_feature_flag(self, authenticated_client):
+    def test_admin_can_toggle_feature_flag(self, authenticated_client, admin_user):
         """Test admin can toggle feature flags through admin interface."""
+        from unittest.mock import patch
+
         with authenticated_client.application.app_context():
-            # Create feature flag
-            feature = ExperimentalFeature(
-                feature_key="server_management_page",
-                feature_name="Server Management Page",
-                description="Test feature for server management",
-                enabled=False,
-                is_stable=False,
-            )
-            db.session.add(feature)
-            db.session.commit()
+            # Get or create feature flag (it might already exist from app fixture)
+            feature = ExperimentalFeature.query.filter_by(
+                feature_key="server_management_page"
+            ).first()
+
+            if not feature:
+                # Create feature flag if it doesn't exist
+                feature = ExperimentalFeature(
+                    feature_key="server_management_page",
+                    feature_name="Server Management Page",
+                    description="Test feature for server management",
+                    enabled=False,
+                    is_stable=False,
+                )
+                db.session.add(feature)
+                db.session.commit()
+            else:
+                # Ensure it starts disabled for testing
+                feature.enabled = False
+                db.session.commit()
 
             # Test toggling feature flag (assuming there's an admin endpoint)
             # This would typically be done through an admin interface
             # For now, we'll test the utility function directly
             from app.utils import toggle_experimental_feature
 
-            result = toggle_experimental_feature("server_management_page", True)
-            assert result is True
+            # Mock current_user to be the admin user
+            with patch("app.utils.current_user", admin_user):
+                result = toggle_experimental_feature("server_management_page", True)
+                assert result is True
 
-            # Verify feature is enabled
-            feature = ExperimentalFeature.query.filter_by(
-                feature_key="server_management_page"
-            ).first()
-            assert feature.enabled is True
+                # Verify feature is enabled
+                feature = ExperimentalFeature.query.filter_by(
+                    feature_key="server_management_page"
+                ).first()
+                assert feature.enabled is True
 
-            # Test disabling
-            result = toggle_experimental_feature("server_management_page", False)
-            assert result is True
+                # Test disabling
+                result = toggle_experimental_feature("server_management_page", False)
+                assert result is True
 
-            # Verify feature is disabled
-            feature = ExperimentalFeature.query.filter_by(
-                feature_key="server_management_page"
-            ).first()
-            assert feature.enabled is False
+                # Verify feature is disabled
+                feature = ExperimentalFeature.query.filter_by(
+                    feature_key="server_management_page"
+                ).first()
+                assert feature.enabled is False
 
     def test_regular_user_cannot_toggle_feature_flag(self, authenticated_regular_client):
         """Test regular user cannot toggle feature flags."""
@@ -613,41 +627,53 @@ class TestFeatureFlagAdminIntegration:
             result = toggle_experimental_feature("server_management_page", True)
             assert result is False  # Should fail for non-admin user
 
-    def test_feature_flag_affects_all_console_endpoints(self, authenticated_client, test_server):
+    def test_feature_flag_affects_all_console_endpoints(self, authenticated_client, running_server):
         """Test that feature flag affects all console endpoints consistently."""
+        from unittest.mock import patch
+
         with authenticated_client.application.app_context():
-            # Test with feature disabled
-            feature = ExperimentalFeature.query.filter_by(
-                feature_key="server_management_page"
-            ).first()
-            if feature:
-                feature.enabled = False
+            with patch("app.routes.api.console_routes.send_console_command") as mock_send:
+                # Mock successful command execution
+                mock_send.return_value = {
+                    "success": True,
+                    "message": "Command executed successfully",
+                    "command": "help",
+                    "server_id": running_server.id,
+                    "timestamp": "2025-01-01T00:00:00Z",
+                }
+
+                # Test with feature disabled
+                feature = ExperimentalFeature.query.filter_by(
+                    feature_key="server_management_page"
+                ).first()
+                if feature:
+                    feature.enabled = False
+                    db.session.commit()
+
+                # All console endpoints should return 403
+                response = authenticated_client.get(f"/api/console/{running_server.id}/logs")
+                assert response.status_code == 403
+
+                response = authenticated_client.get(f"/api/console/{running_server.id}/status")
+                assert response.status_code == 403
+
+                response = authenticated_client.post(
+                    f"/api/console/{running_server.id}/command", json={"command": "help"}
+                )
+                assert response.status_code == 403
+
+                # Enable feature
+                feature.enabled = True
                 db.session.commit()
 
-            # All console endpoints should return 403
-            response = authenticated_client.get(f"/api/console/{test_server.id}/logs")
-            assert response.status_code == 403
+                # All console endpoints should work
+                response = authenticated_client.get(f"/api/console/{running_server.id}/logs")
+                assert response.status_code == 200
 
-            response = authenticated_client.get(f"/api/console/{test_server.id}/status")
-            assert response.status_code == 403
+                response = authenticated_client.get(f"/api/console/{running_server.id}/status")
+                assert response.status_code == 200
 
-            response = authenticated_client.post(
-                f"/api/console/{test_server.id}/command", json={"command": "help"}
-            )
-            assert response.status_code == 403
-
-            # Enable feature
-            feature.enabled = True
-            db.session.commit()
-
-            # All console endpoints should work
-            response = authenticated_client.get(f"/api/console/{test_server.id}/logs")
-            assert response.status_code == 200
-
-            response = authenticated_client.get(f"/api/console/{test_server.id}/status")
-            assert response.status_code == 200
-
-            response = authenticated_client.post(
-                f"/api/console/{test_server.id}/command", json={"command": "help"}
-            )
-            assert response.status_code == 200
+                response = authenticated_client.post(
+                    f"/api/console/{running_server.id}/command", json={"command": "help"}
+                )
+                assert response.status_code == 200

@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-088: Fix feature flag management and NoneType errors
+
+**Epic:** Epic 3 – Test Suite Stabilization  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed NoneType errors in feature flag management tests by ensuring ExperimentalFeature objects are properly seeded in the test database. Created feature_flags_fixture in tests/fixtures/utilities.py to provide server_management_page feature flag for testing. Updated app fixture in tests/fixtures/database.py to automatically seed experimental feature flags during test setup. Added admin authorization check to toggle_experimental_feature function in app/utils.py to prevent non-admin users from toggling features. Fixed test_admin_can_toggle_feature_flag to handle existing feature flags and properly mock current_user context. Updated test_feature_flag_affects_all_console_endpoints to use running_server fixture and mock send_console_command to prevent process verification failures. Added authenticated_regular_client fixture import to conftest.py to resolve fixture availability issues. All three affected tests now pass: test_admin_can_toggle_feature_flag, test_feature_flag_affects_all_console_endpoints, and test_regular_user_cannot_toggle_feature_flag.
+
 ## 2025-09-14 - CARD-084: Create unit tests for server management functionality
 
 **Epic:** Epic 1 – Server Management Page Implementation  

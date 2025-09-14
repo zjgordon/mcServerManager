@@ -1398,11 +1398,17 @@ def toggle_experimental_feature(feature_key, enabled):
     try:
         from .models import ExperimentalFeature
 
-        # Try to get current user, but don't fail if not available
+        # Check if user is authenticated and is admin
         try:
-            user_id = current_user.id if current_user.is_authenticated else None
+            if not current_user.is_authenticated or not current_user.is_admin:
+                logger.warning(
+                    f"Non-admin user attempted to toggle experimental feature '{feature_key}'"
+                )
+                return False
+            user_id = current_user.id
         except (AttributeError, RuntimeError):
-            user_id = None
+            logger.warning(f"User authentication check failed for feature toggle '{feature_key}'")
+            return False
 
         feature = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
         if not feature:

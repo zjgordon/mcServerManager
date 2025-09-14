@@ -69,6 +69,20 @@ def app():
             is_active=True,
         )
         db.session.add(admin_user)
+
+        # Create default experimental feature flags for testing
+        from app.models import ExperimentalFeature
+
+        server_management_feature = ExperimentalFeature(
+            feature_key="server_management_page",
+            feature_name="Server Management Page",
+            description="Enable the enhanced server management page with console integration",
+            enabled=True,  # Default to enabled for tests
+            is_stable=False,
+            updated_by=None,
+        )
+        db.session.add(server_management_feature)
+
         db.session.commit()
 
         yield app

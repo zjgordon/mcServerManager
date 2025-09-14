@@ -129,3 +129,28 @@ def mock_subprocess():
             "mock_popen": mock_popen,
             "mock_run": mock_run,
         }
+
+
+@pytest.fixture
+def feature_flags_fixture(app):
+    """Create default experimental feature flags for testing."""
+    from app.extensions import db
+    from app.models import ExperimentalFeature
+
+    with app.app_context():
+        # Create the server_management_page feature flag if it doesn't exist
+        feature = ExperimentalFeature.query.filter_by(feature_key="server_management_page").first()
+
+        if not feature:
+            feature = ExperimentalFeature(
+                feature_key="server_management_page",
+                feature_name="Server Management Page",
+                description="Enable the enhanced server management page with console integration",
+                enabled=True,  # Default to enabled for tests
+                is_stable=False,
+                updated_by=None,
+            )
+            db.session.add(feature)
+            db.session.commit()
+
+        yield feature
