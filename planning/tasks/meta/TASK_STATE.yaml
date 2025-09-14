@@ -1,7 +1,7 @@
-active_card: CARD-051
+active_card: CARD-052
 breadcrumb:
-  step: 'CARD-050 - Fix backup execution test failures and file handling issues'
-  last_commit: 'fix: [CARD-050] Fix backup execution test failures and file handling issues'
-  next_action: 'CARD-051 - Next task in queue'
-queue: [CARD-051, CARD-052, CARD-053]
+  step: 'CARD-051 - Fix backup monitoring test failures and calculation errors'
+  last_commit: 'fix: [CARD-051] Fix backup monitoring test failures and calculation errors'
+  next_action: 'CARD-052 - Next task in queue'
+queue: [CARD-052, CARD-053]
   

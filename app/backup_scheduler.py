@@ -1992,6 +1992,8 @@ class BackupScheduler:
         """Update average backup duration."""
         if self.metrics["successful_backups"] > 0:
             current_avg = self.metrics["average_backup_duration"]
+            # Calculate new average: (current_avg * previous_count + new_duration) / new_count
+            # Since successful_backups is already incremented, we use it directly
             new_avg = (
                 (current_avg * (self.metrics["successful_backups"] - 1)) + duration
             ) / self.metrics["successful_backups"]
