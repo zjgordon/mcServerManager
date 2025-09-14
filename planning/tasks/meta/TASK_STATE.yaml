@@ -1,9 +1,8 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-084 - Create unit tests for server management functionality'
-  last_commit: 'test: [CARD-084] Create comprehensive unit tests for server management functionality'
-  next_action: 'CARD-085 - Next card in queue'
+  step: 'CARD-085 - Create integration tests for server management page'
+  last_commit: 'test: [CARD-085] Create comprehensive integration tests for server management page'
+  next_action: 'CARD-086 - Next card in queue'
 queue: 
-  - CARD-085
   - CARD-086
   
