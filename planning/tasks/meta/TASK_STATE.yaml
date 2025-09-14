@@ -1,10 +1,9 @@
-active_card: CARD-094
+active_card: CARD-095
 breadcrumb:
-  step: 'CARD-093 - Fix backup API and E2E workflow test failures'
-  last_commit: 'fix: [CARD-093] Fix backup API and E2E workflow test failures'
-  next_action: 'CARD-094 - Ready to start next task'
+  step: 'CARD-094 - Fix server management page integration test failures'
+  last_commit: 'fix: [CARD-094] Fix server management page integration test failures'
+  next_action: 'CARD-095 - Ready to start next task'
 queue:
-  - CARD-094
   - CARD-095
   - CARD-096
   - CARD-097

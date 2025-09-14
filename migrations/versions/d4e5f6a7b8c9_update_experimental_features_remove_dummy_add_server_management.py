@@ -34,7 +34,7 @@ def upgrade():
         VALUES
         ('server_management_page', 'Server Management Page',
          'Enhanced server management interface with real-time console and advanced controls',
-         false, false, datetime('now'), datetime('now'))
+         true, false, datetime('now'), datetime('now'))
         """
     )
     # ### end Alembic commands ###
