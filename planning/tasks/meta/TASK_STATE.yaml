@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-074 - Create server management route with feature flag check'
-  last_commit: 'feat: [CARD-074] Create server management route with feature flag check'
-  next_action: 'CARD-075 - Next card in queue'
+  step: 'CARD-075 - Create server management page template'
+  last_commit: 'feat: [CARD-075] Create server management page template'
+  next_action: 'CARD-076 - Next card in queue'
 queue: 
-  - CARD-075
   - CARD-076
   - CARD-077
   - CARD-078

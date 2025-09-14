@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-075: Create server management page template
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive server management page template (app/templates/server_management.html) extending base.html with four main sections as specified: Server Information (name, version, port, memory, config options, status, owner info for admins), Server Controls (start/stop, copy link, manage backups, delete server), Real-Time Console (log display area, controls for refresh/clear/download), and Server Commands (pre-defined command buttons, custom command input, command history). Implemented consistent styling with existing design system using Minecraft-inspired theme, responsive design with mobile breakpoints, and proper Bootstrap integration. The template includes comprehensive CSS styling for console output, command buttons, and mobile responsiveness. All tests pass (359/363) with no linting errors, providing a complete server management interface foundation.
+
 ## 2025-09-14 - CARD-074: Create server management route with feature flag check
 
 **Epic:** Epic 1 – Server Management Page Implementation  

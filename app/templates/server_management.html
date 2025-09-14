@@ -14,7 +14,7 @@
         </p>
     </div>
 
-    <!-- Server Information Card -->
+    <!-- Server Information Section -->
     <div class="card mc-card">
         <div class="card-header">
             <h3 class="pixel-font">
@@ -34,6 +34,9 @@
                         <strong>Port:</strong> {{ server.port }}
                     </div>
                     <div class="info-item">
+                        <strong>Memory:</strong> {{ server.memory_mb }}MB
+                    </div>
+                    <div class="info-item">
                         <strong>Status:</strong>
                         <span class="badge badge-{% if server.status == 'Running' %}success{% else %}secondary{% endif %}">
                             {{ server.status }}
@@ -41,9 +44,6 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="info-item">
-                        <strong>Memory:</strong> {{ server.memory_mb }}MB
-                    </div>
                     <div class="info-item">
                         <strong>Gamemode:</strong> {{ server.gamemode }}
                     </div>
@@ -56,43 +56,150 @@
                             {{ 'Enabled' if server.pvp else 'Disabled' }}
                         </span>
                     </div>
+                    <div class="info-item">
+                        <strong>Level Seed:</strong> {{ server.level_seed or 'Default' }}
+                    </div>
+                    {% if current_user.is_admin %}
+                    <div class="info-item">
+                        <strong>Owner:</strong> {{ server.owner.username if server.owner else 'Unknown' }}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Server Actions Card -->
+    <!-- Server Controls Section -->
     <div class="card mc-card">
         <div class="card-header">
             <h3 class="pixel-font">
-                <i class="fas fa-tools"></i> Server Actions
+                <i class="fas fa-tools"></i> Server Controls
             </h3>
         </div>
         <div class="card-body">
-            <div class="action-buttons">
+            <div class="control-buttons">
+                <button class="btn btn-{% if server.status == 'Running' %}danger{% else %}success{% endif %} server-control-btn"
+                        data-action="{% if server.status == 'Running' %}stop{% else %}start{% endif %}"
+                        data-server-id="{{ server.id }}">
+                    <i class="fas fa-{% if server.status == 'Running' %}stop{% else %}play{% endif %}"></i>
+                    {% if server.status == 'Running' %}Stop Server{% else %}Start Server{% endif %}
+                </button>
+
+                <button class="btn btn-info copy-link-btn" data-server-id="{{ server.id }}">
+                    <i class="fas fa-copy"></i> Copy Server Link
+                </button>
+
+                <a href="{{ url_for('server.backup_management', server_id=server.id) }}" class="btn btn-warning">
+                    <i class="fas fa-database"></i> Manage Backups
+                </a>
+
+                <button class="btn btn-danger delete-server-btn" data-server-id="{{ server.id }}">
+                    <i class="fas fa-trash"></i> Delete Server
+                </button>
+
                 <a href="{{ url_for('server.home') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Server List
-                </a>
-                <a href="{{ url_for('server.backup_management', server_id=server.id) }}" class="btn btn-info">
-                    <i class="fas fa-database"></i> Backup Management
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Server Configuration Card -->
+    <!-- Real-Time Console Section -->
     <div class="card mc-card">
         <div class="card-header">
             <h3 class="pixel-font">
-                <i class="fas fa-sliders-h"></i> Server Configuration
+                <i class="fas fa-terminal"></i> Real-Time Console
             </h3>
         </div>
         <div class="card-body">
-            <div class="config-info">
-                <p><strong>Level Seed:</strong> {{ server.level_seed or 'Default' }}</p>
-                <p><strong>MOTD:</strong> {{ server.motd or 'A Minecraft Server' }}</p>
-                <p><strong>Hardcore:</strong> {{ 'Yes' if server.hardcore else 'No' }}</p>
-                <p><strong>Spawn Monsters:</strong> {{ 'Yes' if server.spawn_monsters else 'No' }}</p>
+            <div class="console-controls">
+                <button class="btn btn-sm btn-primary refresh-console-btn" data-server-id="{{ server.id }}">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-sm btn-warning clear-console-btn">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+                <button class="btn btn-sm btn-info download-logs-btn" data-server-id="{{ server.id }}">
+                    <i class="fas fa-download"></i> Download Logs
+                </button>
+            </div>
+            <div class="console-output" id="console-output">
+                <div class="console-line">
+                    <span class="console-timestamp">[{{ moment().format('HH:mm:ss') }}]</span>
+                    <span class="console-message">Console ready. Server status: {{ server.status }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Server Commands Section -->
+    <div class="card mc-card">
+        <div class="card-header">
+            <h3 class="pixel-font">
+                <i class="fas fa-keyboard"></i> Server Commands
+            </h3>
+        </div>
+        <div class="card-body">
+            <!-- Pre-defined Command Buttons -->
+            <div class="predefined-commands">
+                <h5>Quick Commands</h5>
+                <div class="command-buttons">
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="list">
+                        <i class="fas fa-users"></i> List Players
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="time set day">
+                        <i class="fas fa-sun"></i> Set Day
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="time set night">
+                        <i class="fas fa-moon"></i> Set Night
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="weather clear">
+                        <i class="fas fa-sun"></i> Clear Weather
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="weather rain">
+                        <i class="fas fa-cloud-rain"></i> Rain
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="difficulty peaceful">
+                        <i class="fas fa-dove"></i> Peaceful
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="difficulty easy">
+                        <i class="fas fa-smile"></i> Easy
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="difficulty normal">
+                        <i class="fas fa-meh"></i> Normal
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary command-btn" data-command="difficulty hard">
+                        <i class="fas fa-frown"></i> Hard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Command Input -->
+            <div class="custom-command">
+                <h5>Custom Command</h5>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">/</span>
+                    </div>
+                    <input type="text" class="form-control" id="custom-command-input"
+                           placeholder="Enter Minecraft command (without /)" data-server-id="{{ server.id }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary execute-command-btn" data-server-id="{{ server.id }}">
+                            <i class="fas fa-paper-plane"></i> Execute
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command History -->
+            <div class="command-history">
+                <h5>Command History</h5>
+                <div class="history-list" id="command-history">
+                    <div class="history-item">
+                        <span class="history-timestamp">[{{ moment().format('HH:mm:ss') }}]</span>
+                        <span class="history-command">No commands executed yet</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -120,15 +227,101 @@
     padding: 5px 0;
 }
 
-.action-buttons {
+.control-buttons {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
-.config-info p {
-    margin-bottom: 10px;
+.control-buttons .btn {
+    min-width: 140px;
+}
+
+.console-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.console-output {
+    background-color: #1a1a1a;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    padding: 15px;
+    border-radius: 5px;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #333;
+}
+
+.console-line {
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.console-timestamp {
+    color: #888;
+    margin-right: 10px;
+}
+
+.console-message {
+    color: #00ff00;
+}
+
+.predefined-commands {
+    margin-bottom: 25px;
+}
+
+.command-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.command-buttons .btn {
+    margin-bottom: 5px;
+}
+
+.custom-command {
+    margin-bottom: 25px;
+}
+
+.command-history {
+    margin-top: 20px;
+}
+
+.history-list {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-item {
+    margin-bottom: 8px;
     padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-timestamp {
+    color: #666;
+    font-size: 0.9em;
+    margin-right: 10px;
+}
+
+.history-command {
+    font-family: 'Courier New', monospace;
+    color: #333;
 }
 
 .badge {
@@ -145,6 +338,56 @@
 .badge-secondary {
     background-color: #6c757d;
     color: white;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .server-management-container {
+        padding: 10px;
+    }
+
+    .control-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .control-buttons .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .console-controls {
+        justify-content: center;
+    }
+
+    .command-buttons {
+        justify-content: center;
+    }
+
+    .command-buttons .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .page-description {
+        font-size: 1em;
+    }
+
+    .console-output {
+        min-height: 150px;
+        font-size: 0.9em;
+    }
+
+    .command-buttons .btn {
+        font-size: 0.8em;
+        padding: 5px 8px;
+    }
 }
 </style>
 {% endblock %}
