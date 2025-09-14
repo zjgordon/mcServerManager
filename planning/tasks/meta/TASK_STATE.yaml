@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-055 - Enhance admin_config route with system memory data'
-  last_commit: 'feat: [CARD-055] Enhance admin_config route with system memory data'
-  next_action: 'CARD-056 - Add system CPU utility function for admin configuration'
+  step: 'CARD-056 - Add memory bar gauge HTML structure to admin template'
+  last_commit: 'feat: [CARD-056] Add memory bar gauge HTML structure to admin template'
+  next_action: 'CARD-057 - Add system CPU utility function for admin configuration'
 queue: 
-  - CARD-056
   - CARD-057
   - CARD-058
   - CARD-059

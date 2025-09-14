@@ -106,6 +106,32 @@
                             </small>
                         </div>
 
+                        <!-- System Memory Bar Gauge -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-memory"></i> System Memory
+                            </label>
+                            <div class="memory-gauge-container">
+                                <div class="memory-bar-background">
+                                    <div class="memory-bar-used"
+                                         style="width: {{ system_memory.usage_percentage }}%;"
+                                         title="{{ system_memory.used_memory_gb }}GB used of {{ system_memory.total_memory_gb }}GB total">
+                                    </div>
+                                </div>
+                                <div class="memory-labels">
+                                    <span class="memory-used-label">
+                                        {{ system_memory.used_memory_gb }}GB Used / {{ system_memory.total_memory_gb }}GB Total
+                                    </span>
+                                    <span class="memory-percentage-label">
+                                        {{ system_memory.usage_percentage }}%
+                                    </span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Real-time system memory usage display
+                            </small>
+                        </div>
+
                         <div class="form-group">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>

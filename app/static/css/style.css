@@ -2149,3 +2149,84 @@ body {
         padding: 8px 5px;
     }
 }
+
+/* ===== MEMORY BAR GAUGE STYLES ===== */
+.memory-gauge-container {
+    margin: 10px 0;
+}
+
+.memory-bar-background {
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);
+    border: 1px solid var(--mc-border);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.memory-bar-used {
+    height: 100%;
+    background: linear-gradient(90deg, var(--mc-primary) 0%, var(--mc-secondary) 100%);
+    border-radius: 9px;
+    transition: width 0.6s ease;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.memory-bar-used::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.memory-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 0.9rem;
+}
+
+.memory-used-label {
+    color: var(--mc-text);
+    font-weight: 600;
+}
+
+.memory-percentage-label {
+    color: var(--mc-primary-dark);
+    font-weight: 700;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+/* High usage warning */
+.memory-bar-used[style*="width: 8"]::after,
+.memory-bar-used[style*="width: 9"]::after {
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 193, 7, 0.4) 50%, transparent 100%);
+}
+
+.memory-bar-used[style*="width: 9"] {
+    background: linear-gradient(90deg, var(--mc-warning) 0%, #ff9800 100%);
+}
+
+.memory-bar-used[style*="width: 10"] {
+    background: linear-gradient(90deg, var(--mc-danger) 0%, #e74c3c 100%);
+}
+
+.memory-bar-used[style*="width: 10"]::after {
+    background: linear-gradient(90deg, transparent 0%, rgba(220, 53, 69, 0.4) 50%, transparent 100%);
+}
