@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-043 completed - Unified backup file naming convention between table/card and management interfaces to ensure consistent backup file discovery'
-  last_commit: 'fix: [CARD-043] Unify backup file naming convention between table/card and management interfaces'
-  next_action: 'CARD-044 - Next task in queue'
+  step: 'CARD-044 completed - Replaced table/card backup implementation with backup scheduler for unified backup quality and metadata'
+  last_commit: 'refactor: [CARD-044] Replace table/card backup implementation with backup scheduler'
+  next_action: 'CARD-045 - Next task in queue'
 queue:
-  - CARD-044
   - CARD-045
   - CARD-046
   - CARD-047

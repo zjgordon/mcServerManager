@@ -2,7 +2,6 @@ import os
 import shutil
 import signal
 import subprocess
-import tarfile
 import time
 from datetime import datetime
 
@@ -11,6 +10,7 @@ import requests
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
+from ..backup_scheduler import BackupScheduler
 from ..error_handlers import (
     DatabaseError,
     FileOperationError,
@@ -789,72 +789,16 @@ def backup_server(server_id):
     if not server:
         return redirect(url_for("server.home"))
 
-    server_dir = os.path.join("servers", server.server_name)
-    backup_dir = os.path.join("backups", server.server_name)
+    # Use backup scheduler for consistent backup creation with verification and compression
+    backup_scheduler = BackupScheduler()
+    backup_result = backup_scheduler.execute_backup_job(server_id)
 
-    # Create the backup directory if it doesn't exist
-    if not os.path.exists(backup_dir):
-        os.makedirs(backup_dir)
-
-    # Determine if the server is running
-    was_running = server.status == "Running" and server.pid is not None
-
-    # Stop the server if it's running
-    if was_running:
-        pid = server.pid
-        try:
-            process = psutil.Process(pid)
-            # Terminate the process
-            process.terminate()
-            try:
-                process.wait(timeout=10)
-            except psutil.TimeoutExpired:
-                # If the process did not terminate, kill it
-                process.kill()
-            server.status = "Stopped"
-            server.pid = None
-            db.session.commit()
-            flash(f"Server {server.server_name} stopped for backup.")
-        except psutil.NoSuchProcess:
-            server.status = "Stopped"
-            server.pid = None
-            db.session.commit()
-            flash(f"Server {server.server_name} was not running.")
-        except Exception as e:
-            flash(f"Error stopping server: {e}")
-            return redirect(url_for("server.home"))
-
-    # Create the backup file with a timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_filename = f"{server.server_name}_backup_{timestamp}.tar.gz"
-    backup_filepath = os.path.join(backup_dir, backup_filename)
-
-    try:
-        # Create a tar.gz archive of the server directory
-        with tarfile.open(backup_filepath, "w:gz") as tar:
-            tar.add(server_dir, arcname=os.path.basename(server_dir))
+    if backup_result.get("success"):
         flash(f"Backup of {server.server_name} completed successfully.")
-    except Exception as e:
-        flash(f"Error creating backup: {e}")
+    else:
+        error_msg = backup_result.get("error", "Unknown error occurred")
+        flash(f"Error creating backup: {error_msg}")
         return redirect(url_for("server.home"))
-
-    # Restart the server if it was running before
-    if was_running:
-        try:
-            # Build the command to start the server
-            command = ["java", "-Xms1024M", "-Xmx1024M", "-jar", "server.jar", "nogui"]
-
-            process = subprocess.Popen(
-                command, cwd=server_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
-
-            server.status = "Running"
-            server.pid = process.pid
-            db.session.commit()
-            flash(f"Server {server.server_name} restarted after backup.")
-        except Exception as e:
-            flash(f"Error restarting server: {e}")
-            return redirect(url_for("server.home"))
 
     return redirect(url_for("server.home"))
 

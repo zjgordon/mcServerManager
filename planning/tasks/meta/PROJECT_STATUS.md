@@ -137,3 +137,4 @@ RELEASE_NOTES.md)
 - CARD-041: ✅ Completed - Enhanced dev.sh with comprehensive testing, demo mode, and process management including individual test suite options, fresh install state reset, background server management, and shellcheck compliance
 - CARD-042: ✅ Completed - Fixed JSON.parse error in backup management trigger button with content-type checking and user-friendly error handling for HTML error responses
 - CARD-043: ✅ Completed - Unified backup file naming convention between table/card and management interfaces to ensure consistent backup file discovery
+- CARD-044: ✅ Completed - Replaced table/card backup implementation with backup scheduler for unified backup quality and metadata

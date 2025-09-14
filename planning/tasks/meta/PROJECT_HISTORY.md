@@ -1309,3 +1309,19 @@ buttons are now discoverable by the backup management interface, resolving
 the issue where manually triggered backups were not appearing in backup
 history. The fix maintains backward compatibility while ensuring all backup
 interfaces use consistent file naming patterns for seamless backup management.
+
+## 2025-01-14 - CARD-044: Replace table/card backup implementation with backup scheduler
+
+**Epic:** Epic 8 – Automated Backup Management  
+**Status:** Completed  
+**Owner:** cursor  
+
+Replaced custom tar.gz creation logic in backup_server() function with
+backup_scheduler.execute_backup_job() to unify backup implementation across
+all interfaces. Removed duplicate backup creation code from server_routes.py
+(lines 832-839) and replaced with comprehensive backup scheduler integration.
+This surgical change ensures that table/card backup buttons now use the same
+robust verification, compression, and metadata tracking as the backup management
+interface. Both interfaces now produce identical backup quality and metadata,
+eliminating inconsistent backup functionality and ensuring consistent user
+experience across all backup creation methods.
