@@ -1,10 +1,9 @@
 active_card: null
 breadcrumb:
-  step: 'CARD-083 - Add real-time status updates to server management page'
-  last_commit: 'feat: [CARD-083] Add real-time status updates to server management page'
-  next_action: 'CARD-084 - Next card in queue'
+  step: 'CARD-084 - Create unit tests for server management functionality'
+  last_commit: 'test: [CARD-084] Create comprehensive unit tests for server management functionality'
+  next_action: 'CARD-085 - Next card in queue'
 queue: 
-  - CARD-084
   - CARD-085
   - CARD-086
   

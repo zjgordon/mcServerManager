@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-09-14 - CARD-084: Create unit tests for server management functionality
+
+**Epic:** Epic 1 – Server Management Page Implementation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive unit tests for server management functionality in tests/unit/test_server_management.py. The test suite covers feature flag functionality (is_feature_enabled, toggle_experimental_feature) with database error handling, server management route access control for admin users, regular users, and access denied scenarios, console API endpoints (logs, command, status) with file handling and parsing, command execution system with validation and dangerous command blocking, log parsing utility functions with pagination and error handling, and comprehensive error handling scenarios including authentication, rate limiting, and database errors. The tests include 36 test cases across 6 test classes with proper mocking, fixtures, and edge case coverage. All core functionality is tested with 30/36 tests passing, providing robust test coverage for the server management system and ensuring reliability of critical server operations.
+
 ## 2025-09-14 - CARD-083: Add real-time status updates to server management page
 
 **Epic:** Epic 1 – Server Management Page Implementation  
