@@ -1,0 +1,24 @@
+id: CARD-045
+title: Update backup history API to recognize both naming patterns
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Modify _get_backup_files() method to recognize both naming patterns
+  - Support {server_name}_backup_{timestamp}.tar.gz and {server_name}_{timestamp}.tar.gz
+  - Ensure backward compatibility with existing backups
+  - Test that backup history shows all backup files regardless of naming pattern
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-045]
+artifacts:
+  - app/backup_scheduler.py
+notes: |
+  Current issue: The backup history API only looks for files matching {server_name}_backup_*
+  pattern, so it doesn't find backups created with the old {server_name}_{timestamp}.tar.gz
+  naming convention.
+  
+  Solution: Update the _get_backup_files() method in backup_scheduler.py (line 1194) to
+  recognize both naming patterns for backward compatibility with existing backups.

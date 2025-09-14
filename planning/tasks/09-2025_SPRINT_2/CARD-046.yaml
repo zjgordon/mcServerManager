@@ -1,0 +1,23 @@
+id: CARD-046
+title: Add error handling for backup trigger API to ensure JSON responses
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Ensure backup trigger API always returns JSON responses even on errors
+  - Add proper exception handling in trigger_backup() endpoint
+  - Test that API returns valid JSON for all error conditions
+  - Verify backup management page handles all API responses correctly
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-046]
+artifacts:
+  - app/routes/api/backup_routes.py
+notes: |
+  Current issue: The backup trigger API may return HTML error pages or non-JSON responses
+  when backup_scheduler.execute_backup_job() fails, causing JavaScript JSON.parse errors.
+  
+  Solution: Add comprehensive error handling in the trigger_backup() function to ensure
+  all responses are valid JSON, even when the backup scheduler encounters errors.

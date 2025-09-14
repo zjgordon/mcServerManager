@@ -1,0 +1,24 @@
+id: CARD-042
+title: Fix JSON.parse error in backup management trigger button
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Add proper error handling for non-JSON responses in backup-management.js
+  - Check response content-type before calling response.json()
+  - Display user-friendly error messages for server errors
+  - Test backup trigger button handles HTML error pages gracefully
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-042]
+artifacts:
+  - app/static/js/backup-management.js
+notes: |
+  The backup trigger button fails with "JSON.parse: unexpected character at line 1 column 1" 
+  when the server returns HTML error pages instead of JSON. Need to add content-type checking
+  and proper error handling in the triggerManualBackup() method before calling response.json().
+  
+  Current issue: JavaScript expects JSON but may receive HTML error pages (500 errors) or 
+  empty responses from the backup trigger API endpoint.

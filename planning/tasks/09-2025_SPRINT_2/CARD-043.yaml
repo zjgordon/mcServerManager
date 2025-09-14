@@ -1,0 +1,24 @@
+id: CARD-043
+title: Unify backup file naming convention between table/card and management interfaces
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Update table/card backup route to use backup scheduler naming convention
+  - Change backup filename from {server_name}_{timestamp}.tar.gz to {server_name}_backup_{timestamp}.tar.gz
+  - Ensure backup management page can find backups created by table/card buttons
+  - Test that both interfaces create backups with consistent naming
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-043]
+artifacts:
+  - app/routes/server_routes.py
+notes: |
+  Current discrepancy: Table/card backup buttons create files named {server_name}_{timestamp}.tar.gz
+  while backup management expects {server_name}_backup_{timestamp}.tar.gz. This causes backups
+  created via table/card buttons to not appear in the backup management history.
+  
+  Solution: Update the backup_server() function in server_routes.py to use the same naming
+  convention as the backup scheduler (line 829).

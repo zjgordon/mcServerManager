@@ -1,0 +1,26 @@
+id: CARD-047
+title: Test and validate unified backup functionality
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Test backup creation from both table/card buttons and management page
+  - Verify all backups appear in backup management history
+  - Test backup trigger button works without JSON.parse errors
+  - Validate backup file naming consistency across interfaces
+  - Test error handling for various failure scenarios
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-047]
+artifacts:
+  - tests/integration/test_backup_unification.py
+notes: |
+  Integration testing to ensure all backup functionality works consistently across
+  both the table/card interface and the backup management page. This includes
+  testing backup creation, history display, error handling, and file naming
+  consistency.
+  
+  Create comprehensive tests to validate the unified backup system works as expected
+  and maintains backward compatibility with existing backups.

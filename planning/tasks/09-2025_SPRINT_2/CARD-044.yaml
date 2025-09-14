@@ -1,0 +1,24 @@
+id: CARD-044
+title: Replace table/card backup implementation with backup scheduler
+epic: Epic 8 – Automated Backup Management
+sprint: 09-2025_SPRINT_2
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Replace custom tar.gz creation in backup_server() with backup_scheduler.execute_backup_job()
+  - Remove duplicate backup creation logic from server_routes.py
+  - Ensure table/card backups use same robust verification and compression as management interface
+  - Test that both interfaces produce identical backup quality and metadata
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-044]
+artifacts:
+  - app/routes/server_routes.py
+notes: |
+  Current issue: Table/card backup buttons use simple tarfile.open() while backup management
+  uses comprehensive backup_scheduler.execute_backup_job() with verification, compression,
+  and metadata. This creates inconsistent backup quality and functionality.
+  
+  Solution: Replace the custom backup creation logic in backup_server() function (lines 832-839)
+  with a call to backup_scheduler.execute_backup_job(server_id) to unify the implementation.
