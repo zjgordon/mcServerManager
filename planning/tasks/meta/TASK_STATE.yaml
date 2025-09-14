@@ -1,7 +1,7 @@
-active_card: CARD-050
+active_card: CARD-051
 breadcrumb:
-  step: 'CARD-049 - Fix backup API access control test expectations'
-  last_commit: 'fix: [CARD-049] Fix backup API access control test expectations'
-  next_action: 'CARD-050 - Next task in queue'
-queue: [CARD-050, CARD-051, CARD-052, CARD-053]
+  step: 'CARD-050 - Fix backup execution test failures and file handling issues'
+  last_commit: 'fix: [CARD-050] Fix backup execution test failures and file handling issues'
+  next_action: 'CARD-051 - Next task in queue'
+queue: [CARD-051, CARD-052, CARD-053]
   

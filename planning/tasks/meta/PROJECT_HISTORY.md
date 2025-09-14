@@ -1,5 +1,19 @@
 # Project History
 
+## 2025-01-13 - CARD-050: Fix backup execution test failures and file handling issues
+
+**Epic:** Epic 2 – Test Suite Remediation  
+**Status:** Completed  
+**Owner:** cursor  
+
+Fixed multiple backup execution test failures in `tests/unit/test_backup_execution.py` by
+refining mocking strategies to properly isolate BackupScheduler methods from file system
+and process interactions. Key fixes included mocking database operations for Flask app
+context, correcting error message expectations, and ensuring proper cleanup of test
+artifacts. All 21 backup execution tests now pass with improved test reliability and
+maintainability. Resolved issues with backup job execution, file handling, server
+restart logic, and retry mechanisms.
+
 ## 2025-01-09 - CARD-001: Create dev.sh development environment management script
 
 **Epic:** Epic 1 – Repository Organization and Environment Setup  

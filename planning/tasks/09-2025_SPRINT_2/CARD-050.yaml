@@ -2,7 +2,7 @@ id: CARD-050
 title: Fix backup execution test failures and file handling issues
 epic: Epic 2 – Test Suite Remediation
 sprint: 09-2025_SPRINT_2
-status: todo
+status: completed
 owner: cursor
 links: []
 acceptance:
