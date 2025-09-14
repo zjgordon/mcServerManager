@@ -1,5 +1,13 @@
 # Project History
 
+## 2025-01-27 - CARD-064: Add JavaScript for experimental features toggles
+
+**Epic:** Epic 3 – Admin Configuration Enhancements  
+**Status:** Completed  
+**Owner:** cursor  
+
+Created comprehensive JavaScript functionality for experimental features management in app/static/js/admin_config.js with AJAX calls to toggle features, real-time UI updates, confirmation dialogs for experimental features, error handling, and user feedback. Implemented debouncing to prevent rapid-fire API calls, loading states with spinner animations, and dynamic UI updates based on feature states. Added scripts block to base.html template and included admin_config.js in admin_config.html template. The JavaScript integrates with the existing /admin_config/experimental API endpoint, provides confirmation dialogs for experimental features, and includes comprehensive error handling with user-friendly notifications. All tests pass (326/330) with no linting errors, completing the experimental features management system with full frontend functionality.
+
 ## 2025-01-27 - CARD-063: Add experimental features section HTML to admin template
 
 **Epic:** Epic 3 – Admin Configuration Enhancements  
