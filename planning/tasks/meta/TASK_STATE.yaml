@@ -1,10 +1,9 @@
-active_card: CARD-107
+active_card: CARD-108
 breadcrumb:
-  step: 'CARD-106 - Create git tag for v0.2.0-alpha release'
-  last_commit: 'feat: [CARD-106] Create git tag for v0.2.0-alpha release'
-  next_action: 'CARD-108'
+  step: 'CARD-107 - Merge develop branch to main branch'
+  last_commit: 'chore: [CARD-107] merge develop into main for v0.2.0-alpha release'
+  next_action: 'CARD-109'
 queue:
-  - CARD-107
   - CARD-108
   - CARD-109
   - CARD-110

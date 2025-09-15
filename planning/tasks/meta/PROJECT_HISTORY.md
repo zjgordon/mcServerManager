@@ -1911,13 +1911,21 @@ Added test class and function execution capability to dev.sh development script 
 
 Added individual test file execution capability to dev.sh development script to allow agents to run specific test files instead of entire test suites. Implemented --file option for test command with support for both absolute and relative paths, file existence validation, and clear error messages for invalid files. Modified argument parsing in main() function to capture --file option and its value, passing them to run_tests() function. Updated run_tests() function to handle --file parameter with proper file validation logic that checks both direct path and tests/ directory fallback. Enhanced show_usage() function with comprehensive documentation including --file option description and usage examples. The implementation supports all existing test suite options (--unit, --integration, --e2e, --performance) and maintains backward compatibility. New usage examples include "./dev.sh test --file tests/unit/test_server_management.py" and "./dev.sh test --file test_server_management.py" for improved development workflow efficiency. All functionality tested with both existing and non-existent test files, confirming proper error handling and file execution.
 
+## 2025-01-27 - CARD-107: Merge develop branch to main branch
+
+**Epic:** Epic 4 – Version Release and Branch Management  
+**Status:** Completed  
+**Owner:** cursor
+
+Successfully merged the develop branch into main branch to publish the v0.2.0-alpha release. Switched to main branch, pulled latest changes, and performed a non-fast-forward merge with comprehensive commit message documenting all features brought from develop including server management page implementation, enhanced test suite capabilities, experimental features system, comprehensive backup scheduling, and memory management improvements. Verified merge success with all 416 tests passing and pushed changes to remote repository. The merge preserves complete branch history and establishes main branch as the stable release branch containing all v0.2.0-alpha features. This completes the release process for v0.2.0-alpha milestone.                
+
 ## 2025-01-27 - CARD-106: Create git tag for v0.2.0-alpha release
 
 **Epic:** Epic 4 – Version Release and Branch Management  
 **Status:** Completed  
 **Owner:** cursor
 
-Created annotated git tag v0.2.0-alpha to mark the v0.2.0-alpha release in the repository. Used comprehensive tag message documenting major features including server management page with real-time console streaming, enhanced command execution system, experimental features system with admin controls, advanced test suite with dev.sh enhancements, comprehensive backup scheduling system, and memory management improvements. Successfully pushed tag to remote repository and verified tag creation with proper content and commit reference. The tag serves as a stable release marker for the significant milestone achieved with enhanced server management capabilities, improved testing infrastructure, and robust backup scheduling system.
+Created annotated git tag v0.2.0-alpha to mark the v0.2.0-alpha release in the repository. Used comprehensive tag message documenting major features including server management page with real-time console streaming, enhanced command execution system, experimental features system with admin controls, advanced test suite with dev.sh enhancements, comprehensive backup scheduling system, and memory management improvements. Successfully pushed tag to remote repository and verified tag creation with proper content and commit reference. The tag serves as a stable release marker for the significant milestone achieved with enhanced server management capabilities, improved testing infrastructure, and robust backup scheduling system.                            
 
 ## 2025-01-27 - CARD-105: Update version numbers and release information for v0.2.0-alpha
 
