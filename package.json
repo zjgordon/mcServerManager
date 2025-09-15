@@ -1,6 +1,6 @@
 {
   "name": "minecraft-server-manager",
-  "version": "0.1.0-alpha",
+  "version": "0.2.0-alpha",
   "description": "A Flask-based web application for managing Minecraft servers",
   "main": "run.py",
   "scripts": {

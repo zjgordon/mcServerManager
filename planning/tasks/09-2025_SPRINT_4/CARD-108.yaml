@@ -1,0 +1,55 @@
+id: CARD-108
+title: Create new develop branch from main for next sprint
+epic: Epic 4 – Version Release and Branch Management
+sprint: 09-2025_SPRINT_4
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Objective**: Create a new develop branch from the updated main branch to begin work on the next sprint features.
+
+  **Prerequisites**:
+  - Main branch has been updated with v0.2.0-alpha release (CARD-107)
+  - All changes are properly merged and pushed
+
+  **Branch Creation Process**:
+  1. Ensure on main branch: `git checkout main`
+  2. Pull latest main: `git pull origin main`
+  3. Create new develop branch: `git checkout -b develop`
+  4. Push new develop branch: `git push -u origin develop`
+  5. Verify branch creation and setup
+
+  **Branch Configuration**:
+  - Set upstream tracking: `git branch --set-upstream-to=origin/develop develop`
+  - Verify tracking is correct: `git branch -vv`
+  - Ensure develop is ahead of main by default
+
+  **Branch Setup Verification**:
+  - Confirm develop branch exists locally and remotely
+  - Verify develop is tracking origin/develop
+  - Ensure develop contains all main branch changes
+  - Test that new commits can be made on develop
+
+  **Technical Requirements**:
+  - Create branch from latest main commit
+  - Set up proper upstream tracking
+  - Push branch to remote repository
+  - Verify branch is ready for development
+
+  **Validation**:
+  - Confirm develop branch exists and is current
+  - Verify tracking configuration is correct
+  - Ensure branch is ready for new feature development
+  - Test branch switching and pushing capabilities
+
+  **Next Steps**:
+  - This new develop branch will be used for implementing the Console Commands features
+  - All new development work should be done on this develop branch
+  - Future releases will follow the same merge process

@@ -1,9 +1,12 @@
-active_card: CARD-105
+active_card: CARD-106
 breadcrumb:
-  step: 'CARD-104 - Fix feature flag integration tests expecting 403 but getting 200'
-  last_commit: 'fix: [CARD-104] Fix feature flag integration tests expecting 403 but getting 200'
-  next_action: 'CARD-106'
+  step: 'CARD-105 - Update version numbers and release information for v0.2.0-alpha'
+  last_commit: 'feat: [CARD-105] Update version numbers and release information for v0.2.0-alpha'
+  next_action: 'CARD-107'
 queue:
-  - CARD-105
   - CARD-106
+  - CARD-107
+  - CARD-108
+  - CARD-109
+  - CARD-110
   

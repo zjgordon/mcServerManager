@@ -1911,6 +1911,14 @@ Added test class and function execution capability to dev.sh development script 
 
 Added individual test file execution capability to dev.sh development script to allow agents to run specific test files instead of entire test suites. Implemented --file option for test command with support for both absolute and relative paths, file existence validation, and clear error messages for invalid files. Modified argument parsing in main() function to capture --file option and its value, passing them to run_tests() function. Updated run_tests() function to handle --file parameter with proper file validation logic that checks both direct path and tests/ directory fallback. Enhanced show_usage() function with comprehensive documentation including --file option description and usage examples. The implementation supports all existing test suite options (--unit, --integration, --e2e, --performance) and maintains backward compatibility. New usage examples include "./dev.sh test --file tests/unit/test_server_management.py" and "./dev.sh test --file test_server_management.py" for improved development workflow efficiency. All functionality tested with both existing and non-existent test files, confirming proper error handling and file execution.
 
+## 2025-01-27 - CARD-105: Update version numbers and release information for v0.2.0-alpha
+
+**Epic:** Epic 4 – Version Release and Branch Management  
+**Status:** Completed  
+**Owner:** cursor
+
+Updated all version references from v0.1.0-alpha to v0.2.0-alpha across the codebase and documentation. Updated README.md version badge and current release section, added comprehensive v0.2.0-alpha section to CHANGELOG.md documenting all new features including server management page enhancements, experimental features system, advanced testing infrastructure, backup system enhancements, memory management improvements, process management enhancements, and security improvements. Created comprehensive RELEASE_NOTES.md for v0.2.0-alpha with detailed feature descriptions, technology stack updates, project statistics, and future roadmap. Updated package.json version field. Verified all version references are consistent across the codebase. The update maintains proper changelog format following Keep a Changelog standards and ensures comprehensive documentation of all major features added since v0.1.0-alpha.
+
 ## 2025-01-14 - CARD-104: Fix feature flag integration tests expecting 403 but getting 200
 
 **Epic:** Epic 3 – Test Suite Stabilization  

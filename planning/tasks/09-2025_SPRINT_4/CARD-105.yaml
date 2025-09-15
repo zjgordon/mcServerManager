@@ -1,0 +1,51 @@
+id: CARD-105
+title: Update version numbers and release information for v0.2.0-alpha
+epic: Epic 4 – Version Release and Branch Management
+sprint: 09-2025_SPRINT_4
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Objective**: Update all version references from v0.1.0-alpha to v0.2.0-alpha across the codebase and documentation.
+
+  **Files to Update**:
+  1. README.md - Update version badge and current release section
+  2. CHANGELOG.md - Add new v0.2.0-alpha section with all completed features
+  3. RELEASE_NOTES.md - Create comprehensive release notes for v0.2.0-alpha
+  4. pyproject.toml - Update version field if present
+  5. Any other version references in documentation
+
+  **Version Information**:
+  - Current: v0.1.0-alpha (September 4, 2025)
+  - New: v0.2.0-alpha (January 27, 2025)
+  - Status: Alpha Release
+
+  **Key Features to Document in v0.2.0-alpha**:
+  - Server Management Page with real-time console streaming
+  - Enhanced command execution system
+  - Experimental features system with admin controls
+  - Advanced test suite with dev.sh enhancements
+  - Comprehensive backup scheduling system
+  - Memory management and admin configuration improvements
+  - Process monitoring and health checks
+  - Enhanced security and authentication
+
+  **Technical Requirements**:
+  - Update all version badges and references consistently
+  - Document all major features added since v0.1.0-alpha
+  - Maintain proper changelog format following Keep a Changelog
+  - Ensure release notes are comprehensive and user-friendly
+  - Verify all version references are updated consistently
+
+  **Validation**:
+  - Search codebase for any remaining v0.1.0-alpha references
+  - Verify changelog format and completeness
+  - Ensure release notes cover all major features
+  - Confirm version consistency across all files

@@ -118,6 +118,10 @@ RELEASE_NOTES.md)
 - CARD-026: ✅ Completed - updated development documentation for new pre-commit standards,
   including pre-commit setup guide, contributing guidelines, and comprehensive workflow documentation
 
+## 09-2025_SPRINT_4 Status
+
+- CARD-105: ✅ Completed - Updated version numbers and release information for v0.2.0-alpha across README.md, CHANGELOG.md, RELEASE_NOTES.md, and package.json with comprehensive documentation of all new features
+
 ## 09-2025_SPRINT_3 Status
 
 - CARD-104: ✅ Completed - Fixed feature flag integration tests expecting 403 but getting 200 by uncommenting feature flag checks in console API endpoints, resolving 3 failing tests and ensuring proper access control when server_management_page feature is disabled
