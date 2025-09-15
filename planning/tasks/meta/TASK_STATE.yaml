@@ -1,10 +1,10 @@
-active_card: CARD-108
+active_card: CARD-109
 breadcrumb:
-  step: 'CARD-107 - Merge develop branch to main branch'
-  last_commit: 'chore: [CARD-107] merge develop into main for v0.2.0-alpha release'
-  next_action: 'CARD-109'
+  step: 'CARD-108 - Create new develop branch from main for next sprint'
+  last_commit: 'chore: [CARD-108] create new develop branch from main for next sprint'
+  next_action: 'CARD-110'
 queue:
-  - CARD-108
   - CARD-109
   - CARD-110
+  - CARD-111
   
