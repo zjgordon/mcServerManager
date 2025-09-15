@@ -1,0 +1,43 @@
+id: CARD-102
+title: Fix experimental feature toggle functionality returning False
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: The `test_toggle_experimental_feature_success` test is failing because the toggle function returns False instead of True, and there's a warning about "Non-admin user attempted to toggle experimental feature".
+  
+  **Root Cause**: The toggle_experimental_feature function is checking for admin permissions but the test is not properly authenticated as an admin user, causing the function to return False.
+  
+  **Affected Test**:
+  - `tests/unit/test_experimental_features.py::TestExperimentalFeatures::test_toggle_experimental_feature_success`
+  
+  **Log Evidence**:
+  - Warning: "Non-admin user attempted to toggle experimental feature 'test_toggle_success'"
+  - Test expects `result is True` but gets `False`
+  
+  **Actions Required**:
+  1. Review the toggle_experimental_feature function in app/utils.py
+  2. Check admin permission validation logic
+  3. Fix test setup to properly authenticate as admin user
+  4. Ensure the function returns True when toggle is successful
+  5. Verify admin permission checking is working correctly
+  
+  **Files to Examine**:
+  - app/utils.py (toggle_experimental_feature function)
+  - tests/unit/test_experimental_features.py (test setup and authentication)
+  - app/models.py (User model admin flag)
+  
+  **Technical Requirements**:
+  - Ensure test user has is_admin=True
+  - Verify admin permission check logic
+  - Fix return value when toggle is successful
+  - Remove or fix the non-admin user warning

@@ -1,0 +1,42 @@
+id: CARD-094
+title: Fix server management page integration test failures
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Server management page integration tests are failing due to missing routes, authentication issues, and feature flag problems.
+  
+  **Root Cause**: The server management page route may not be properly registered or accessible, and there are issues with feature flag integration in the page tests.
+  
+  **Affected Tests**:
+  - `test_server_management_page_feature_enabled` (expects 200, gets 404)
+  - `test_console_api_access_control_admin_vs_regular_user` (ERROR)
+  - `test_regular_user_cannot_toggle_feature_flag` (ERROR)
+  
+  **Actions Required**:
+  1. Verify server management page route registration and accessibility
+  2. Fix feature flag integration in server management page
+  3. Resolve authentication and authorization issues in page tests
+  4. Ensure proper test setup for server management page functionality
+  5. Fix any missing imports or dependencies in test files
+  
+  **Files to Examine**:
+  - app/routes/server_routes.py (server management page route)
+  - tests/integration/test_server_management.py (page integration tests)
+  - Feature flag integration in server management page
+  - Test fixture setup for page testing
+  
+  **Route and Page Issues**:
+  - Server management page may not be properly registered
+  - Feature flag integration may be missing from page
+  - Authentication middleware may not be working correctly
+  - Test setup may be missing required components

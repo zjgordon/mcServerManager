@@ -11,6 +11,7 @@ from .health import health_bp
 from .logging import logger, setup_logging
 from .models import BackupSchedule, Configuration, Server, User
 from .routes.api.backup_routes import backup_api_bp
+from .routes.api.console_routes import console_api_bp
 from .routes.auth_routes import auth_bp
 from .routes.server_routes import server_bp
 from .security import add_security_headers, audit_log
@@ -37,16 +38,18 @@ def create_app():
     app.register_blueprint(server_bp)
     app.register_blueprint(health_bp)
     app.register_blueprint(backup_api_bp)
+    app.register_blueprint(console_api_bp)
 
     # Template context processor for global variables
     @app.context_processor
     def inject_app_config():
-        from .utils import get_app_config
+        from .utils import get_app_config, is_feature_enabled
 
         config = get_app_config()
         return {
             "app_title": config["app_title"],
             "server_hostname": config["server_hostname"],
+            "is_feature_enabled": is_feature_enabled,
         }
 
     # Custom Jinja filters

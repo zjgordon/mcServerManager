@@ -162,6 +162,27 @@ show_usage() {
     echo "  --integration       Run only integration tests (tests/integration/)"
     echo "  --e2e               Run only end-to-end tests (tests/e2e/)"
     echo "  --performance       Run only performance tests (tests/performance/)"
+    echo "  --file FILE         Run specific test file (relative or absolute path)"
+    echo "  --class CLASS       Run specific test class (use with --file)"
+    echo "  --function FUNCTION Run specific test function (use with --file and --class)"
+    echo "  --pattern PATTERN   Run tests matching pattern using pytest -k syntax"
+    echo "  --list              List available tests without running them"
+    echo "  --pytest-args ARGS  Pass arbitrary pytest options (e.g., --pytest-args "-v --tb=short")"
+    echo "  --verbose, -v       Run tests with verbose output"
+    echo "  --quiet, -q         Run tests with quiet output"
+    echo "  --tb=STYLE          Set traceback style (short, long, auto, line, native)"
+    echo "  --maxfail=NUM       Stop after NUM failures"
+    echo "  --markers           Show available pytest markers"
+    echo ""
+    echo "TROUBLESHOOTING:"
+    echo "  Common Issues and Solutions:"
+    echo "  • Test file not found: Use absolute path or ensure file exists in tests/ directory"
+    echo "  • Class/function not found: Use --list to see available classes and functions"
+    echo "  • Pattern syntax errors: Ensure balanced parentheses and valid pytest -k syntax"
+    echo "  • Port conflicts: Use -p PORT to specify different port or --kill to stop running server"
+    echo "  • Permission errors: Ensure proper file permissions and virtual environment activation"
+    echo "  • Import errors: Run 'pip install -r requirements.txt' to install dependencies"
+    echo "  • Test failures: Use --verbose for detailed output or --tb=long for full tracebacks"
     echo ""
     echo "EXAMPLES:"
     echo "  $0                                    # Run with default settings"
@@ -174,6 +195,33 @@ show_usage() {
     echo "  $0 test --integration                # Run only integration tests"
     echo "  $0 test --e2e                        # Run only e2e tests"
     echo "  $0 test --performance                # Run only performance tests"
+    echo "  $0 test --file tests/unit/test_server_management.py  # Run specific test file"
+    echo "  $0 test --file test_server_management.py             # Run test file (relative path)"
+    echo "  $0 test --file tests/unit/test_server_management.py --class TestServerManagementRouteAccessControl  # Run specific test class"
+    echo "  $0 test --file tests/unit/test_server_management.py --class TestServerManagementRouteAccessControl --function test_validate_server_access_owner_user  # Run specific test function"
+    echo "  $0 test --pattern \"authentication\"                  # Run tests matching 'authentication'"
+    echo "  $0 test --pattern \"server_management and not integration\"  # Run server_management tests excluding integration"
+    echo "  $0 test --unit --pattern \"test_execute_server_command\"  # Run unit tests matching pattern"
+    echo "  $0 test --pattern \"backup or restore\"               # Run tests matching 'backup' or 'restore'"
+    echo "  $0 test --list                                        # List all available tests"
+    echo "  $0 test --list --unit                                 # List unit tests only"
+    echo "  $0 test --list --pattern \"authentication\"           # List tests matching pattern"
+    echo "  $0 test --list --file tests/unit/test_server_management.py  # List tests in specific file"
+    echo "  $0 test --pytest-args "-v --tb=short"               # Run with verbose output and short traceback"
+    echo "  $0 test --pytest-args "-m 'not slow' --maxfail=5"   # Run with markers and max failures"
+    echo "  $0 test --file test_server_management.py --pytest-args "-v --tb=long"  # Run specific file with options"
+    echo "  $0 test --unit --pytest-args "--cov=app --cov-report=html"  # Run unit tests with coverage"
+    echo "  $0 test --verbose                                    # Run with verbose output"
+    echo "  $0 test --quiet                                      # Run with quiet output"
+    echo "  $0 test --tb=short                                   # Run with short traceback style"
+    echo "  $0 test --maxfail=3                                  # Stop after 3 failures"
+    echo ""
+    echo "  Additional Comprehensive Examples:"
+    echo "  $0 test --file tests/unit/test_server_management.py --class TestConsoleAPIEndpoints  # Run specific class (updated example)"
+    echo "  $0 test --file test_server_management.py --class TestConsoleAPIEndpoints --function test_send_console_command_success  # Run specific function (updated example)"
+    echo "  $0 test --pattern \"authentication\"                  # Pattern filtering (as specified in card)"
+    echo "  $0 test --list --unit                                 # List unit tests (as specified in card)"
+    echo "  $0 test --pytest-args \"-v --tb=short\"               # Advanced pytest options (as specified in card)"
     echo "  $0 setup                             # Setup environment without running"
     echo ""
     echo "PROCESS MANAGEMENT:"
@@ -243,6 +291,16 @@ setup_demo_mode() {
 run_tests() {
     local test_type="all"
     local test_path="tests/"
+    local test_file=""
+    local test_class=""
+    local test_function=""
+    local test_pattern=""
+    local list_mode=false
+    local pytest_args=""
+    local verbose=false
+    local quiet=false
+    local tb_style=""
+    local maxfail=""
 
     # Parse test arguments
     while [[ $# -gt 0 ]]; do
@@ -267,11 +325,203 @@ run_tests() {
                 test_path="tests/performance/"
                 shift
                 ;;
+            --file)
+                test_file="$2"
+                shift 2
+                ;;
+            --class)
+                test_class="$2"
+                shift 2
+                ;;
+            --function)
+                test_function="$2"
+                shift 2
+                ;;
+            --pattern)
+                test_pattern="$2"
+                shift 2
+                ;;
+            --list)
+                list_mode=true
+                shift
+                ;;
+            --pytest-args)
+                pytest_args="$2"
+                shift 2
+                ;;
+            --verbose|-v)
+                verbose=true
+                shift
+                ;;
+            --quiet|-q)
+                quiet=true
+                shift
+                ;;
+            --tb=*)
+                tb_style="${1#--tb=}"
+                shift
+                ;;
+            --maxfail=*)
+                maxfail="${1#--maxfail=}"
+                shift
+                ;;
+            --markers)
+                pytest_args="$pytest_args --markers"
+                shift
+                ;;
             *)
                 shift
                 ;;
         esac
     done
+
+    # Handle list mode
+    if [ "$list_mode" = true ]; then
+        # Build arguments for list_tests
+        local list_args=""
+        if [ "$test_type" != "all" ]; then
+            list_args="$list_args --$test_type"
+        fi
+        if [ -n "$test_file" ]; then
+            list_args="$list_args --file $test_file"
+        fi
+        if [ -n "$test_pattern" ]; then
+            list_args="$list_args --pattern $test_pattern"
+        fi
+        list_tests $list_args
+        return
+    fi
+
+    # Build pytest arguments from options
+    local final_pytest_args=""
+    if [ "$verbose" = true ]; then
+        final_pytest_args="$final_pytest_args -v"
+    fi
+    if [ "$quiet" = true ]; then
+        final_pytest_args="$final_pytest_args -q"
+    fi
+    if [ -n "$tb_style" ]; then
+        final_pytest_args="$final_pytest_args --tb=$tb_style"
+    fi
+    if [ -n "$maxfail" ]; then
+        final_pytest_args="$final_pytest_args --maxfail=$maxfail"
+    fi
+    if [ -n "$pytest_args" ]; then
+        final_pytest_args="$final_pytest_args $pytest_args"
+    fi
+
+    # Validate that class/function options are used with file option
+    if [ -n "$test_class" ] && [ -z "$test_file" ]; then
+        print_error "--class option requires --file option"
+        print_info "Usage: $0 test --file FILE --class CLASS"
+        exit 1
+    fi
+
+    if [ -n "$test_function" ] && [ -z "$test_file" ]; then
+        print_error "--function option requires --file option"
+        print_info "Usage: $0 test --file FILE --class CLASS --function FUNCTION"
+        exit 1
+    fi
+
+    # Validate pattern syntax
+    if [ -n "$test_pattern" ]; then
+        # Basic validation for common pytest -k syntax issues
+        if [[ "$test_pattern" =~ ^[[:space:]]*$ ]]; then
+            print_error "Pattern cannot be empty or whitespace only"
+            print_info "Usage: $0 test --pattern 'PATTERN'"
+            exit 1
+        fi
+
+        # Check for balanced parentheses (basic check)
+        local open_parens
+        local close_parens
+        open_parens=$(echo "$test_pattern" | tr -cd '(' | wc -c)
+        close_parens=$(echo "$test_pattern" | tr -cd ')' | wc -c)
+        if [ "$open_parens" -ne "$close_parens" ]; then
+            print_error "Unbalanced parentheses in pattern: $test_pattern"
+            print_info "Please ensure all parentheses are balanced"
+            exit 1
+        fi
+
+        print_info "Pattern validation passed: $test_pattern"
+    fi
+
+    # Handle file-specific test execution
+    if [ -n "$test_file" ]; then
+        # Validate file exists
+        if [ ! -f "$test_file" ]; then
+            # Try relative path from tests directory
+            if [ -f "tests/$test_file" ]; then
+                test_file="tests/$test_file"
+            else
+                print_error "Test file not found: $test_file"
+                print_info "Please provide a valid test file path (relative or absolute)"
+                exit 1
+            fi
+        fi
+
+        # Check if pytest is available
+        if ! command -v pytest &> /dev/null; then
+            print_error "pytest not found. Installing..."
+            pip install pytest >/dev/null 2>&1
+        fi
+
+        # Build pytest path based on provided options
+        local pytest_path="$test_file"
+
+        if [ -n "$test_class" ]; then
+            pytest_path="$test_file::$test_class"
+            print_info "Running specific test class: $test_class in $test_file"
+
+            # Validate class exists
+            if ! pytest --collect-only "$pytest_path" >/dev/null 2>&1; then
+                print_error "Test class '$test_class' not found in $test_file"
+                print_info "Available classes in $test_file:"
+                pytest --collect-only "$test_file" 2>/dev/null | grep "Class" | head -10
+                exit 1
+            fi
+        fi
+
+        if [ -n "$test_function" ]; then
+            if [ -z "$test_class" ]; then
+                print_error "--function option requires --class option"
+                print_info "Usage: $0 test --file FILE --class CLASS --function FUNCTION"
+                exit 1
+            fi
+            pytest_path="$test_file::$test_class::$test_function"
+            print_info "Running specific test function: $test_function in $test_class"
+
+            # Validate function exists
+            if ! pytest --collect-only "$pytest_path" >/dev/null 2>&1; then
+                print_error "Test function '$test_function' not found in class '$test_class'"
+                print_info "Available functions in $test_class:"
+                pytest --collect-only "$test_file::$test_class" 2>/dev/null | grep "Function" | head -10
+                exit 1
+            fi
+        fi
+
+        if [ -z "$test_class" ] && [ -z "$test_function" ]; then
+            print_info "Running specific test file: $test_file"
+        fi
+
+        # Run the specific test
+        if [ -n "$test_pattern" ]; then
+            print_info "Running tests with pattern: $test_pattern"
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$pytest_path" -k "$test_pattern" $final_pytest_args
+            else
+                pytest "$pytest_path" -v -k "$test_pattern"
+            fi
+        else
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$pytest_path" $final_pytest_args
+            else
+                pytest "$pytest_path" -v
+            fi
+        fi
+        print_success "Test execution completed"
+        return
+    fi
 
     print_info "Running $test_type tests..."
 
@@ -293,8 +543,157 @@ run_tests() {
     # Run tests
     if [ -d "$test_path" ]; then
         print_info "Running tests from: $test_path"
-        pytest "$test_path" -v
+        if [ -n "$test_pattern" ]; then
+            print_info "Running tests with pattern: $test_pattern"
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$test_path" -k "$test_pattern" $final_pytest_args
+            else
+                pytest "$test_path" -v -k "$test_pattern"
+            fi
+        else
+            if [ -n "$final_pytest_args" ]; then
+                pytest "$test_path" $final_pytest_args
+            else
+                pytest "$test_path" -v
+            fi
+        fi
         print_success "Tests completed"
+    else
+        print_warning "No tests directory found"
+    fi
+}
+
+# Function to list available tests
+list_tests() {
+    local test_type="all"
+    local test_path="tests/"
+    local test_file=""
+    local test_pattern=""
+    local max_tests=50  # Limit output for large test suites
+
+    # Parse test arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --unit)
+                test_type="unit"
+                test_path="tests/unit/"
+                shift
+                ;;
+            --integration)
+                test_type="integration"
+                test_path="tests/integration/"
+                shift
+                ;;
+            --e2e)
+                test_type="e2e"
+                test_path="tests/e2e/"
+                shift
+                ;;
+            --performance)
+                test_type="performance"
+                test_path="tests/performance/"
+                shift
+                ;;
+            --file)
+                test_file="$2"
+                shift 2
+                ;;
+            --pattern)
+                test_pattern="$2"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    # Validate pattern syntax
+    if [ -n "$test_pattern" ]; then
+        # Basic validation for common pytest -k syntax issues
+        if [[ "$test_pattern" =~ ^[[:space:]]*$ ]]; then
+            print_error "Pattern cannot be empty or whitespace only"
+            print_info "Usage: $0 test --list --pattern 'PATTERN'"
+            exit 1
+        fi
+
+        # Check for balanced parentheses (basic check)
+        local open_parens
+        local close_parens
+        open_parens=$(echo "$test_pattern" | tr -cd '(' | wc -c)
+        close_parens=$(echo "$test_pattern" | tr -cd ')' | wc -c)
+        if [ "$open_parens" -ne "$close_parens" ]; then
+            print_error "Unbalanced parentheses in pattern: $test_pattern"
+            print_info "Please ensure all parentheses are balanced"
+            exit 1
+        fi
+
+        print_info "Pattern validation passed: $test_pattern"
+    fi
+
+    # Check if pytest is available
+    if ! command -v pytest &> /dev/null; then
+        print_error "pytest not found. Installing..."
+        pip install pytest >/dev/null 2>&1
+    fi
+
+    # Handle file-specific test listing
+    if [ -n "$test_file" ]; then
+        # Validate file exists
+        if [ ! -f "$test_file" ]; then
+            # Try relative path from tests directory
+            if [ -f "tests/$test_file" ]; then
+                test_file="tests/$test_file"
+            else
+                print_error "Test file not found: $test_file"
+                print_info "Please provide a valid test file path (relative or absolute)"
+                exit 1
+            fi
+        fi
+
+        print_info "Listing tests in file: $test_file"
+        if [ -n "$test_pattern" ]; then
+            print_info "Filtering by pattern: $test_pattern"
+            pytest --collect-only "$test_file" -k "$test_pattern" --quiet | head -n "$max_tests"
+        else
+            pytest --collect-only "$test_file" --quiet | head -n "$max_tests"
+        fi
+        return
+    fi
+
+    # Check if test directory exists
+    if [ ! -d "$test_path" ]; then
+        print_warning "Test directory $test_path not found"
+        if [ "$test_type" != "all" ]; then
+            print_info "Falling back to all tests..."
+            test_path="tests/"
+        fi
+    fi
+
+    # List tests
+    if [ -d "$test_path" ]; then
+        print_info "Listing $test_type tests from: $test_path"
+        if [ -n "$test_pattern" ]; then
+            print_info "Filtering by pattern: $test_pattern"
+            pytest --collect-only "$test_path" -k "$test_pattern" --quiet | head -n "$max_tests"
+        else
+            pytest --collect-only "$test_path" --quiet | head -n "$max_tests"
+        fi
+
+        # Show test count
+        local total_tests
+        if [ -n "$test_pattern" ]; then
+            total_tests=$(pytest --collect-only "$test_path" -k "$test_pattern" --quiet 2>/dev/null | grep -c "Function\|Class" || echo "0")
+        else
+            total_tests=$(pytest --collect-only "$test_path" --quiet 2>/dev/null | grep -c "Function\|Class" || echo "0")
+        fi
+
+        if [ "$total_tests" -gt "$max_tests" ]; then
+            print_info "Showing first $max_tests tests (total: $total_tests)"
+            print_info "Use --pattern to filter results or run specific tests"
+        else
+            print_info "Total tests found: $total_tests"
+        fi
     else
         print_warning "No tests directory found"
     fi
@@ -381,19 +780,20 @@ main() {
             run|test|setup)
                 command="$1"
                 shift
-                # For test command, continue parsing test-specific options
+                # For test command, break out of parsing and let run_tests handle remaining args
                 if [ "$command" = "test" ]; then
-                    continue
+                    break
                 fi
                 ;;
-            --unit|--integration|--e2e|--performance)
+            --unit|--integration|--e2e|--performance|--file|--class|--function|--pattern|--list|--pytest-args|--verbose|-v|--quiet|-q|--tb=*|--maxfail=*|--markers)
                 # These are test-specific options, only valid after 'test' command
                 if [ "$command" != "test" ]; then
                     print_error "Option $1 is only valid with 'test' command"
                     show_usage
                     exit 1
                 fi
-                shift
+                # For test command, break out of parsing and let run_tests handle remaining args
+                break
                 ;;
             *)
                 print_error "Unknown option: $1"

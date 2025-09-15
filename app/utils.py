@@ -3,6 +3,8 @@ import json
 import os
 import re
 import socket
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
 
 import psutil
 import requests
@@ -1214,6 +1216,73 @@ def verify_backup_restore(backup_filepath, test_extract_dir=None):
         }
 
 
+def get_system_memory_for_admin():
+    """
+    Get system memory data specifically formatted for admin configuration page.
+
+    This function extracts and formats system memory data from the existing
+    get_system_metrics() function and returns a dictionary with total system
+    memory, used memory, available memory, and percentages formatted for
+    display in the memory bar gauge.
+
+    Returns:
+        dict: Formatted memory data for admin configuration display
+    """
+    try:
+        from .monitoring import get_system_metrics
+
+        # Get system metrics
+        metrics = get_system_metrics()
+
+        # Check if metrics collection was successful
+        if metrics.get("status") != "healthy":
+            logger.warning("System metrics collection failed, using fallback values")
+            return {
+                "total_memory_gb": 8.0,
+                "used_memory_gb": 4.0,
+                "available_memory_gb": 4.0,
+                "usage_percentage": 50.0,
+                "status": "unhealthy",
+                "error": metrics.get("message", "Unknown error"),
+            }
+
+        # Extract memory data from metrics
+        memory_data = metrics.get("memory", {})
+
+        # Convert bytes to GB for display
+        total_bytes = memory_data.get("total_bytes", 0)
+        used_bytes = memory_data.get("used_bytes", 0)
+        available_bytes = memory_data.get("available_bytes", 0)
+
+        # Convert to GB (1 GB = 1024^3 bytes)
+        total_gb = round(total_bytes / (1024**3), 2)
+        used_gb = round(used_bytes / (1024**3), 2)
+        available_gb = round(available_bytes / (1024**3), 2)
+
+        # Recalculate percentage from GB values for consistency
+        calculated_percentage = round((used_gb / total_gb) * 100, 1) if total_gb > 0 else 0.0
+
+        return {
+            "total_memory_gb": total_gb,
+            "used_memory_gb": used_gb,
+            "available_memory_gb": available_gb,
+            "usage_percentage": calculated_percentage,
+            "status": "healthy",
+            "error": None,
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting system memory for admin: {str(e)}")
+        return {
+            "total_memory_gb": 8.0,
+            "used_memory_gb": 4.0,
+            "available_memory_gb": 4.0,
+            "usage_percentage": 50.0,
+            "status": "unhealthy",
+            "error": str(e),
+        }
+
+
 def generate_backup_quality_score(verification_results):
     """
     Generate a quality score for backup verification results.
@@ -1282,4 +1351,626 @@ def generate_backup_quality_score(verification_results):
             "quality_level": "Unknown",
             "deductions": [f"Score calculation error: {str(e)}"],
             "max_possible_score": 100,
+        }
+
+
+def get_experimental_features():
+    """
+    Get all experimental features from the database.
+
+    Returns:
+        list: List of experimental feature dictionaries
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        features = ExperimentalFeature.query.all()
+        return [
+            {
+                "id": feature.id,
+                "feature_key": feature.feature_key,
+                "feature_name": feature.feature_name,
+                "description": feature.description,
+                "enabled": feature.enabled,
+                "is_stable": feature.is_stable,
+                "created_at": feature.created_at,
+                "updated_at": feature.updated_at,
+                "updated_by": feature.updated_by,
+            }
+            for feature in features
+        ]
+    except Exception as e:
+        logger.error(f"Error getting experimental features: {str(e)}")
+        return []
+
+
+def toggle_experimental_feature(feature_key, enabled):
+    """
+    Toggle an experimental feature on or off.
+
+    Args:
+        feature_key: The unique key identifying the feature
+        enabled: Boolean indicating whether to enable or disable the feature
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        # Check if user is authenticated and is admin
+        try:
+            if not current_user.is_authenticated or not current_user.is_admin:
+                logger.warning(
+                    f"Non-admin user attempted to toggle experimental feature '{feature_key}'"
+                )
+                return False
+            user_id = current_user.id
+        except (AttributeError, RuntimeError):
+            logger.warning(f"User authentication check failed for feature toggle '{feature_key}'")
+            return False
+
+        feature = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if not feature:
+            logger.warning(f"Experimental feature '{feature_key}' not found")
+            return False
+
+        feature.enabled = enabled
+        feature.updated_by = user_id
+        db.session.commit()
+
+        logger.info(f"Experimental feature '{feature_key}' {'enabled' if enabled else 'disabled'}")
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling experimental feature '{feature_key}': {str(e)}")
+        db.session.rollback()
+        return False
+
+
+def is_feature_enabled(feature_key):
+    """
+    Check if an experimental feature is enabled.
+
+    Args:
+        feature_key: The unique key identifying the feature
+
+    Returns:
+        bool: True if feature is enabled, False otherwise
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        feature = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if not feature:
+            logger.debug(f"Experimental feature '{feature_key}' not found, returning False")
+            return False
+
+        return feature.enabled
+    except Exception as e:
+        logger.error(f"Error checking if feature '{feature_key}' is enabled: {str(e)}")
+        return False
+
+
+def add_experimental_feature(
+    feature_key, feature_name, description, enabled=False, is_stable=False
+):
+    """
+    Add a new experimental feature to the database.
+
+    Args:
+        feature_key: Unique key for the feature
+        feature_name: Human-readable name for the feature
+        description: Description of what the feature does
+        enabled: Whether the feature is enabled by default
+        is_stable: Whether the feature is considered stable
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        from .models import ExperimentalFeature
+
+        # Check if feature already exists
+        existing = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if existing:
+            logger.warning(f"Experimental feature '{feature_key}' already exists")
+            return False
+
+        # Try to get current user, but don't fail if not available
+        try:
+            user_id = current_user.id if current_user.is_authenticated else None
+        except (AttributeError, RuntimeError):
+            user_id = None
+
+        # Create new feature
+        feature = ExperimentalFeature(
+            feature_key=feature_key,
+            feature_name=feature_name,
+            description=description,
+            enabled=enabled,
+            is_stable=is_stable,
+            updated_by=user_id,
+        )
+
+        db.session.add(feature)
+        db.session.commit()
+
+        logger.info(f"Added experimental feature '{feature_key}': {feature_name}")
+        return True
+    except Exception as e:
+        logger.error(f"Error adding experimental feature '{feature_key}': {str(e)}")
+        db.session.rollback()
+        return False
+
+
+def parse_server_logs(log_file_path: str, page: int = 1, page_size: int = 100) -> Dict:
+    """
+    Parse Minecraft server log files and extract structured log data.
+
+    Args:
+        log_file_path: Path to the log file to parse
+        page: Page number for pagination (1-based)
+        page_size: Number of log entries per page
+
+    Returns:
+        dict: Parsed log data with entries, pagination info, and metadata
+    """
+    try:
+        # Validate input parameters
+        if not log_file_path or not isinstance(log_file_path, str):
+            raise ValidationError("Invalid log file path provided")
+
+        if page < 1:
+            raise ValidationError("Page number must be >= 1")
+
+        if page_size < 1 or page_size > 1000:
+            raise ValidationError("Page size must be between 1 and 1000")
+
+        # Check if file exists and is readable
+        if not os.path.exists(log_file_path):
+            logger.warning(f"Log file not found: {log_file_path}")
+            return {
+                "success": False,
+                "error": "Log file not found",
+                "entries": [],
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0,
+                    "total_entries": 0,
+                },
+            }
+
+        if not os.access(log_file_path, os.R_OK):
+            logger.warning(f"Log file not readable: {log_file_path}")
+            return {
+                "success": False,
+                "error": "Log file not readable",
+                "entries": [],
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0,
+                    "total_entries": 0,
+                },
+            }
+
+        logger.info(f"Parsing server logs from: {log_file_path}, page: {page}, size: {page_size}")
+
+        # Read log file with safe file operation
+        with SafeFileOperation(log_file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        if not lines:
+            return {
+                "success": True,
+                "entries": [],
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0,
+                    "total_entries": 0,
+                },
+                "metadata": {"file_size": os.path.getsize(log_file_path), "total_lines": 0},
+            }
+
+        # Parse log entries
+        parsed_entries = []
+        total_entries = 0
+
+        for line_num, line in enumerate(lines, 1):
+            line = line.strip()
+            if not line:
+                continue
+
+            # Try to parse different Minecraft log formats
+            parsed_entry = _parse_log_line(line, line_num)
+            if parsed_entry:
+                parsed_entries.append(parsed_entry)
+                total_entries += 1
+
+        # Calculate pagination
+        total_pages = (total_entries + page_size - 1) // page_size
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+
+        # Get page entries
+        page_entries = parsed_entries[start_idx:end_idx]
+
+        # Calculate file metadata
+        file_size = os.path.getsize(log_file_path)
+
+        result = {
+            "success": True,
+            "entries": page_entries,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "total_entries": total_entries,
+                "has_next": page < total_pages,
+                "has_prev": page > 1,
+            },
+            "metadata": {
+                "file_size": file_size,
+                "total_lines": len(lines),
+                "parsed_lines": total_entries,
+                "parse_rate": round((total_entries / len(lines)) * 100, 2) if lines else 0,
+            },
+        }
+
+        logger.info(
+            f"Successfully parsed {total_entries} log entries from {len(lines)} total lines"
+        )
+        return result
+
+    except ValidationError as e:
+        logger.error(f"Validation error parsing logs: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "entries": [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "total_entries": 0,
+            },
+        }
+    except FileOperationError as e:
+        logger.error(f"File operation error parsing logs: {str(e)}")
+        return {
+            "success": False,
+            "error": f"File operation failed: {str(e)}",
+            "entries": [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "total_entries": 0,
+            },
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error parsing server logs: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Log parsing failed: {str(e)}",
+            "entries": [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0,
+                "total_entries": 0,
+            },
+        }
+
+
+def _parse_log_line(line: str, line_number: int) -> Optional[Dict]:
+    """
+    Parse a single log line and extract structured data.
+
+    Args:
+        line: Raw log line to parse
+        line_number: Line number in the file
+
+    Returns:
+        dict: Parsed log entry or None if parsing failed
+    """
+    try:
+        # Common Minecraft server log patterns
+        patterns = [
+            # Standard format: [HH:MM:SS] [Thread/Level] message
+            r"^\[(\d{2}:\d{2}:\d{2})\] \[([^/]+)/(\w+)\]: (.+)$",
+            # Alternative format: [YYYY-MM-DD HH:MM:SS] [Thread/Level] message
+            r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] \[([^/]+)/(\w+)\]: (.+)$",
+            # Simple format: [HH:MM:SS] message
+            r"^\[(\d{2}:\d{2}:\d{2})\] (.+)$",
+            # Timestamp with milliseconds: [HH:MM:SS.mmm] [Thread/Level] message
+            r"^\[(\d{2}:\d{2}:\d{2}\.\d{3})\] \[([^/]+)/(\w+)\]: (.+)$",
+            # Paper/Spigot format: [HH:MM:SS INFO]: message
+            r"^\[(\d{2}:\d{2}:\d{2}) (\w+)\]: (.+)$",
+        ]
+
+        for pattern in patterns:
+            match = re.match(pattern, line)
+            if match:
+                groups = match.groups()
+
+                # Extract timestamp
+                timestamp_str = groups[0]
+                timestamp = _parse_timestamp(timestamp_str)
+
+                # Extract level and message based on pattern
+                if len(groups) == 4:  # [time] [thread/level]: message
+                    thread = groups[1]
+                    level = groups[2]
+                    message = groups[3]
+                elif len(groups) == 3:
+                    if "/" in groups[1]:  # [time] [thread/level]: message
+                        thread, level = groups[1].split("/", 1)
+                        message = groups[2]
+                    else:  # [time] level: message
+                        thread = "main"
+                        level = groups[1]
+                        message = groups[2]
+                elif len(groups) == 2:  # [time] message
+                    thread = "main"
+                    level = _infer_log_level(groups[1])
+                    message = groups[1]
+                else:
+                    continue
+
+                # Normalize log level
+                level = _normalize_log_level(level)
+
+                return {
+                    "line_number": line_number,
+                    "timestamp": timestamp,
+                    "level": level,
+                    "thread": thread,
+                    "message": message,
+                    "raw_line": line,
+                }
+
+        # If no pattern matches, treat as unparsed line with inferred level
+        level = _infer_log_level(line)
+        return {
+            "line_number": line_number,
+            "timestamp": None,
+            "level": level,
+            "thread": "unknown",
+            "message": line,
+            "raw_line": line,
+        }
+
+    except Exception as e:
+        logger.debug(f"Error parsing log line {line_number}: {str(e)}")
+        return None
+
+
+def _parse_timestamp(timestamp_str: str) -> Optional[str]:
+    """
+    Parse timestamp string and return ISO format timestamp.
+
+    Args:
+        timestamp_str: Raw timestamp string from log
+
+    Returns:
+        str: ISO format timestamp or None if parsing fails
+    """
+    try:
+        # Try different timestamp formats
+        formats = [
+            "%H:%M:%S",  # HH:MM:SS
+            "%Y-%m-%d %H:%M:%S",  # YYYY-MM-DD HH:MM:SS
+            "%H:%M:%S.%f",  # HH:MM:SS.mmm
+        ]
+
+        for fmt in formats:
+            try:
+                dt = datetime.strptime(timestamp_str, fmt)
+                # If no date, assume today
+                if fmt == "%H:%M:%S" or fmt == "%H:%M:%S.%f":
+                    dt = dt.replace(
+                        year=datetime.now().year, month=datetime.now().month, day=datetime.now().day
+                    )
+                return dt.isoformat()
+            except ValueError:
+                continue
+
+        return None
+    except Exception:
+        return None
+
+
+def _normalize_log_level(level: str) -> str:
+    """
+    Normalize log level to standard format.
+
+    Args:
+        level: Raw log level string
+
+    Returns:
+        str: Normalized log level
+    """
+    level = level.upper()
+
+    # Map common variations to standard levels
+    level_map = {
+        "INFO": "INFO",
+        "INFORMATION": "INFO",
+        "WARN": "WARN",
+        "WARNING": "WARN",
+        "ERROR": "ERROR",
+        "ERR": "ERROR",
+        "FATAL": "ERROR",
+        "CRITICAL": "ERROR",
+        "DEBUG": "DEBUG",
+        "TRACE": "DEBUG",
+        "FINE": "DEBUG",
+        "FINEST": "DEBUG",
+    }
+
+    return level_map.get(level, "INFO")
+
+
+def _infer_log_level(message: str) -> str:
+    """
+    Infer log level from message content.
+
+    Args:
+        message: Log message content
+
+    Returns:
+        str: Inferred log level
+    """
+    message_lower = message.lower()
+
+    # Error indicators
+    if any(
+        word in message_lower
+        for word in ["error", "exception", "failed", "fail", "crash", "fatal", "cannot", "unable"]
+    ):
+        return "ERROR"
+
+    # Warning indicators
+    if any(word in message_lower for word in ["warn", "warning", "caution", "deprecated"]):
+        return "WARN"
+
+    # Debug indicators
+    if any(word in message_lower for word in ["debug", "trace", "verbose"]):
+        return "DEBUG"
+
+    # Default to INFO
+    return "INFO"
+
+
+def _validate_command_input(server_id, command):
+    """Validate command input parameters."""
+    if not server_id or not isinstance(server_id, int):
+        raise ValidationError("Invalid server ID provided")
+
+    if not command or not isinstance(command, str):
+        raise ValidationError("Invalid command provided")
+
+    command = command.strip()
+    if not command:
+        raise ValidationError("Command cannot be empty")
+
+    return command
+
+
+def _check_dangerous_commands(command):
+    """Check for potentially dangerous commands."""
+    dangerous_commands = ["rm", "del", "format", "shutdown", "halt", "reboot"]
+    command_lower = command.lower()
+    for dangerous in dangerous_commands:
+        if command_lower.startswith(dangerous):
+            logger.warning(f"Potentially dangerous command blocked: {command}")
+            raise ValidationError(f"Command '{dangerous}' is not allowed")
+
+
+def _validate_server_running(server):
+    """Validate that server is running and update status if needed."""
+    if not server.pid:
+        return False, "Server is not running"
+
+    # Verify process is actually running
+    process_status = verify_process_status(server.pid)
+    if not process_status["is_running"]:
+        # Update server status in database
+        try:
+            server.status = "Stopped"
+            server.pid = None
+            db.session.commit()
+            logger.info(f"Updated server {server.server_name} status to Stopped")
+        except Exception as e:
+            logger.error(f"Failed to update server status: {str(e)}")
+
+        return False, "Server process is not running"
+
+    return True, None
+
+
+def _send_command_to_process(server, command):
+    """Send command to server process stdin."""
+    import psutil
+
+    process = psutil.Process(server.pid)
+
+    try:
+        # Write command to process stdin
+        process.stdin.write(f"{command}\n")
+        process.stdin.flush()
+
+        # Log the command execution for security
+        logger.info(
+            f"Executed command '{command}' on server {server.server_name} (PID {server.pid})"
+        )
+
+        return {
+            "success": True,
+            "message": f"Command '{command}' executed successfully",
+            "server_id": server.id,
+            "server_name": server.server_name,
+            "command": command,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+    except (OSError, IOError) as e:
+        logger.error(f"Failed to send command to server process: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Failed to send command to server: {str(e)}",
+            "server_id": server.id,
+            "command": command,
+        }
+
+
+def execute_server_command(server_id, command):
+    """
+    Execute a command on a running Minecraft server process.
+
+    Args:
+        server_id: ID of the server to execute command on
+        command: Command string to send to the server
+
+    Returns:
+        dict: Execution result with success/error status and details
+    """
+    try:
+        # Input validation
+        command = _validate_command_input(server_id, command)
+        _check_dangerous_commands(command)
+
+        # Get server from database
+        from .models import Server
+
+        server = Server.query.get(server_id)
+        if not server:
+            raise ValidationError("Server not found")
+
+        # Validate server is running
+        is_running, error_msg = _validate_server_running(server)
+        if not is_running:
+            return {
+                "success": False,
+                "error": error_msg,
+                "server_id": server_id,
+                "command": command,
+            }
+
+        # Send command to process
+        return _send_command_to_process(server, command)
+
+    except ValidationError as e:
+        logger.warning(f"Command execution validation failed: {str(e)}")
+        return {"success": False, "error": str(e), "server_id": server_id, "command": command}
+    except Exception as e:
+        logger.error(f"Unexpected error executing server command: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Command execution failed: {str(e)}",
+            "server_id": server_id,
+            "command": command,
         }

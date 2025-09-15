@@ -1,0 +1,22 @@
+id: CARD-075
+title: Create server management page template
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Create app/templates/server_management.html extending base.html. Include four main sections:
+  1) Server Information (name, version, port, memory, config options, status, owner info for admins)
+  2) Server Controls (start/stop, copy link, manage backups, delete server)
+  3) Real-Time Console (log display area, controls for refresh/clear/download)
+  4) Server Commands (pre-defined command buttons, custom command input, command history)
+  Use consistent styling with existing design system and ensure mobile responsiveness.
+

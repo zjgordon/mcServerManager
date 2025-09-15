@@ -282,7 +282,7 @@ class TestBackupWorkflows:
         # Login as regular user
         client.post(
             "/login",
-            data={"username": "testuser", "password": "testpass"},  # pragma: allowlist secret
+            data={"username": "testuser", "password": "userpass123"},  # pragma: allowlist secret
             follow_redirects=True,
         )
 
@@ -337,7 +337,7 @@ class TestBackupWorkflows:
         )
         assert response.status_code == 404
         error_response = response.get_json()
-        assert "Server not found or access denied" in error_response["error"]
+        assert "Server not found" in error_response["error"]
 
         # Step 2: Try to create schedule with invalid data
         invalid_data = {

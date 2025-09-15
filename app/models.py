@@ -265,3 +265,74 @@ class BackupSchedule(db.Model):
             errors.append("Retention days must be between 1 and 365")
 
         return errors
+
+
+class ExperimentalFeature(db.Model):
+    """Experimental feature toggles and metadata for feature gating system."""
+
+    __tablename__ = "experimental_feature"
+
+    id = db.Column(db.Integer, primary_key=True)
+    feature_key = db.Column(db.String(100), unique=True, nullable=False)
+    feature_name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    enabled = db.Column(db.Boolean, nullable=False, default=False)
+    is_stable = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updated_at = db.Column(
+        db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp()
+    )
+    updated_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+
+    # Relationship to User model
+    updater = db.relationship("User", foreign_keys=[updated_by])
+
+    # Add constraints
+    __table_args__ = (
+        CheckConstraint("LENGTH(feature_key) >= 1", name="check_feature_key_length"),
+        CheckConstraint("LENGTH(feature_key) <= 100", name="check_feature_key_max_length"),
+        CheckConstraint("LENGTH(feature_name) >= 1", name="check_feature_name_length"),
+        CheckConstraint("LENGTH(feature_name) <= 200", name="check_feature_name_max_length"),
+        CheckConstraint("LENGTH(description) >= 1", name="check_description_length"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ExperimentalFeature {self.feature_key}: {self.feature_name}>"
+
+    def validate_feature_key(self) -> bool:
+        """Validate feature_key format."""
+        if not self.feature_key:
+            return False
+        if len(self.feature_key) < 1 or len(self.feature_key) > 100:
+            return False
+        # Feature key should contain only alphanumeric characters, dots, hyphens, and underscores
+        return bool(re.match(r"^[a-zA-Z0-9._-]+$", self.feature_key))
+
+    def validate_feature_name(self) -> bool:
+        """Validate feature_name format."""
+        return (
+            self.feature_name is not None
+            and len(self.feature_name) >= 1
+            and len(self.feature_name) <= 200
+        )
+
+    def validate_description(self) -> bool:
+        """Validate description format."""
+        return self.description is not None and len(self.description) >= 1
+
+    def validate(self) -> list:
+        """Validate experimental feature data and return list of errors."""
+        errors = []
+
+        if not self.validate_feature_key():
+            errors.append(
+                "Feature key must be 1-100 characters and contain only alphanumeric characters, dots, hyphens, and underscores"
+            )
+
+        if not self.validate_feature_name():
+            errors.append("Feature name must be 1-200 characters and cannot be empty")
+
+        if not self.validate_description():
+            errors.append("Description cannot be empty")
+
+        return errors

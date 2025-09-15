@@ -1,0 +1,40 @@
+id: CARD-089
+title: Fix error message inconsistencies in command execution
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: done  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Tests expect "Failed to send command" error message but receive "Server process is not running" instead.
+  
+  **Root Cause**: The error handling logic in execute_server_command() is checking server process status before attempting to send the command, so it returns the "Server process is not running" error instead of the command-specific error.
+  
+  **Affected Tests**:
+  - `test_execute_server_command_process_error` (unit test)
+  - `test_console_api_process_error_handling` (integration test)
+  
+  **Actions Required**:
+  1. Review the execute_server_command() function in app/utils.py
+  2. Understand the expected behavior: should tests expect process errors or command errors?
+  3. Either fix the error handling logic or update test expectations
+  4. Ensure consistent error messages across unit and integration tests
+  5. Verify that mock process setup in tests is working correctly
+  
+  **Files to Examine**:
+  - app/utils.py (execute_server_command function, lines 1924+)
+  - app/utils.py (_send_command_to_process function, lines 1889+)
+  - tests/unit/test_server_management.py (lines 340-347)
+  - tests/integration/test_server_management.py (lines 550-561)
+  
+  **Error Message Analysis**:
+  - Current: "Server process is not running" (from line 1884 in utils.py)
+  - Expected: "Failed to send command" (from line 1918 in utils.py)
+  - The issue is that process verification happens before command execution

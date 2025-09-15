@@ -1,0 +1,42 @@
+id: CARD-104
+title: Fix feature flag integration tests expecting 403 but getting 200
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Multiple integration tests are failing because they expect 403 (Forbidden) responses when feature flags are disabled, but are getting 200 (OK) responses instead.
+  
+  **Root Cause**: The feature flag checking logic in console API endpoints is not properly working, allowing access when the feature should be disabled.
+  
+  **Affected Tests**:
+  - `test_console_api_feature_flag_integration` (expects 403, gets 200)
+  - `test_feature_flag_affects_all_console_endpoints` (expects 403, gets 200)
+  - `test_console_api_feature_flag_disabled` (expects 403, gets 200)
+  
+  **Actions Required**:
+  1. Review feature flag checking logic in console API endpoints
+  2. Verify is_feature_enabled() function is working correctly
+  3. Ensure feature flags are properly disabled in tests
+  4. Fix the feature flag integration to properly block access when disabled
+  5. Verify test setup is correctly disabling the feature flag
+  
+  **Files to Examine**:
+  - app/routes/api/console_routes.py (feature flag checks)
+  - app/utils.py (is_feature_enabled function)
+  - tests/integration/test_server_management.py (feature flag test setup)
+  - tests/unit/test_server_management.py (feature flag test setup)
+  
+  **Technical Requirements**:
+  - Ensure is_feature_enabled("server_management_page") returns False when disabled
+  - Verify console API endpoints check feature flag before processing requests
+  - Fix test setup to properly disable feature flags
+  - Ensure consistent feature flag state across tests

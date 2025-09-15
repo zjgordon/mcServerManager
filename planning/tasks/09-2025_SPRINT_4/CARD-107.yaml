@@ -1,0 +1,61 @@
+id: CARD-107
+title: Merge develop branch to main branch
+epic: Epic 4 – Version Release and Branch Management
+sprint: 09-2025_SPRINT_4
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Objective**: Merge the develop branch into the main branch to publish the v0.2.0-alpha release.
+
+  **Prerequisites**:
+  - Git tag v0.2.0-alpha created (CARD-106)
+  - All tests passing on develop branch
+  - Code is in stable, releasable state
+
+  **Merge Process**:
+  1. Switch to main branch: `git checkout main`
+  2. Pull latest main: `git pull origin main`
+  3. Merge develop into main: `git merge develop`
+  4. Push main branch: `git push origin main`
+  5. Verify merge was successful
+
+  **Merge Strategy**:
+  - Use regular merge (not fast-forward) to preserve branch history
+  - Create merge commit with descriptive message
+  - Ensure all changes from develop are included in main
+
+  **Merge Commit Message**:
+  ```
+  Merge develop into main for v0.2.0-alpha release
+
+  This merge brings all development work from the develop branch
+  into main for the v0.2.0-alpha release, including:
+  - Server Management Page implementation
+  - Enhanced test suite capabilities
+  - Experimental features system
+  - Comprehensive backup scheduling
+  - Memory management improvements
+
+  Tag: v0.2.0-alpha
+  ```
+
+  **Technical Requirements**:
+  - Ensure clean working directory before merge
+  - Verify no conflicts exist between branches
+  - Use proper merge commit message
+  - Push changes to remote repository
+  - Verify merge was successful
+
+  **Validation**:
+  - Confirm main branch contains all develop changes
+  - Verify git log shows proper merge commit
+  - Ensure remote main branch is updated
+  - Test that main branch is in working state

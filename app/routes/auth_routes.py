@@ -14,7 +14,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from ..extensions import db, login_manager
+from ..extensions import csrf, db, login_manager
 from ..models import User
 from ..security import (
     PasswordPolicyError,
@@ -23,6 +23,13 @@ from ..security import (
     rate_limit,
     rate_limiter,
     validate_password_policy,
+)
+from ..utils import (
+    get_app_config,
+    get_experimental_features,
+    get_system_memory_for_admin,
+    toggle_experimental_feature,
+    update_app_config,
 )
 
 auth_bp = Blueprint("auth", __name__)
@@ -371,7 +378,6 @@ def reset_user_password(user_id):
 @admin_required
 def admin_config():
     """Admin configuration page for system settings."""
-    from ..utils import get_app_config, update_app_config
 
     if request.method == "POST":
         try:
@@ -418,6 +424,18 @@ def admin_config():
             else:
                 flash("Failed to update system configuration.", "danger")
 
+            # Handle server management page feature toggle
+            server_management_page_enabled = "server_management_page" in request.form
+            toggle_success = toggle_experimental_feature(
+                "server_management_page", server_management_page_enabled
+            )
+
+            if toggle_success:
+                feature_status = "enabled" if server_management_page_enabled else "disabled"
+                flash(f"Server Management Page feature {feature_status} successfully.", "info")
+            else:
+                flash("Failed to update Server Management Page feature setting.", "warning")
+
         except ValueError:
             flash("Invalid memory values provided.", "danger")
         except Exception as e:
@@ -428,6 +446,12 @@ def admin_config():
     # Get current configuration
     config = get_app_config()
 
+    # Get system memory data for admin display
+    system_memory = get_system_memory_for_admin()
+
+    # Get experimental features data for admin display
+    experimental_features = get_experimental_features()
+
     # Debug logging
     print(f"DEBUG: Current config: {config}")
 
@@ -437,7 +461,79 @@ def admin_config():
         server_hostname=config["server_hostname"],
         max_total_mb=config["max_total_mb"],
         max_per_server_mb=config["max_server_mb"],
+        system_memory=system_memory,
+        experimental_features=experimental_features,
     )
+
+
+@auth_bp.route("/admin_config/experimental", methods=["GET", "POST"])
+@login_required
+@admin_required
+@csrf.exempt
+def experimental_features():
+    """Handle experimental feature requests (admin only)."""
+    if request.method == "GET":
+        # Return current experimental features
+        try:
+            features = get_experimental_features()
+            return jsonify({"features": features}), 200
+        except Exception as e:
+            current_app.logger.error(f"Error fetching experimental features: {str(e)}")
+            return jsonify({"success": False, "error": "Internal server error"}), 500
+
+    # Handle POST requests (toggle feature)
+    return experimental_features_toggle()
+
+
+def experimental_features_toggle():
+    """Handle experimental feature toggle requests (admin only)."""
+    try:
+        # Get JSON data from request
+        if not request.is_json:
+            return jsonify({"success": False, "error": "Request must be JSON"}), 400
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"}), 400
+
+        feature_key = data.get("feature_key")
+        enabled = data.get("enabled")
+
+        # Validate input
+        if not feature_key:
+            return jsonify({"success": False, "error": "feature_key is required"}), 400
+
+        if enabled is None:
+            return jsonify({"success": False, "error": "enabled field is required"}), 400
+
+        if not isinstance(enabled, bool):
+            return jsonify({"success": False, "error": "enabled must be a boolean"}), 400
+
+        # Toggle the experimental feature
+        success = toggle_experimental_feature(feature_key, enabled)
+
+        if success:
+            # Get updated features list for response
+            features = get_experimental_features()
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "message": f"Feature '{feature_key}' {'enabled' if enabled else 'disabled'} successfully",
+                        "features": features,
+                    }
+                ),
+                200,
+            )
+        else:
+            return (
+                jsonify({"success": False, "error": f"Feature '{feature_key}' not found"}),
+                200,
+            )
+
+    except Exception as e:
+        current_app.logger.error(f"Error in experimental features toggle: {str(e)}")
+        return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
 @auth_bp.route("/admin/process_management", methods=["GET", "POST"])

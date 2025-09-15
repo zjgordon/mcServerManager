@@ -8,7 +8,14 @@ import pytest
 
 # Import all fixture modules to make them available to tests
 from tests.fixtures import clients, database, mocks, server_files, servers, users, utilities
-from tests.fixtures.clients import authenticated_client, client, client_no_admin
+from tests.fixtures.clients import (
+    authenticated_client,
+    authenticated_inactive_client,
+    authenticated_regular_client,
+    client,
+    client_no_admin,
+    unauthenticated_client,
+)
 
 # Re-export key fixtures from database module for backward compatibility
 from tests.fixtures.database import app, app_no_admin, clean_db

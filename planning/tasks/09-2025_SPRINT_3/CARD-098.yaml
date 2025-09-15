@@ -1,0 +1,45 @@
+id: CARD-098
+title: Add pattern-based test filtering to dev.sh
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: done  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Agents need a way to run tests that match specific patterns or keywords without knowing exact file/class/function names.
+  
+  **Solution**: Add --pattern option to dev.sh test command for keyword-based test filtering using pytest's -k option.
+  
+  **Implementation Details**:
+  1. Add --pattern option to test command argument parsing
+  2. Extend run_tests() function to use pytest -k flag with pattern
+  3. Support pytest pattern syntax (AND, OR, NOT operators)
+  4. Add validation for pattern syntax
+  5. Update help documentation with examples
+  
+  **New Usage Examples**:
+  - `./dev.sh test --pattern "authentication"`
+  - `./dev.sh test --pattern "server_management and not integration"`
+  - `./dev.sh test --unit --pattern "test_execute_server_command"`
+  - `./dev.sh test --pattern "backup or restore"`
+  
+  **Files to Modify**:
+  - dev.sh (main script file)
+  - Update show_usage() function with pattern examples
+  - Extend run_tests() function to handle -k flag
+  - Update argument parsing in main() function
+  
+  **Technical Requirements**:
+  - Use pytest -k flag for pattern matching
+  - Support pytest pattern operators (and, or, not)
+  - Validate pattern syntax (basic validation)
+  - Show helpful error messages for invalid patterns
+  - Maintain compatibility with existing options
+  - Allow combining with test suite options (--unit, --integration, etc.)

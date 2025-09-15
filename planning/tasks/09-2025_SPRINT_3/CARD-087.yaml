@@ -1,0 +1,39 @@
+id: CARD-087
+title: Fix authentication and authorization test failures
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Multiple tests are failing due to authentication/authorization issues where tests expect 403 (Forbidden) but receive 401 (Unauthorized).
+  
+  **Root Cause**: Tests are not properly authenticated before making requests to protected endpoints, or the authentication flow is not working correctly in the test environment.
+  
+  **Affected Tests**:
+  - `test_console_api_feature_flag_disabled` (expects 403, gets 401)
+  - `test_backup_workflow_with_user_permissions` (expects 403, gets 401)
+  - `test_server_access_control` (expects 403, gets 401)
+  - `test_console_api_authentication_flow` (expects 401, gets 302)
+  
+  **Actions Required**:
+  1. Review test authentication setup in fixtures and conftest.py
+  2. Ensure proper session management in tests
+  3. Fix authentication flow for both admin and regular user tests
+  4. Verify that protected endpoints properly check authentication before authorization
+  5. Update tests to use correct authentication methods
+  
+  **Files to Examine**:
+  - tests/fixtures/clients.py
+  - tests/conftest.py
+  - tests/unit/test_server_management.py (lines 461-480)
+  - tests/integration/test_server_management.py (authentication flow tests)
+  - tests/e2e/test_backup_workflows.py
+  - tests/integration/test_backup_api.py

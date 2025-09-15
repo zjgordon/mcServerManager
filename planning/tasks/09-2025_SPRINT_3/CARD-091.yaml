@@ -1,0 +1,42 @@
+id: CARD-091
+title: Fix server access control and validation test failures
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Tests are failing due to server access control validation issues, including unexpected ValueError exceptions and incorrect response formats.
+  
+  **Root Cause**: Server access validation logic is throwing exceptions instead of returning proper error responses, and some tests expect different response formats than what's being returned.
+  
+  **Affected Tests**:
+  - `test_validate_server_access_owner_user` (ValueError: Access denied)
+  - `test_console_api_server_not_found` (KeyError: 'success')
+  - `test_console_api_invalid_json_data` (expects 400, gets 500)
+  - `test_console_api_rate_limiting_integration` (expects 429, gets 200)
+  
+  **Actions Required**:
+  1. Review validate_server_access() function in console_routes.py
+  2. Fix exception handling to return proper HTTP responses instead of raising exceptions
+  3. Ensure consistent error response formats across all endpoints
+  4. Fix rate limiting configuration in tests
+  5. Update error handling to return proper JSON responses with 'success' field
+  
+  **Files to Examine**:
+  - app/routes/api/console_routes.py (validate_server_access function)
+  - tests/unit/test_server_management.py (access control tests)
+  - tests/integration/test_server_management.py (error handling tests)
+  - app/security.py (rate limiting configuration)
+  
+  **Response Format Issues**:
+  - Tests expect JSON responses with 'success' field
+  - Some endpoints may not be returning consistent response formats
+  - Error handling needs to be standardized across API endpoints

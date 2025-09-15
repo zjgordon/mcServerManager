@@ -1,0 +1,20 @@
+id: CARD-071
+title: Remove dummy experimental features from admin config
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Remove the dummy experimental feature cards (advanced_monitoring, auto_backup, multi_user, plugin_manager) 
+  from app/templates/admin_config.html lines 151-239. Replace with a single "Server Management Page" 
+  feature card that is experimental and disabled by default. This prepares the system for the real 
+  server management page feature flag.
+

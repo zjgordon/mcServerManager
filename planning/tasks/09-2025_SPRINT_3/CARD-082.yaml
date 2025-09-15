@@ -1,0 +1,23 @@
+id: CARD-082
+title: Add server management page CSS styling
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Add CSS styles to app/static/css/style.css for the server management page:
+  - Responsive layout for mobile and desktop
+  - Console display styling with proper font and colors
+  - Command input and button styling
+  - Server information card layout
+  - Control button styling consistent with existing design
+  - Mobile-optimized touch controls
+

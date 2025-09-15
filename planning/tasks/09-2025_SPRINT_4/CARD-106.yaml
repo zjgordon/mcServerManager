@@ -1,0 +1,55 @@
+id: CARD-106
+title: Create git tag for v0.2.0-alpha release
+epic: Epic 4 – Version Release and Branch Management
+sprint: 09-2025_SPRINT_4
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Objective**: Create a git tag for the v0.2.0-alpha release to mark this version in the repository.
+
+  **Prerequisites**: 
+  - All version updates completed in CARD-105
+  - All tests passing
+  - Code is in a stable, releasable state
+
+  **Git Tag Creation**:
+  1. Create annotated tag: `git tag -a v0.2.0-alpha -m "Release v0.2.0-alpha"`
+  2. Push tag to remote: `git push origin v0.2.0-alpha`
+  3. Verify tag creation: `git tag -l` and `git show v0.2.0-alpha`
+
+  **Tag Message Content**:
+  ```
+  Release v0.2.0-alpha
+
+  Major Features:
+  - Server Management Page with real-time console streaming
+  - Enhanced command execution system
+  - Experimental features system with admin controls
+  - Advanced test suite with dev.sh enhancements
+  - Comprehensive backup scheduling system
+  - Memory management and admin configuration improvements
+
+  This release represents a significant milestone with enhanced server
+  management capabilities, improved testing infrastructure, and robust
+  backup scheduling system.
+  ```
+
+  **Technical Requirements**:
+  - Use annotated tag (not lightweight) for proper release tracking
+  - Include comprehensive tag message describing key features
+  - Push tag to remote repository
+  - Verify tag is properly created and accessible
+
+  **Validation**:
+  - Confirm tag exists locally and remotely
+  - Verify tag points to correct commit
+  - Ensure tag message is properly formatted
+  - Test tag checkout to verify it works correctly

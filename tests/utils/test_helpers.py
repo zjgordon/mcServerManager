@@ -273,3 +273,77 @@ def save_test_data(filename: str, data: Dict[str, Any]):
 
     with open(file_path, "w") as f:
         json.dump(data, f, indent=2)
+
+
+def create_experimental_feature(
+    app: Flask,
+    feature_key: str,
+    feature_name: str,
+    description: str = "Test feature",
+    enabled: bool = True,
+    is_stable: bool = False,
+) -> Any:
+    """
+    Create an experimental feature for testing.
+
+    Args:
+        app: Flask application instance
+        feature_key: Unique key for the feature
+        feature_name: Display name for the feature
+        description: Description of the feature
+        enabled: Whether the feature is enabled
+        is_stable: Whether the feature is stable
+
+    Returns:
+        Created ExperimentalFeature instance
+    """
+    from app.models import ExperimentalFeature
+
+    with app.app_context():
+        # Check if feature already exists
+        existing = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if existing:
+            return existing
+
+        feature = ExperimentalFeature(
+            feature_key=feature_key,
+            feature_name=feature_name,
+            description=description,
+            enabled=enabled,
+            is_stable=is_stable,
+            updated_by=None,
+        )
+        from app.extensions import db
+
+        db.session.add(feature)
+        db.session.commit()
+        return feature
+
+
+def ensure_experimental_feature_state(
+    app: Flask,
+    feature_key: str,
+    enabled: bool,
+) -> bool:
+    """
+    Ensure an experimental feature has a specific enabled state.
+
+    Args:
+        app: Flask application instance
+        feature_key: Key of the feature to update
+        enabled: Desired enabled state
+
+    Returns:
+        True if feature was found and updated, False otherwise
+    """
+    from app.models import ExperimentalFeature
+
+    with app.app_context():
+        feature = ExperimentalFeature.query.filter_by(feature_key=feature_key).first()
+        if feature:
+            feature.enabled = enabled
+            from app.extensions import db
+
+            db.session.commit()
+            return True
+        return False

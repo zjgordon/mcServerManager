@@ -1,6 +1,6 @@
 # Minecraft Server Manager
 
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha-blue.svg)](https://github.com/yourusername/mcServerManager/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0--alpha-blue.svg)](https://github.com/yourusername/mcServerManager/releases)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-3.0.3-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -10,7 +10,7 @@
 A professional web application for creating, managing, and monitoring Minecraft game
 servers with enterprise-grade process management and user administration.
 
-## 🏷️ Current Release: v0.1.0-alpha
+## 🏷️ Current Release: v0.2.0-alpha
 
 This is the alpha release of Minecraft Server Manager, featuring a complete server
 management system with advanced process monitoring, user administration, and security
@@ -296,7 +296,9 @@ for details.
 
 ## 🔄 Version History
 
-- **v0.1.0-alpha** (Current): Alpha release with comprehensive server management,
+- **v0.2.0-alpha** (Current): Enhanced alpha release with server management page,
+  real-time console streaming, experimental features, and comprehensive testing
+- **v0.1.0-alpha**: Alpha release with comprehensive server management,
   process monitoring, and security features
 - **v0.0.2**: Code review, cleanup, and AI-enhanced improvements (Sprint 2)
 - **v0.0.1**: Initial HarvardX school project implementation (Sprint 1)

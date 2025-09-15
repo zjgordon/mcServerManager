@@ -1,0 +1,44 @@
+id: CARD-090
+title: Fix mock configuration and process verification issues
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Tests are failing due to improper mock configuration, specifically "argument of type 'Mock' is not iterable" errors in process verification.
+  
+  **Root Cause**: Mock objects are not properly configured for process verification functions, causing type errors when the code tries to iterate over mock return values.
+  
+  **Affected Tests**:
+  - Multiple tests showing "Error verifying process X: argument of type 'Mock' is not iterable"
+  - Process status verification failures in server management tests
+  
+  **Actions Required**:
+  1. Review mock setup in test fixtures, particularly for psutil.Process
+  2. Fix verify_process_status() function mocking
+  3. Ensure mock return values match expected data types
+  4. Update test fixtures to properly mock process verification
+  5. Add proper cleanup for mock objects
+  
+  **Files to Examine**:
+  - tests/fixtures/mocks.py
+  - tests/fixtures/servers.py
+  - app/utils.py (verify_process_status function)
+  - Any test files using @patch for process mocking
+  
+  **Mock Configuration Issues**:
+  - Mock objects need to return proper data types (lists, dicts, etc.)
+  - Process verification functions expect specific return formats
+  - Need to ensure mocks are properly scoped and cleaned up
+  
+  **Error Pattern**:
+  - "Error verifying process X: argument of type 'Mock' is not iterable"
+  - This suggests the code is trying to iterate over a Mock object instead of expected data

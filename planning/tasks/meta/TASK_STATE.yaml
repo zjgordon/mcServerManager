@@ -1,24 +1,11 @@
-active_card: null
+active_card: CARD-107
 breadcrumb:
-  step: 'CARD-053 - Improve test fixtures and setup for comprehensive test coverage'
-  last_commit: 'feat: [CARD-053] Improve test fixtures and setup for comprehensive test coverage'
-  next_action: 'CARD-054 - Add system memory utility function for admin configuration'
-queue: 
-  - CARD-054
-  - CARD-055
-  - CARD-056
-  - CARD-057
-  - CARD-058
-  - CARD-059
-  - CARD-060
-  - CARD-061
-  - CARD-062
-  - CARD-063
-  - CARD-064
-  - CARD-065
-  - CARD-066
-  - CARD-067
-  - CARD-068
-  - CARD-069
-  - CARD-070
+  step: 'CARD-106 - Create git tag for v0.2.0-alpha release'
+  last_commit: 'feat: [CARD-106] Create git tag for v0.2.0-alpha release'
+  next_action: 'CARD-108'
+queue:
+  - CARD-107
+  - CARD-108
+  - CARD-109
+  - CARD-110
   

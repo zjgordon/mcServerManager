@@ -1,0 +1,24 @@
+id: CARD-079
+title: Create server management JavaScript module
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Create app/static/js/server_management.js with functionality for:
+  - Real-time log streaming using polling (every 2-3 seconds)
+  - Command execution via API calls
+  - Auto-scroll management with manual override
+  - Log filtering by level (INFO/WARN/ERROR)
+  - Error handling and user feedback
+  - Command history storage and retrieval
+  - Server status updates
+

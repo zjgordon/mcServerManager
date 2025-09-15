@@ -69,6 +69,25 @@ def app():
             is_active=True,
         )
         db.session.add(admin_user)
+
+        # Create default experimental feature flags for testing
+        from app.models import ExperimentalFeature
+
+        # Check if the feature already exists to avoid UNIQUE constraint errors
+        existing_feature = ExperimentalFeature.query.filter_by(
+            feature_key="server_management_page"
+        ).first()
+        if not existing_feature:
+            server_management_feature = ExperimentalFeature(
+                feature_key="server_management_page",
+                feature_name="Server Management Page",
+                description="Enable the enhanced server management page with console integration",
+                enabled=True,  # Default to enabled for tests
+                is_stable=False,
+                updated_by=None,
+            )
+            db.session.add(server_management_feature)
+
         db.session.commit()
 
         yield app
@@ -129,3 +148,44 @@ def db_session(app):
     with app.app_context():
         yield db.session
         db.session.rollback()
+
+
+@pytest.fixture
+def clean_test_environment(app):
+    """Ensure a completely clean test environment with proper setup."""
+    with app.app_context():
+        # Clean database state
+        db.drop_all()
+        db.create_all()
+
+        # Create admin user
+        from werkzeug.security import generate_password_hash
+
+        from app.models import ExperimentalFeature, User
+
+        admin_user = User(
+            username="admin",
+            password_hash=generate_password_hash("adminpass"),  # pragma: allowlist secret
+            is_admin=True,
+            is_active=True,
+        )
+        db.session.add(admin_user)
+
+        # Create default experimental feature
+        server_management_feature = ExperimentalFeature(
+            feature_key="server_management_page",
+            feature_name="Server Management Page",
+            description="Enable the enhanced server management page with console integration",
+            enabled=True,
+            is_stable=False,
+            updated_by=None,
+        )
+        db.session.add(server_management_feature)
+
+        db.session.commit()
+
+        yield app
+
+        # Cleanup after test
+        db.session.rollback()
+        db.drop_all()

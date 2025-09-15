@@ -106,6 +106,73 @@
                             </small>
                         </div>
 
+                        <!-- System Memory Bar Gauge -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-memory"></i> System Memory
+                            </label>
+                            <div class="memory-gauge-container">
+                                <div class="memory-bar-background">
+                                    <div class="memory-bar-used"
+                                         style="width: {{ system_memory.usage_percentage }}%;"
+                                         title="{{ system_memory.used_memory_gb }}GB used of {{ system_memory.total_memory_gb }}GB total">
+                                    </div>
+                                </div>
+                                <div class="memory-labels">
+                                    <span class="memory-used-label">
+                                        {{ system_memory.used_memory_gb }}GB Used / {{ system_memory.total_memory_gb }}GB Total
+                                    </span>
+                                    <span class="memory-percentage-label">
+                                        {{ system_memory.usage_percentage }}%
+                                    </span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Real-time system memory usage display
+                            </small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Experimental Features Section -->
+                        <div class="experimental-features-section">
+                            <div class="experimental-features-header">
+                                <h6 class="pixel-font text-gradient-mc">
+                                    <i class="fas fa-flask"></i> Experimental Features
+                                </h6>
+                            </div>
+
+                            <div class="experimental-warning-alert">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> Experimental features are in development and may be unstable.
+                                Use with caution and report any issues.
+                            </div>
+
+                            <div class="experimental-features-grid">
+                                <div class="experimental-feature-card">
+                                    <div class="feature-card-header">
+                                        <div class="feature-title-group">
+                                            <h6 class="feature-title">
+                                                <i class="fas fa-cogs"></i> Server Management Page
+                                            </h6>
+                                        </div>
+                                        <span class="feature-status-badge badge-warning">Experimental</span>
+                                    </div>
+                                    <p class="feature-description">
+                                        Comprehensive server management interface with advanced controls and monitoring.
+                                    </p>
+                                    <div class="feature-toggle-container">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="server_management_page" name="server_management_page" {% if experimental_features %}{% for feature in experimental_features %}{% if feature.feature_key == 'server_management_page' and feature.enabled %}checked{% endif %}{% endfor %}{% endif %}>
+                                            <label class="form-check-label" for="server_management_page">
+                                                Enable Server Management Page
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
@@ -163,6 +230,38 @@
                         consuming all available system memory.
                     </p>
 
+                    <h6><i class="fas fa-chart-bar"></i> Memory Bar Gauge</h6>
+                    <p class="small text-muted">
+                        The memory bar gauge provides a visual representation of your system's memory usage.
+                        Use this tool to make informed decisions about memory allocation:
+                    </p>
+                    <ul class="small text-muted">
+                        <li><strong>Green:</strong> Healthy memory usage (under 70%)</li>
+                        <li><strong>Yellow:</strong> Moderate usage (70-85%) - monitor closely</li>
+                        <li><strong>Red:</strong> High usage (over 85%) - consider reducing allocations</li>
+                    </ul>
+                    <p class="small text-muted">
+                        <strong>Best Practices:</strong> Leave 20-30% of total RAM for the operating system
+                        and other applications. Adjust server memory limits based on the gauge readings
+                        to maintain optimal performance.
+                    </p>
+
+                    <h6><i class="fas fa-flask"></i> Experimental Features</h6>
+                    <p class="small text-muted">
+                        Experimental features are in development and may be unstable. Use the toggle system
+                        to enable/disable features as needed:
+                    </p>
+                    <ul class="small text-muted">
+                        <li><strong>Experimental:</strong> New features under development - use with caution</li>
+                        <li><strong>Stable:</strong> Mature features that are production-ready</li>
+                        <li><strong>Toggle System:</strong> Click switches to enable/disable features instantly</li>
+                    </ul>
+                    <p class="small text-muted">
+                        <strong>When to Enable:</strong> Enable experimental features only for testing or
+                        if you need cutting-edge functionality. Always backup your data before enabling
+                        experimental features and monitor system stability closely.
+                    </p>
+
                     <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
                     <ul class="small text-muted">
                         <li>Changes take effect immediately</li>
@@ -174,4 +273,8 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_config.js') }}"></script>
 {% endblock %}

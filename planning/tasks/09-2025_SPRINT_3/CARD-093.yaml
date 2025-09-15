@@ -1,0 +1,43 @@
+id: CARD-093
+title: Fix backup API and E2E workflow test failures
+epic: Epic 3 – Test Suite Stabilization
+sprint: 09-2025_SPRINT_3
+status: todo  # todo | doing | review | done | blocked
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  **Problem**: Backup API and end-to-end workflow tests are failing due to authentication and error message issues.
+  
+  **Root Cause**: Similar to console API issues, backup API tests are experiencing authentication problems and inconsistent error message handling.
+  
+  **Affected Tests**:
+  - `test_backup_workflow_with_user_permissions` (expects 403, gets 401)
+  - `test_backup_workflow_error_handling` (expects "Server not found or access denied", gets "Server not found")
+  - `test_list_schedules_user_access` (expects 200, gets 401)
+  - `test_server_access_control` (expects 403, gets 401)
+  
+  **Actions Required**:
+  1. Review backup API authentication and authorization logic
+  2. Fix error message consistency in backup-related endpoints
+  3. Ensure proper user permission handling in backup workflows
+  4. Update backup API tests to use correct authentication methods
+  5. Verify backup API endpoint response formats
+  
+  **Files to Examine**:
+  - app/routes/api/backup_routes.py
+  - tests/integration/test_backup_api.py
+  - tests/e2e/test_backup_workflows.py
+  - Backup-related authentication and permission logic
+  
+  **Issues to Address**:
+  - Authentication flow for backup API endpoints
+  - Error message standardization across backup endpoints
+  - User permission validation in backup operations
+  - E2E workflow test setup and teardown

@@ -5,6 +5,68 @@ All notable changes to Minecraft Server Manager will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-alpha] - 2025-01-27
+
+### Added
+
+- **Server Management Page Enhancement**
+  - Real-time console streaming with WebSocket support
+  - Enhanced command execution system with better error handling
+  - Improved server status monitoring and display
+  - Advanced server configuration interface
+
+- **Experimental Features System**
+  - Admin-controlled feature flags for experimental functionality
+  - Dynamic feature enablement/disablement
+  - Comprehensive experimental features testing framework
+  - Feature flag integration with existing functionality
+
+- **Advanced Testing Infrastructure**
+  - Enhanced dev.sh tool for development environment management
+  - Comprehensive test suite improvements with better coverage
+  - Integration testing for experimental features
+  - Performance testing and optimization validation
+
+- **Backup System Enhancements**
+  - Comprehensive backup scheduling system
+  - Advanced backup verification and integrity checking
+  - Improved backup restoration capabilities
+  - Enhanced backup monitoring and alerting
+
+- **Memory Management Improvements**
+  - Advanced memory allocation and monitoring
+  - Admin configuration enhancements for memory limits
+  - Real-time memory usage tracking and optimization
+  - Memory leak prevention and detection
+
+- **Process Management & Health Monitoring**
+  - Enhanced process monitoring and health checks
+  - Improved orphaned process detection and cleanup
+  - Advanced system health monitoring
+  - Real-time system status reporting
+
+- **Security Enhancements**
+  - Enhanced authentication and authorization systems
+  - Improved security scanning and vulnerability assessment
+  - Advanced input validation and sanitization
+  - Comprehensive security audit logging
+
+### Changed
+
+- Enhanced user interface with improved server management page
+- Better error handling and user feedback systems
+- Improved performance and resource optimization
+- Enhanced logging and monitoring capabilities
+- Better integration between core and experimental features
+
+### Fixed
+
+- Multiple stability improvements and bug fixes
+- Enhanced error handling and recovery mechanisms
+- Improved process management reliability
+- Better memory management and leak prevention
+- Enhanced security vulnerability patches
+
 ## [0.1.0-alpha] - 2025-09-04
 
 ### Added

@@ -1,0 +1,24 @@
+id: CARD-086
+title: Perform manual testing and bug fixes
+epic: Epic 1 – Server Management Page Implementation
+sprint: 09-2025_SPRINT_3
+status: todo
+owner: cursor
+links: []
+acceptance:
+  - Code compiles, lints, tests pass
+  - Feature behind a flag if risky
+  - Update planning/meta/PROJECT_HISTORY.md with log entry
+  - Update meta/PROJECT_STATUS.md with one-liner
+  - Commit follows Conventional Commits with [CARD-ID]
+artifacts: []
+notes: |
+  Perform comprehensive manual testing of the server management page:
+  - Test feature disabled scenario (fallback to console modal)
+  - Test feature enabled scenario (server management page)
+  - Test console log streaming with real server
+  - Test command execution and response handling
+  - Test mobile responsiveness
+  - Test error handling and edge cases
+  - Fix any bugs or issues discovered during testing
+
